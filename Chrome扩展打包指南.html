@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=266dd97a-5e4f-48fc-b798-675a60c67943
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome扩展打包工具</title>
+    <style>
+        :root {
+            --primary: #4285f4;
+            --secondary: #34a853;
+            --accent: #ea4335;
+            --light: #f8f9fa;
+            --dark: #1a1a1a;
+            --border: #dadce0;
+            --code-bg: #f1f3f4;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: #fafafa;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+        }
+        
+        .steps {
+            flex: 2;
+            min-width: 300px;
+            padding: 20px;
+        }
+        
+        .preview {
+            flex: 1;
+            min-width: 300px;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 8px;
+            margin-left: 20px;
+        }
+        
+        .step {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-left: 4px solid var(--primary);
+            background: white;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        h3 {
+            font-size: 1.2rem;
+            margin: 15px 0 10px;
+            color: var(--secondary);
+        }
+        
+        p {
+            margin-bottom: 15px;
+        }
+        
+        code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+        
+        pre {
+            background: var(--code-bg);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Consolas', monospace;
+        }
+        
+        .note {
+            background: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .warning {
+            background: #ffebee;
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .file-structure {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .folder {
+            color: #4285f4;
+        }
+        
+        .file {
+            color: #34a853;
+        }
+        
+        .extension-preview {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .extension-icon {
+            width: 128px;
+            height: 128px;
+            margin: 0 auto 20px;
+            background: var(--primary);
+            border-radius: 20%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 4rem;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background: var(--secondary);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin: 5px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin: 20px 0;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #f1f3f4;
+            border-radius: 6px 6px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 0 0 6px 6px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: var(--light);
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .preview {
+                margin-left: 0;
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Chrome扩展打包指南</h1>
+            <p class="subtitle">如何将源码打包成CRX文件或ZIP压缩包</p>
+        </header>
+        
+        <div class="content">
+            <div class="steps">
+                <div class="step">
+                    <h2><span class="step-number">1</span>准备工作</h2>
+                    <p>确保您的Chrome扩展项目包含以下必要文件：</p>
+                    
+                    <div class="file-structure">
+                        <div class="folder">github/workflows</div>
+                        <div class="folder">docs</div>
+                        <div class="folder">src</div>
+                        <div class="folder">store</div>
+                        <div class="folder">test</div>
+                        <div class="file">.editorconfig</div>
+                        <div class="file">.gitignore</div>
+                        <div class="file">.prettierrc</div>
+                        <div class="file">BUILD.en.md</div>
+                        <div class="file">BUILD.zh-CN.md</div>
+                        <div class="file">LICENSE</div>
+                        <div class="file">README.md</div>
+                        <div class="file">README.zh-CN.md</div>
+                        <div class="file">build.js</div>
+                        <div class="file">package-lock.json</div>
+                        <div class="file">package.json</div>
+                    </div>
+                    
+                    <div class="note">
+                        <p><strong>注意：</strong> 最重要的是确保您的扩展有一个有效的<code>manifest.json</code>文件（可能在src目录中）。</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <h2><span class="step-number">2</span>构建项目（如果需要）</h2>
+                    <p>根据您的项目结构，可能需要先构建项目：</p>
+                    
+                    <pre>npm install
+npm run build</pre>
+                    
+                    <p>或者直接使用build.js：</p>
+                    
+                    <pre>node build.js</pre>
+                    
+                    <div class="note">
+                        <p><strong>提示：</strong> 检查package.json中的scripts部分，查看可用的构建命令。</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <h2><span class="step-number">3</span>打包扩展</h2>
+                    
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchTab(event, 'crx')">打包为CRX</div>
+                        <div class="tab" onclick="switchTab(event, 'zip')">打包为ZIP</div>
+                    </div>
+                    
+                    <div id="crx" class="tab-content active">
+                        <h3>使用Chrome浏览器打包扩展</h3>
+                        <ol>
+                            <li>打开Chrome浏览器，在地址栏输入：<code>chrome://extensions</code></li>
+                            <li>开启右上角的"开发者模式"</li>
+                            <li>点击"打包扩展程序"按钮</li>
+                            <li>选择扩展的根目录（包含manifest.json的文件夹）</li>
+                            <li>如果需要，选择私钥文件（如果之前打包过）</li>
+                            <li>点击"打包扩展程序"</li>
+                            <li>Chrome会生成.crx文件和.pem私钥文件</li>
+                        </ol>
+                        
+                        <div class="warning">
+                            <p><strong>重要：</strong> 保存好.pem私钥文件！以后更新扩展时需要相同的私钥。</p>
+                        </div>
+                    </div>
+                    
+                    <div id="zip" class="tab-content">
+                        <h3>创建ZIP压缩包</h3>
+                        <ol>
+                            <li>确保您的扩展文件已经准备好（构建完成后）</li>
+                            <li>选择所有需要的文件（不包括开发相关的文件如.git、node_modules等）</li>
+                            <li>右键点击选择的文件，选择"压缩"（Mac）或"添加到压缩文件"（Windows）</li>
+                            <li>设置压缩文件名为您的扩展名称</li>
+                            <li>确保压缩格式为ZIP</li>
+                            <li>完成压缩</li>
+                        </ol>
+                        
+                        <p>或者使用命令行：</p>
+                        <pre># 在扩展根目录下
+zip -r my-extension.zip . -x ".*" "node_modules/*" "docs/*" "test/*"</pre>
+                        
+                        <div class="note">
+                            <p><strong>提示：</strong> ZIP格式通常用于上传到Chrome Web Store。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <h2><span class="step-number">4</span>加载扩展到Chrome</h2>
+                    <p>对于开发测试，您可以加载已解压的扩展：</p>
+                    
+                    <ol>
+                        <li>打开<code>chrome://extensions</code></li>
+                        <li>开启"开发者模式"</li>
+                        <li>点击"加载已解压的扩展程序"</li>
+                        <li>选择包含manifest.json的文件夹</li>
+                    </ol>
+                    
+                    <p>要安装CRX文件：</p>
+                    <ol>
+                        <li>拖放CRX文件到Chrome扩展页面</li>
+                        <li>确认安装（注意：可能需要开启开发者模式）</li>
+                    </ol>
+                    
+                    <div class="warning">
+                        <p><strong>注意：</strong> 从Chrome 73开始，非Web Store的扩展安装受到限制，通常只能通过开发者模式加载。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="preview">
+
+                <h3>安装方式</h3>
+                <p>通过Chrome Web Store安装：</p>
+                <a href="https://chrome.google.com/webstore/detail/a..." target="_blank">
+                    <img src="https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png" alt="Chrome Web Store" style="max-width: 100%;">
+                </a>
+                
+                <div class="note">
+                    <p>或使用"加载已解压的扩展程序"进行开发测试</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>本指南适用于Chrome扩展开发者</p>
+        </footer>
+    </div>
+
+    <script>
+        function switchTab(event, tabId) {
+            // 隐藏所有标签内容
+            var tabContents = document.getElementsByClassName('tab-content');
+            for (var i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+            
+            // 取消所有标签的激活状态
+            var tabs = document.getElementsByClassName('tab');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            
+            // 显示选中的标签内容
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>

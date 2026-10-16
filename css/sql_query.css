@@ -1,0 +1,350 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f5f7fa;
+    color: #333;
+}
+
+/* 导航栏样式 */
+.sidebar {
+    width: 250px;
+    background: linear-gradient(135deg, #2c3e50, #4a69bd);
+    color: white;
+    padding: 20px 0;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+}
+
+.logo {
+    text-align: center;
+    padding: 20px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.nav-item {
+    padding: 15px 30px;
+    margin: 5px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+}
+
+.nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item.active {
+    background-color: #1e90ff;
+    border-left: 5px solid #fff;
+}
+
+.nav-item i {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+/* 主内容区域样式 */
+.content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.database-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #eee;
+}
+
+.database-title {
+    font-size: 2rem;
+    color: #2c3e50;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 30px;
+    padding: 5px 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.search-box input {
+    border: none;
+    outline: none;
+    padding: 10px;
+    font-size: 1rem;
+    width: 250px;
+}
+
+/* 命令分类选项卡 */
+.category-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.category-tab {
+    padding: 12px 25px;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    font-weight: 500;
+}
+
+.category-tab.active {
+    background: #1e90ff;
+    color: white;
+}
+
+.category-tab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* 命令卡片样式 */
+.command-section {
+    display: none;
+}
+
+.command-section.active {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+.command-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.command-card h3 {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f1f1f1;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+}
+
+.command-card h3 i {
+    margin-right: 10px;
+    color: #1e90ff;
+}
+
+.command-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.command-table th, .command-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.command-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.command-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.command-table code {
+    background: #f3f7ff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #1e90ff;
+    font-weight: 500;
+    display: inline-block;
+    width: calc(100% - 60px);
+    transition: background-color 0.2s ease;
+}
+
+.command-table tr:hover code {
+    background: #e6f0ff;
+}
+
+/* 复制按钮样式 - 美化版本 */
+/* 修改复制按钮样式 */
+.copy-button {
+    position: absolute;
+    right: 15px; /* 增加右侧距离 */
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(30, 144, 255, 0.1);
+    color: #1e90ff;
+    border: 1px solid rgba(30, 144, 255, 0.3);
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    opacity: 0; /* 默认隐藏 */
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* 行悬停时显示复制按钮 */
+.command-table tr:hover .copy-button {
+    opacity: 0.9;
+}
+
+.copy-button:hover {
+    opacity: 1 !important;
+    background: rgba(30, 144, 255, 0.2);
+    transform: translateY(-50%) translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* 调整代码容器样式 */
+.command-code-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    padding-right: 80px; /* 为复制按钮留出更多空间 */
+}
+
+.command-table code {
+    background: #f3f7ff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    color: #1e90ff;
+    font-weight: 500;
+    display: inline-block;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+
+/* 复制成功提示 - 美化版本 */
+.copy-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s, transform 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.copy-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.copy-notification::before {
+    content: '✓';
+    font-weight: bold;
+}
+
+/* 响应式设计 */
+@media (max-width: 992px) {
+    body {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        padding: 10px 0;
+    }
+    
+    .nav-items {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .nav-item {
+        padding: 10px 20px;
+    }
+    
+    .content {
+        padding: 20px;
+    }
+    
+    .database-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .search-box {
+        margin-top: 15px;
+        width: 100%;
+    }
+    
+    .search-box input {
+        width: 100%;
+    }
+    
+    .category-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 10px;
+    }
+    
+    .copy-button {
+        opacity: 0.9;
+        padding: 6px 8px;
+        font-size: 0.7rem;
+    }
+    
+    .command-table code {
+        width: calc(100% - 50px);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}

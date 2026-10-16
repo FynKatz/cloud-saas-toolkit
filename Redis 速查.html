@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=266dd97a-5e4f-48fc-b798-675a60c67943
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <title>Redis 完整命令手册（含复制功能）</title>
+
+    <!-- 使用Font Awesome图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        h1,
+        h2 {
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f5f5f5;
+        }
+
+        code {
+            background: #f9f9f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            display: inline-block;
+            min-width: 100px;
+        }
+
+        .copy-btn {
+            cursor: pointer;
+            color: #0366d6;
+            margin-left: 10px;
+            display: inline-block;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+
+        .copy-btn:hover {
+            opacity: 1;
+        }
+
+        .note {
+            background-color: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            color: #856404;
+            border-left: 4px solid #ffeeba;
+        }
+
+        .command-section {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+    </style>
+    <link rel="stylesheet" href="css/auth-styles.css">
+    <script src="js/auth-config.js"></script>
+    <script src="js/auth-check.js"></script>
+</head>
+
+<body>
+    <div class="header-actions">
+        <div class="header-left">
+            <button onclick="goToHome()" class="home-btn">
+                <i class="fas fa-home"></i>
+                首页
+            </button>
+        </div>
+        <div class="header-right">
+            <button onclick="logout()" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                退出
+            </button>
+        </div>
+    </div>
+
+    <h1>Redis 完整命令手册（含复制功能）</h1>
+    <div class="note">
+        <strong>使用说明：</strong>
+        <ul>
+            <li>点击命令右侧的 📋 图标即可复制完整命令</li>
+            <li>需在支持 Clipboard API 的浏览器中使用</li>
+            <li>命令参数中 [] 表示可选参数，... 表示可重复</li>
+        </ul>
+    </div>
+
+    <!-- Redis 完整命令分类开始 -->
+    <div class="command-section">
+        <h2>一、连接管理</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="auth">AUTH password</code><span class="copy-btn" onclick="copyText('auth')">📋</span></td>
+                <td>认证密码</td>
+            </tr>
+            <tr>
+                <td><code id="echo">ECHO message</code><span class="copy-btn" onclick="copyText('echo')">📋</span></td>
+                <td>打印消息</td>
+            </tr>
+            <tr>
+                <td><code id="ping">PING</code><span class="copy-btn" onclick="copyText('ping')">📋</span></td>
+                <td>测试连接是否存活</td>
+            </tr>
+            <tr>
+                <td><code id="quit">QUIT</code><span class="copy-btn" onclick="copyText('quit')">📋</span></td>
+                <td>关闭连接</td>
+            </tr>
+            <tr>
+                <td><code id="select">SELECT index</code><span class="copy-btn" onclick="copyText('select')">📋</span>
+                </td>
+                <td>切换数据库（默认 0-15）</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>二、键（Key）操作</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="del">DEL key [key ...]</code><span class="copy-btn" onclick="copyText('del')">📋</span>
+                </td>
+                <td>删除一个或多个键</td>
+            </tr>
+            <tr>
+                <td><code id="dump">DUMP key</code><span class="copy-btn" onclick="copyText('dump')">📋</span></td>
+                <td>序列化键值</td>
+            </tr>
+            <tr>
+                <td><code id="exists">EXISTS key</code><span class="copy-btn" onclick="copyText('exists')">📋</span>
+                </td>
+                <td>检查键是否存在</td>
+            </tr>
+            <tr>
+                <td><code id="expire">EXPIRE key seconds</code><span class="copy-btn"
+                        onclick="copyText('expire')">📋</span></td>
+                <td>设置键的过期时间（秒）</td>
+            </tr>
+            <tr>
+                <td><code id="expireat">EXPIREAT key timestamp</code><span class="copy-btn"
+                        onclick="copyText('expireat')">📋</span></td>
+                <td>设置键的过期时间（时间戳）</td>
+            </tr>
+            <tr>
+                <td><code id="keys">KEYS pattern</code><span class="copy-btn" onclick="copyText('keys')">📋</span></td>
+                <td>查找匹配模式的键（慎用，生产环境可能阻塞）</td>
+            </tr>
+            <tr>
+                <td><code id="move">MOVE key db</code><span class="copy-btn" onclick="copyText('move')">📋</span></td>
+                <td>将键移动到另一个数据库</td>
+            </tr>
+            <tr>
+                <td><code id="persist">PERSIST key</code><span class="copy-btn" onclick="copyText('persist')">📋</span>
+                </td>
+                <td>移除键的过期时间</td>
+            </tr>
+            <tr>
+                <td><code id="pexpire">PEXPIRE key milliseconds</code><span class="copy-btn"
+                        onclick="copyText('pexpire')">📋</span></td>
+                <td>设置过期时间（毫秒）</td>
+            </tr>
+            <tr>
+                <td><code id="pexpireat">PEXPIREAT key milliseconds-timestamp</code><span class="copy-btn"
+                        onclick="copyText('pexpireat')">📋</span></td>
+                <td>设置过期时间（毫秒时间戳）</td>
+            </tr>
+            <tr>
+                <td><code id="pttl">PTTL key</code><span class="copy-btn" onclick="copyText('pttl')">📋</span></td>
+                <td>获取键的剩余生存时间（毫秒）</td>
+            </tr>
+            <tr>
+                <td><code id="randomkey">RANDOMKEY</code><span class="copy-btn"
+                        onclick="copyText('randomkey')">📋</span></td>
+                <td>返回一个随机键</td>
+            </tr>
+            <tr>
+                <td><code id="rename">RENAME key newkey</code><span class="copy-btn"
+                        onclick="copyText('rename')">📋</span></td>
+                <td>重命名键</td>
+            </tr>
+            <tr>
+                <td><code id="renamens">RENAMENX key newkey</code><span class="copy-btn"
+                        onclick="copyText('renamens')">📋</span></td>
+                <td>仅当新键不存在时重命名</td>
+            </tr>
+            <tr>
+                <td><code id="scan">SCAN cursor [MATCH pattern] [COUNT count]</code><span class="copy-btn"
+                        onclick="copyText('scan')">📋</span></td>
+                <td>迭代键集合（替代 KEYS）</td>
+            </tr>
+            <tr>
+                <td><code id="ttl">TTL key</code><span class="copy-btn" onclick="copyText('ttl')">📋</span></td>
+                <td>获取键的剩余生存时间（秒）</td>
+            </tr>
+            <tr>
+                <td><code id="type">TYPE key</code><span class="copy-btn" onclick="copyText('type')">📋</span></td>
+                <td>返回键的类型</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>三、字符串（String）</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="append">APPEND key value</code><span class="copy-btn"
+                        onclick="copyText('append')">📋</span></td>
+                <td>追加字符串</td>
+            </tr>
+            <tr>
+                <td><code id="bitcount">BITCOUNT key [start end]</code><span class="copy-btn"
+                        onclick="copyText('bitcount')">📋</span></td>
+                <td>计算位数为 1 的数量</td>
+            </tr>
+            <tr>
+                <td><code id="bitop">BITOP operation destkey key [key ...]</code><span class="copy-btn"
+                        onclick="copyText('bitop')">📋</span></td>
+                <td>对字符串执行位操作</td>
+            </tr>
+            <tr>
+                <td><code id="decr">DECR key</code><span class="copy-btn" onclick="copyText('decr')">📋</span></td>
+                <td>减 1</td>
+            </tr>
+            <tr>
+                <td><code id="decrby">DECRBY key decrement</code><span class="copy-btn"
+                        onclick="copyText('decrby')">📋</span></td>
+                <td>减指定数值</td>
+            </tr>
+            <tr>
+                <td><code id="get">GET key</code><span class="copy-btn" onclick="copyText('get')">📋</span></td>
+                <td>获取值</td>
+            </tr>
+            <tr>
+                <td><code id="getbit">GETBIT key offset</code><span class="copy-btn"
+                        onclick="copyText('getbit')">📋</span></td>
+                <td>获取指定位的值（0 或 1）</td>
+            </tr>
+            <tr>
+                <td><code id="getrange">GETRANGE key start end</code><span class="copy-btn"
+                        onclick="copyText('getrange')">📋</span></td>
+                <td>获取子字符串</td>
+            </tr>
+            <tr>
+                <td><code id="getset">GETSET key value</code><span class="copy-btn"
+                        onclick="copyText('getset')">📋</span></td>
+                <td>设置新值并返回旧值</td>
+            </tr>
+            <tr>
+                <td><code id="incr">INCR key</code><span class="copy-btn" onclick="copyText('incr')">📋</span></td>
+                <td>加 1</td>
+            </tr>
+            <tr>
+                <td><code id="incrby">INCRBY key increment</code><span class="copy-btn"
+                        onclick="copyText('incrby')">📋</span></td>
+                <td>加指定数值</td>
+            </tr>
+            <tr>
+                <td><code id="incrbyfloat">INCRBYFLOAT key increment</code><span class="copy-btn"
+                        onclick="copyText('incrbyfloat')">📋</span></td>
+                <td>加浮点数</td>
+            </tr>
+            <tr>
+                <td><code id="mget">MGET key [key ...]</code><span class="copy-btn" onclick="copyText('mget')">📋</span>
+                </td>
+                <td>获取多个键的值</td>
+            </tr>
+            <tr>
+                <td><code id="mset">MSET key value [key value ...]</code><span class="copy-btn"
+                        onclick="copyText('mset')">📋</span></td>
+                <td>设置多个键值对</td>
+            </tr>
+            <tr>
+                <td><code id="msetnx">MSETNX key value [key value ...]</code><span class="copy-btn"
+                        onclick="copyText('msetnx')">📋</span></td>
+                <td>仅当所有键不存在时设置</td>
+            </tr>
+            <tr>
+                <td><code id="psetex">PSETEX key milliseconds value</code><span class="copy-btn"
+                        onclick="copyText('psetex')">📋</span></td>
+                <td>设置值并指定过期时间（毫秒）</td>
+            </tr>
+            <tr>
+                <td><code id="set">SET key value [EX seconds] [PX milliseconds] [NX|XX]</code><span class="copy-btn"
+                        onclick="copyText('set')">📋</span></td>
+                <td>设置值（可带过期时间和条件）</td>
+            </tr>
+            <tr>
+                <td><code id="setbit">SETBIT key offset value</code><span class="copy-btn"
+                        onclick="copyText('setbit')">📋</span></td>
+                <td>设置指定位的值（0 或 1）</td>
+            </tr>
+            <tr>
+                <td><code id="setex">SETEX key seconds value</code><span class="copy-btn"
+                        onclick="copyText('setex')">📋</span></td>
+                <td>设置值并指定过期时间（秒）</td>
+            </tr>
+            <tr>
+                <td><code id="setnx">SETNX key value</code><span class="copy-btn" onclick="copyText('setnx')">📋</span>
+                </td>
+                <td>仅当键不存在时设置</td>
+            </tr>
+            <tr>
+                <td><code id="setrange">SETRANGE key offset value</code><span class="copy-btn"
+                        onclick="copyText('setrange')">📋</span></td>
+                <td>替换子字符串</td>
+            </tr>
+            <tr>
+                <td><code id="strlen">STRLEN key</code><span class="copy-btn" onclick="copyText('strlen')">📋</span>
+                </td>
+                <td>获取字符串长度</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>四、哈希（Hash）</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="hdel">HDEL key field [field ...]</code><span class="copy-btn"
+                        onclick="copyText('hdel')">📋</span></td>
+                <td>删除一个或多个字段</td>
+            </tr>
+            <tr>
+                <td><code id="hexists">HEXISTS key field</code><span class="copy-btn"
+                        onclick="copyText('hexists')">📋</span></td>
+                <td>检查字段是否存在</td>
+            </tr>
+            <tr>
+                <td><code id="hget">HGET key field</code><span class="copy-btn" onclick="copyText('hget')">📋</span>
+                </td>
+                <td>获取字段的值</td>
+            </tr>
+            <tr>
+                <td><code id="hgetall">HGETALL key</code><span class="copy-btn" onclick="copyText('hgetall')">📋</span>
+                </td>
+                <td>获取所有字段和值</td>
+            </tr>
+            <tr>
+                <td><code id="hincrby">HINCRBY key field increment</code><span class="copy-btn"
+                        onclick="copyText('hincrby')">📋</span></td>
+                <td>字段值增加整数</td>
+            </tr>
+            <tr>
+                <td><code id="hincrbyfloat">HINCRBYFLOAT key field increment</code><span class="copy-btn"
+                        onclick="copyText('hincrbyfloat')">📋</span></td>
+                <td>字段值增加浮点数</td>
+            </tr>
+            <tr>
+                <td><code id="hkeys">HKEYS key</code><span class="copy-btn" onclick="copyText('hkeys')">📋</span></td>
+                <td>获取所有字段</td>
+            </tr>
+            <tr>
+                <td><code id="hlen">HLEN key</code><span class="copy-btn" onclick="copyText('hlen')">📋</span></td>
+                <td>获取字段数量</td>
+            </tr>
+            <tr>
+                <td><code id="hmget">HMGET key field [field ...]</code><span class="copy-btn"
+                        onclick="copyText('hmget')">📋</span></td>
+                <td>获取多个字段的值</td>
+            </tr>
+            <tr>
+                <td><code id="hmset">HMSET key field value [field value ...]</code><span class="copy-btn"
+                        onclick="copyText('hmset')">📋</span></td>
+                <td>设置多个字段值</td>
+            </tr>
+            <tr>
+                <td><code id="hscan">HSCAN key cursor [MATCH pattern] [COUNT count]</code><span class="copy-btn"
+                        onclick="copyText('hscan')">📋</span></td>
+                <td>迭代哈希字段</td>
+            </tr>
+            <tr>
+                <td><code id="hset">HSET key field value</code><span class="copy-btn"
+                        onclick="copyText('hset')">📋</span></td>
+                <td>设置字段值</td>
+            </tr>
+            <tr>
+                <td><code id="hsetnx">HSETNX key field value</code><span class="copy-btn"
+                        onclick="copyText('hsetnx')">📋</span></td>
+                <td>仅当字段不存在时设置</td>
+            </tr>
+            <tr>
+                <td><code id="hvals">HVALS key</code><span class="copy-btn" onclick="copyText('hvals')">📋</span></td>
+                <td>获取所有值</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>五、列表（List）</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="blpop">BLPOP key [key ...] timeout</code><span class="copy-btn"
+                        onclick="copyText('blpop')">📋</span></td>
+                <td>阻塞式左弹出</td>
+            </tr>
+            <tr>
+                <td><code id="brpop">BRPOP key [key ...] timeout</code><span class="copy-btn"
+                        onclick="copyText('brpop')">📋</span></td>
+                <td>阻塞式右弹出</td>
+            </tr>
+            <tr>
+                <td><code id="brpoplpush">BRPOPLPUSH source destination timeout</code><span class="copy-btn"
+                        onclick="copyText('brpoplpush')">📋</span></td>
+                <td>阻塞式右弹出并左压入</td>
+            </tr>
+            <tr>
+                <td><code id="lindex">LINDEX key index</code><span class="copy-btn"
+                        onclick="copyText('lindex')">📋</span></td>
+                <td>获取指定索引的元素</td>
+            </tr>
+            <tr>
+                <td><code id="linsert">LINSERT key BEFORE|AFTER pivot value</code><span class="copy-btn"
+                        onclick="copyText('linsert')">📋</span></td>
+                <td>在某个元素前后插入</td>
+            </tr>
+            <tr>
+                <td><code id="llen">LLEN key</code><span class="copy-btn" onclick="copyText('llen')">📋</span></td>
+                <td>获取列表长度</td>
+            </tr>
+            <tr>
+                <td><code id="lpop">LPOP key</code><span class="copy-btn" onclick="copyText('lpop')">📋</span></td>
+                <td>左弹出元素</td>
+            </tr>
+            <tr>
+                <td><code id="lpush">LPUSH key value [value ...]</code><span class="copy-btn"
+                        onclick="copyText('lpush')">📋</span></td>
+                <td>左压入元素</td>
+            </tr>
+            <tr>
+                <td><code id="lpushx">LPUSHX key value</code><span class="copy-btn"
+                        onclick="copyText('lpushx')">📋</span></td>
+                <td>仅当键存在时左压入</td>
+            </tr>
+            <tr>
+                <td><code id="lrange">LRANGE key start stop</code><span class="copy-btn"
+                        onclick="copyText('lrange')">📋</span></td>
+                <td>获取范围元素</td>
+            </tr>
+            <tr>
+                <td><code id="lrem">LREM key count value</code><span class="copy-btn"
+                        onclick="copyText('lrem')">📋</span></td>
+                <td>移除指定值的元素</td>
+            </tr>
+            <tr>
+                <td><code id="lset">LSET key index value</code><span class="copy-btn"
+                        onclick="copyText('lset')">📋</span></td>
+                <td>修改指定索引的元素</td>
+            </tr>
+            <tr>
+                <td><code id="ltrim">LTRIM key start stop</code><span class="copy-btn"
+                        onclick="copyText('ltrim')">📋</span></td>
+                <td>修剪列表到指定范围</td>
+            </tr>
+            <tr>
+                <td><code id="rpop">RPOP key</code><span class="copy-btn" onclick="copyText('rpop')">📋</span></td>
+                <td>右弹出元素</td>
+            </tr>
+            <tr>
+                <td><code id="rpoplpush">RPOPLPUSH source destination</code><span class="copy-btn"
+                        onclick="copyText('rpoplpush')">📋</span></td>
+                <td>右弹出并左压入</td>
+            </tr>
+            <tr>
+                <td><code id="rpush">RPUSH key value [value ...]</code><span class="copy-btn"
+                        onclick="copyText('rpush')">📋</span></td>
+                <td>右压入元素</td>
+            </tr>
+            <tr>
+                <td><code id="rpushx">RPUSHX key value</code><span class="copy-btn"
+                        onclick="copyText('rpushx')">📋</span></td>
+                <td>仅当键存在时右压入</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>六、集合（Set）</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="sadd">SADD key member [member ...]</code><span class="copy-btn"
+                        onclick="copyText('sadd')">📋</span></td>
+                <td>添加成员</td>
+            </tr>
+            <tr>
+                <td><code id="scard">SCARD key</code><span class="copy-btn" onclick="copyText('scard')">📋</span></td>
+                <td>获取集合成员数</td>
+            </tr>
+            <tr>
+                <td><code id="sdiff">SDIFF key [key ...]</code><span class="copy-btn"
+                        onclick="copyText('sdiff')">📋</span></td>
+                <td>差集</td>
+            </tr>
+            <tr>
+                <td><code id="sdiffstore">SDIFFSTORE destination key [key ...]</code><span class="copy-btn"
+                        onclick="copyText('sdiffstore')">📋</span></td>
+                <td>差集并存储</td>
+            </tr>
+            <tr>
+                <td><code id="sinter">SINTER key [key ...]</code><span class="copy-btn"
+                        onclick="copyText('sinter')">📋</span></td>
+                <td>交集</td>
+            </tr>
+            <tr>
+                <td><code id="sinterstore">SINTERSTORE destination key [key ...]</code><span class="copy-btn"
+                        onclick="copyText('sinterstore')">📋</span></td>
+                <td>交集并存储</td>
+            </tr>
+            <tr>
+                <td><code id="sismember">SISMEMBER key member</code><span class="copy-btn"
+                        onclick="copyText('sismember')">📋</span></td>
+                <td>检查成员是否存在</td>
+            </tr>
+            <tr>
+                <td><code id="smembers">SMEMBERS key</code><span class="copy-btn"
+                        onclick="copyText('smembers')">📋</span></td>
+                <td>获取所有成员</td>
+            </tr>
+            <tr>
+                <td><code id="smove">SMOVE source destination member</code><span class="copy-btn"
+                        onclick="copyText('smove')">📋</span></td>
+                <td>移动成员到另一个集合</td>
+            </tr>
+            <tr>
+                <td><code id="spop">SPOP key [count]</code><span class="copy-btn" onclick="copyText('spop')">📋</span>
+                </td>
+                <td>随机弹出成员</td>
+            </tr>
+            <tr>
+                <td><code id="srandmember">SRANDMEMBER key [count]</code><span class="copy-btn"
+                        onclick="copyText('srandmember')">📋</span></td>
+                <td>随机获取成员</td>
+            </tr>
+            <tr>
+                <td><code id="srem">SREM key member [member ...]</code><span class="copy-btn"
+                        onclick="copyText('srem')">📋</span></td>
+                <td>移除成员</td>
+            </tr>
+            <tr>
+                <td><code id="sscan">SSCAN key cursor [MATCH pattern] [COUNT count]</code><span class="copy-btn"
+                        onclick="copyText('sscan')">📋</span></td>
+                <td>迭代集合成员</td>
+            </tr>
+            <tr>
+                <td><code id="sunion">SUNION key [key ...]</code><span class="copy-btn"
+                        onclick="copyText('sunion')">📋</span></td>
+                <td>并集</td>
+            </tr>
+            <tr>
+                <td><code id="sunionstore">SUNIONSTORE destination key [key ...]</code><span class="copy-btn"
+                        onclick="copyText('sunionstore')">📋</span></td>
+                <td>并集并存储</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>七、有序集合（Sorted Set）</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="zadd">ZADD key [NX|XX] [CH] [INCR] score member</code><span class="copy-btn"
+                        onclick="copyText('zadd')">📋</span></td>
+                <td>添加或更新成员</td>
+            </tr>
+            <tr>
+                <td><code id="zcard">ZCARD key</code><span class="copy-btn" onclick="copyText('zcard')">📋</span></td>
+                <td>获取成员数</td>
+            </tr>
+            <tr>
+                <td><code id="zcount">ZCOUNT key min max</code><span class="copy-btn"
+                        onclick="copyText('zcount')">📋</span></td>
+                <td>统计分数范围内的成员数</td>
+            </tr>
+            <tr>
+                <td><code id="zincrby">ZINCRBY key increment member</code><span class="copy-btn"
+                        onclick="copyText('zincrby')">📋</span></td>
+                <td>增加成员分数</td>
+            </tr>
+            <tr>
+                <td><code
+                        id="zinterstore">ZINTERSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM|MIN|MAX]</code><span
+                        class="copy-btn" onclick="copyText('zinterstore')">📋</span></td>
+                <td>交集并存储</td>
+            </tr>
+            <tr>
+                <td><code id="zrange">ZRANGE key start stop [WITHSCORES]</code><span class="copy-btn"
+                        onclick="copyText('zrange')">📋</span></td>
+                <td>按索引范围获取成员</td>
+            </tr>
+            <tr>
+                <td><code id="zrangebyscore">ZRANGEBYSCORE key min max [WITHSCORES] [LIMIT offset count]</code><span
+                        class="copy-btn" onclick="copyText('zrangebyscore')">📋</span></td>
+                <td>按分数范围获取成员</td>
+            </tr>
+            <tr>
+                <td><code id="zrank">ZRANK key member</code><span class="copy-btn" onclick="copyText('zrank')">📋</span>
+                </td>
+                <td>获取成员的排名（按分数升序）</td>
+            </tr>
+            <tr>
+                <td><code id="zrem">ZREM key member [member ...]</code><span class="copy-btn"
+                        onclick="copyText('zrem')">📋</span></td>
+                <td>移除成员</td>
+            </tr>
+            <tr>
+                <td><code id="zremrangebyrank">ZREMRANGEBYRANK key start stop</code><span class="copy-btn"
+                        onclick="copyText('zremrangebyrank')">📋</span></td>
+                <td>按排名范围移除</td>
+            </tr>
+            <tr>
+                <td><code id="zremrangebyscore">ZREMRANGEBYSCORE key min max</code><span class="copy-btn"
+                        onclick="copyText('zremrangebyscore')">📋</span></td>
+                <td>按分数范围移除</td>
+            </tr>
+            <tr>
+                <td><code id="zrevrange">ZREVRANGE key start stop [WITHSCORES]</code><span class="copy-btn"
+                        onclick="copyText('zrevrange')">📋</span></td>
+                <td>反向按索引获取</td>
+            </tr>
+            <tr>
+                <td><code
+                        id="zrevrangebyscore">ZREVRANGEBYSCORE key max min [WITHSCORES] [LIMIT offset count]</code><span
+                        class="copy-btn" onclick="copyText('zrevrangebyscore')">📋</span></td>
+                <td>反向按分数获取</td>
+            </tr>
+            <tr>
+                <td><code id="zrevrank">ZREVRANK key member</code><span class="copy-btn"
+                        onclick="copyText('zrevrank')">📋</span></td>
+                <td>反向排名（降序）</td>
+            </tr>
+            <tr>
+                <td><code id="zscore">ZSCORE key member</code><span class="copy-btn"
+                        onclick="copyText('zscore')">📋</span></td>
+                <td>获取成员分数</td>
+            </tr>
+            <tr>
+                <td><code
+                        id="zunionstore">ZUNIONSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM|MIN|MAX]</code><span
+                        class="copy-btn" onclick="copyText('zunionstore')">📋</span></td>
+                <td>并集并存储</td>
+            </tr>
+            <tr>
+                <td><code id="zscan">ZSCAN key cursor [MATCH pattern] [COUNT count]</code><span class="copy-btn"
+                        onclick="copyText('zscan')">📋</span></td>
+                <td>迭代有序集合成员</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>八、HyperLogLog</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="pfadd">PFADD key element [element ...]</code><span class="copy-btn"
+                        onclick="copyText('pfadd')">📋</span></td>
+                <td>添加元素</td>
+            </tr>
+            <tr>
+                <td><code id="pfcount">PFCOUNT key [key ...]</code><span class="copy-btn"
+                        onclick="copyText('pfcount')">📋</span></td>
+                <td>估算基数</td>
+            </tr>
+            <tr>
+                <td><code id="pfmerge">PFMERGE destkey sourcekey [sourcekey ...]</code><span class="copy-btn"
+                        onclick="copyText('pfmerge')">📋</span></td>
+                <td>合并多个 HyperLogLog</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>九、地理空间（Geospatial）</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="geoadd">GEOADD key longitude latitude member</code><span class="copy-btn"
+                        onclick="copyText('geoadd')">📋</span></td>
+                <td>添加地理坐标</td>
+            </tr>
+            <tr>
+                <td><code id="geodist">GEODIST key member1 member2 [unit]</code><span class="copy-btn"
+                        onclick="copyText('geodist')">📋</span></td>
+                <td>计算两点距离（m, km, mi, ft）</td>
+            </tr>
+            <tr>
+                <td><code id="geohash">GEOHASH key member [member ...]</code><span class="copy-btn"
+                        onclick="copyText('geohash')">📋</span></td>
+                <td>获取 Geohash</td>
+            </tr>
+            <tr>
+                <td><code id="geopos">GEOPOS key member [member ...]</code><span class="copy-btn"
+                        onclick="copyText('geopos')">📋</span></td>
+                <td>获取坐标</td>
+            </tr>
+            <tr>
+                <td><code
+                        id="georadius">GEORADIUS key longitude latitude radius m|km|mi|ft [WITHCOORD] [WITHDIST] [WITHHASH] [COUNT count]</code><span
+                        class="copy-btn" onclick="copyText('georadius')">📋</span></td>
+                <td>查询半径内元素</td>
+            </tr>
+            <tr>
+                <td><code
+                        id="georadiusbymember">GEORADIUSBYMEMBER key member radius m|km|mi|ft [WITHCOORD] [WITHDIST] [WITHHASH] [COUNT count]</code><span
+                        class="copy-btn" onclick="copyText('georadiusbymember')">📋</span></td>
+                <td>以成员为中心查询</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>十、流（Stream）</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="xadd">XADD key ID field value [field value ...]</code><span class="copy-btn"
+                        onclick="copyText('xadd')">📋</span></td>
+                <td>添加流记录</td>
+            </tr>
+            <tr>
+                <td><code id="xtrim">XTRIM key MAXLEN [~] count</code><span class="copy-btn"
+                        onclick="copyText('xtrim')">📋</span></td>
+                <td>修剪流长度</td>
+            </tr>
+            <tr>
+                <td><code id="xdel">XDEL key ID [ID ...]</code><span class="copy-btn"
+                        onclick="copyText('xdel')">📋</span></td>
+                <td>删除记录</td>
+            </tr>
+            <tr>
+                <td><code id="xlen">XLEN key</code><span class="copy-btn" onclick="copyText('xlen')">📋</span></td>
+                <td>获取流长度</td>
+            </tr>
+            <tr>
+                <td><code id="xrange">XRANGE key start end [COUNT count]</code><span class="copy-btn"
+                        onclick="copyText('xrange')">📋</span></td>
+                <td>获取范围记录</td>
+            </tr>
+            <tr>
+                <td><code id="xrevrange">XREVRANGE key end start [COUNT count]</code><span class="copy-btn"
+                        onclick="copyText('xrevrange')">📋</span></td>
+                <td>反向获取范围记录</td>
+            </tr>
+            <tr>
+                <td><code
+                        id="xread">XREAD [COUNT count] [BLOCK milliseconds] STREAMS key [key ...] ID [ID ...]</code><span
+                        class="copy-btn" onclick="copyText('xread')">📋</span></td>
+                <td>读取流记录</td>
+            </tr>
+            <tr>
+                <td><code id="xgroupcreate">XGROUP CREATE key groupname ID [$|-]</code><span class="copy-btn"
+                        onclick="copyText('xgroupcreate')">📋</span></td>
+                <td>创建消费者组</td>
+            </tr>
+            <tr>
+                <td><code
+                        id="xreadgroup">XREADGROUP GROUP group consumer [COUNT count] [BLOCK milliseconds] [NOACK] STREAMS key [key ...] ID [ID ...]</code><span
+                        class="copy-btn" onclick="copyText('xreadgroup')">📋</span></td>
+                <td>读取并分配给消费者组</td>
+            </tr>
+            <tr>
+                <td><code id="xack">XACK key group ID [ID ...]</code><span class="copy-btn"
+                        onclick="copyText('xack')">📋</span></td>
+                <td>确认处理完成</td>
+            </tr>
+            <tr>
+                <td><code id="xclaim">XCLAIM key group consumer min-idle-time ID [ID ...]</code><span class="copy-btn"
+                        onclick="copyText('xclaim')">📋</span></td>
+                <td>转移未确认消息</td>
+            </tr>
+            <tr>
+                <td><code id="xinfo">XINFO [STREAM key] [GROUPS key] [CONSUMERS key group]</code><span class="copy-btn"
+                        onclick="copyText('xinfo')">📋</span></td>
+                <td>获取流/组/消费者信息</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>十一、发布订阅（Pub/Sub）</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="publish">PUBLISH channel message</code><span class="copy-btn"
+                        onclick="copyText('publish')">📋</span></td>
+                <td>发布消息</td>
+            </tr>
+            <tr>
+                <td><code id="subscribe">SUBSCRIBE channel [channel ...]</code><span class="copy-btn"
+                        onclick="copyText('subscribe')">📋</span></td>
+                <td>订阅频道</td>
+            </tr>
+            <tr>
+                <td><code id="unsubscribe">UNSUBSCRIBE [channel [channel ...]]</code><span class="copy-btn"
+                        onclick="copyText('unsubscribe')">📋</span></td>
+                <td>取消订阅</td>
+            </tr>
+            <tr>
+                <td><code id="psubscribe">PSUBSCRIBE pattern [pattern ...]</code><span class="copy-btn"
+                        onclick="copyText('psubscribe')">📋</span></td>
+                <td>订阅模式</td>
+            </tr>
+            <tr>
+                <td><code id="punsubscribe">PUNSUBSCRIBE [pattern [pattern ...]]</code><span class="copy-btn"
+                        onclick="copyText('punsubscribe')">📋</span></td>
+                <td>取消订阅模式</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>十二、事务</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="multi">MULTI</code><span class="copy-btn" onclick="copyText('multi')">📋</span></td>
+                <td>开始事务</td>
+            </tr>
+            <tr>
+                <td><code id="exec">EXEC</code><span class="copy-btn" onclick="copyText('exec')">📋</span></td>
+                <td>执行事务</td>
+            </tr>
+            <tr>
+                <td><code id="discard">DISCARD</code><span class="copy-btn" onclick="copyText('discard')">📋</span></td>
+                <td>取消事务</td>
+            </tr>
+            <tr>
+                <td><code id="watch">WATCH key [key ...]</code><span class="copy-btn"
+                        onclick="copyText('watch')">📋</span></td>
+                <td>监视键</td>
+            </tr>
+            <tr>
+                <td><code id="unwatch">UNWATCH</code><span class="copy-btn" onclick="copyText('unwatch')">📋</span></td>
+                <td>取消监视</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>十三、脚本（Lua）</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="eval">EVAL script numkeys key [key ...] arg [arg ...]</code><span class="copy-btn"
+                        onclick="copyText('eval')">📋</span></td>
+                <td>执行 Lua 脚本</td>
+            </tr>
+            <tr>
+                <td><code id="evalsha">EVALSHA sha1 numkeys key [key ...] arg [arg ...]</code><span class="copy-btn"
+                        onclick="copyText('evalsha')">📋</span></td>
+                <td>执行已缓存的脚本</td>
+            </tr>
+            <tr>
+                <td><code id="scriptload">SCRIPT LOAD script</code><span class="copy-btn"
+                        onclick="copyText('scriptload')">📋</span></td>
+                <td>缓存脚本</td>
+            </tr>
+            <tr>
+                <td><code id="scriptexists">SCRIPT EXISTS sha1 [sha1 ...]</code><span class="copy-btn"
+                        onclick="copyText('scriptexists')">📋</span></td>
+                <td>检查脚本是否存在</td>
+            </tr>
+            <tr>
+                <td><code id="scriptflush">SCRIPT FLUSH</code><span class="copy-btn"
+                        onclick="copyText('scriptflush')">📋</span></td>
+                <td>清空脚本缓存</td>
+            </tr>
+            <tr>
+                <td><code id="scriptkill">SCRIPT KILL</code><span class="copy-btn"
+                        onclick="copyText('scriptkill')">📋</span></td>
+                <td>终止正在运行的脚本</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>十四、服务器管理</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="bgrewriteaof">BGREWRITEAOF</code><span class="copy-btn"
+                        onclick="copyText('bgrewriteaof')">📋</span></td>
+                <td>异步重写 AOF 文件</td>
+            </tr>
+            <tr>
+                <td><code id="bgsave">BGSAVE</code><span class="copy-btn" onclick="copyText('bgsave')">📋</span></td>
+                <td>异步保存 RDB 快照</td>
+            </tr>
+            <tr>
+                <td><code id="clientgetname">CLIENT GETNAME</code><span class="copy-btn"
+                        onclick="copyText('clientgetname')">📋</span></td>
+                <td>获取客户端名称</td>
+            </tr>
+            <tr>
+                <td><code id="clientkill">CLIENT KILL ip:port</code><span class="copy-btn"
+                        onclick="copyText('clientkill')">📋</span></td>
+                <td>终止客户端连接</td>
+            </tr>
+            <tr>
+                <td><code id="clientlist">CLIENT LIST</code><span class="copy-btn"
+                        onclick="copyText('clientlist')">📋</span></td>
+                <td>列出客户端连接</td>
+            </tr>
+            <tr>
+                <td><code id="clientpause">CLIENT PAUSE timeout</code><span class="copy-btn"
+                        onclick="copyText('clientpause')">📋</span></td>
+                <td>暂停客户端请求</td>
+            </tr>
+            <tr>
+                <td><code id="clientreply">CLIENT REPLY ON|OFF|SKIP</code><span class="copy-btn"
+                        onclick="copyText('clientreply')">📋</span></td>
+                <td>控制服务器响应</td>
+            </tr>
+            <tr>
+                <td><code id="clientsetname">CLIENT SETNAME connection-name</code><span class="copy-btn"
+                        onclick="copyText('clientsetname')">📋</span></td>
+                <td>设置客户端名称</td>
+            </tr>
+            <tr>
+                <td><code id="cluster">CLUSTER ...</code><span class="copy-btn" onclick="copyText('cluster')">📋</span>
+                </td>
+                <td>集群管理命令（如 CLUSTER NODES, CLUSTER MEET 等）</td>
+            </tr>
+            <tr>
+                <td><code id="configget">CONFIG GET parameter</code><span class="copy-btn"
+                        onclick="copyText('configget')">📋</span></td>
+                <td>获取配置参数</td>
+            </tr>
+            <tr>
+                <td><code id="configset">CONFIG SET parameter value</code><span class="copy-btn"
+                        onclick="copyText('configset')">📋</span></td>
+                <td>设置配置参数</td>
+            </tr>
+            <tr>
+                <td><code id="configresetstat">CONFIG RESETSTAT</code><span class="copy-btn"
+                        onclick="copyText('configresetstat')">📋</span></td>
+                <td>重置统计信息</td>
+            </tr>
+            <tr>
+                <td><code id="dbsize">DBSIZE</code><span class="copy-btn" onclick="copyText('dbsize')">📋</span></td>
+                <td>获取当前数据库键数量</td>
+            </tr>
+            <tr>
+                <td><code id="debugobject">DEBUG OBJECT key</code><span class="copy-btn"
+                        onclick="copyText('debugobject')">📋</span></td>
+                <td>获取键的调试信息</td>
+            </tr>
+            <tr>
+                <td><code id="debugsegfault">DEBUG SEGFAULT</code><span class="copy-btn"
+                        onclick="copyText('debugsegfault')">📋</span></td>
+                <td>触发段错误（测试用）</td>
+            </tr>
+            <tr>
+                <td><code id="flushall">FLUSHALL [ASYNC]</code><span class="copy-btn"
+                        onclick="copyText('flushall')">📋</span></td>
+                <td>清空所有数据库</td>
+            </tr>
+            <tr>
+                <td><code id="flushdb">FLUSHDB [ASYNC]</code><span class="copy-btn"
+                        onclick="copyText('flushdb')">📋</span></td>
+                <td>清空当前数据库</td>
+            </tr>
+            <tr>
+                <td><code id="info">INFO [section]</code><span class="copy-btn" onclick="copyText('info')">📋</span>
+                </td>
+                <td>获取服务器信息</td>
+            </tr>
+            <tr>
+                <td><code id="lastsave">LASTSAVE</code><span class="copy-btn" onclick="copyText('lastsave')">📋</span>
+                </td>
+                <td>获取上次保存 RDB 的时间</td>
+            </tr>
+            <tr>
+                <td><code id="monitor">MONITOR</code><span class="copy-btn" onclick="copyText('monitor')">📋</span></td>
+                <td>实时监控请求（慎用，性能影响大）</td>
+            </tr>
+            <tr>
+                <td><code id="role">ROLE</code><span class="copy-btn" onclick="copyText('role')">📋</span></td>
+                <td>获取实例角色（主/从）</td>
+            </tr>
+            <tr>
+                <td><code id="save">SAVE</code><span class="copy-btn" onclick="copyText('save')">📋</span></td>
+                <td>同步保存 RDB 快照</td>
+            </tr>
+            <tr>
+                <td><code id="shutdown">SHUTDOWN [NOSAVE|SAVE]</code><span class="copy-btn"
+                        onclick="copyText('shutdown')">📋</span></td>
+                <td>关闭服务器</td>
+            </tr>
+            <tr>
+                <td><code id="slaveof">SLAVEOF host port</code><span class="copy-btn"
+                        onclick="copyText('slaveof')">📋</span></td>
+                <td>设置主从关系（Redis 5.0+ 改为 REPLICAOF）</td>
+            </tr>
+            <tr>
+                <td><code id="slowlog">SLOWLOG subcommand</code><span class="copy-btn"
+                        onclick="copyText('slowlog')">📋</span></td>
+                <td>管理慢查询日志</td>
+            </tr>
+            <tr>
+                <td><code id="sync">SYNC</code><span class="copy-btn" onclick="copyText('sync')">📋</span></td>
+                <td>主从同步（内部使用）</td>
+            </tr>
+            <tr>
+                <td><code id="time">TIME</code><span class="copy-btn" onclick="copyText('time')">📋</span></td>
+                <td>获取服务器时间</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>十五、集群命令（Cluster）</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="clusteraddslots">CLUSTER ADDSLOTS slot [slot ...]</code><span class="copy-btn"
+                        onclick="copyText('clusteraddslots')">📋</span></td>
+                <td>分配槽位</td>
+            </tr>
+            <tr>
+                <td><code id="clustterbumpepoch">CLUSTER BUMPEPOCH</code><span class="copy-btn"
+                        onclick="copyText('clustterbumpepoch')">📋</span></td>
+                <td>强制增加集群纪元</td>
+            </tr>
+            <tr>
+                <td><code id="clusterdelslots">CLUSTER DELSLOTS slot [slot ...]</code><span class="copy-btn"
+                        onclick="copyText('clusterdelslots')">📋</span></td>
+                <td>移除槽位</td>
+            </tr>
+            <tr>
+                <td><code id="clusterfailover">CLUSTER FAILOVER [FORCE|TAKEOVER]</code><span class="copy-btn"
+                        onclick="copyText('clusterfailover')">📋</span></td>
+                <td>手动故障转移</td>
+            </tr>
+            <tr>
+                <td><code id="clusterforget">CLUSTER FORGET node-id</code><span class="copy-btn"
+                        onclick="copyText('clusterforget')">📋</span></td>
+                <td>忘记节点</td>
+            </tr>
+            <tr>
+                <td><code id="clustergetkeysinslot">CLUSTER GETKEYSINSLOT slot count</code><span class="copy-btn"
+                        onclick="copyText('clustergetkeysinslot')">📋</span></td>
+                <td>获取槽位中的键</td>
+            </tr>
+            <tr>
+                <td><code id="clusterinfo">CLUSTER INFO</code><span class="copy-btn"
+                        onclick="copyText('clusterinfo')">📋</span></td>
+                <td>获取集群信息</td>
+            </tr>
+            <tr>
+                <td><code id="clusterkeyslot">CLUSTER KEYSLOT key</code><span class="copy-btn"
+                        onclick="copyText('clusterkeyslot')">📋</span></td>
+                <td>计算键的槽位</td>
+            </tr>
+            <tr>
+                <td><code id="clusttermeet">CLUSTER MEET ip port</code><span class="copy-btn"
+                        onclick="copyText('clusttermeet')">📋</span></td>
+                <td>连接节点到集群</td>
+            </tr>
+            <tr>
+                <td><code id="clustternodes">CLUSTER NODES</code><span class="copy-btn"
+                        onclick="copyText('clustternodes')">📋</span></td>
+                <td>列出集群节点</td>
+            </tr>
+            <tr>
+                <td><code id="clusterreplicate">CLUSTER REPLICATE node-id</code><span class="copy-btn"
+                        onclick="copyText('clusterreplicate')">📋</span></td>
+                <td>设置从节点复制主节点</td>
+            </tr>
+            <tr>
+                <td><code id="clusterreset">CLUSTER RESET [HARD|SOFT]</code><span class="copy-btn"
+                        onclick="copyText('clusterreset')">📋</span></td>
+                <td>重置集群状态</td>
+            </tr>
+            <tr>
+                <td><code id="clustersaveconfig">CLUSTER SAVECONFIG</code><span class="copy-btn"
+                        onclick="copyText('clustersaveconfig')">📋</span></td>
+                <td>保存集群配置</td>
+            </tr>
+            <tr>
+                <td><code id="clustersetconfigepoch">CLUSTER SET-CONFIG-EPOCH epoch</code><span class="copy-btn"
+                        onclick="copyText('clustersetconfigepoch')">📋</span></td>
+                <td>设置配置纪元</td>
+            </tr>
+            <tr>
+                <td><code id="clustersetslot">CLUSTER SETSLOT slot MIGRATING|IMPORTING|STABLE|NODE node-id</code><span
+                        class="copy-btn" onclick="copyText('clustersetslot')">📋</span></td>
+                <td>设置槽位状态</td>
+            </tr>
+            <tr>
+                <td><code id="clusterslaves">CLUSTER SLAVES node-id</code><span class="copy-btn"
+                        onclick="copyText('clusterslaves')">📋</span></td>
+                <td>列出从节点</td>
+            </tr>
+            <tr>
+                <td><code id="clusterslots">CLUSTER SLOTS</code><span class="copy-btn"
+                        onclick="copyText('clusterslots')">📋</span></td>
+                <td>获取槽位分布信息</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>十六、Sentinel（哨兵）</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="sentinelckquorum">SENTINEL CKQUORUM master-name</code><span class="copy-btn"
+                        onclick="copyText('sentinelckquorum')">📋</span></td>
+                <td>检查仲裁数量</td>
+            </tr>
+            <tr>
+                <td><code id="sentinelfailover">SENTINEL FAILOVER master-name</code><span class="copy-btn"
+                        onclick="copyText('sentinelfailover')">📋</span></td>
+                <td>强制故障转移</td>
+            </tr>
+            <tr>
+                <td><code id="sentinelflushconfig">SENTINEL FLUSHCONFIG</code><span class="copy-btn"
+                        onclick="copyText('sentinelflushconfig')">📋</span></td>
+                <td>强制写入配置</td>
+            </tr>
+            <tr>
+                <td><code id="sentinelgetmasteraddrbyname">SENTINEL GET-MASTER-ADDR-BY-NAME master-name</code><span
+                        class="copy-btn" onclick="copyText('sentinelgetmasteraddrbyname')">📋</span></td>
+                <td>获取主节点地址</td>
+            </tr>
+            <tr>
+                <td><code id="sentinelmaster">SENTINEL MASTER master-name</code><span class="copy-btn"
+                        onclick="copyText('sentinelmaster')">📋</span></td>
+                <td>获取主节点信息</td>
+            </tr>
+            <tr>
+                <td><code id="sentinelmasters">SENTINEL MASTERS</code><span class="copy-btn"
+                        onclick="copyText('sentinelmasters')">📋</span></td>
+                <td>列出所有主节点</td>
+            </tr>
+            <tr>
+                <td><code id="sentinelmonitor">SENTINEL MONITOR master-name ip port quorum</code><span class="copy-btn"
+                        onclick="copyText('sentinelmonitor')">📋</span></td>
+                <td>监控主节点</td>
+            </tr>
+            <tr>
+                <td><code id="sentinelremove">SENTINEL REMOVE master-name</code><span class="copy-btn"
+                        onclick="copyText('sentinelremove')">📋</span></td>
+                <td>移除主节点</td>
+            </tr>
+            <tr>
+                <td><code id="sentinelreset">SENTINEL RESET master-name</code><span class="copy-btn"
+                        onclick="copyText('sentinelreset')">📋</span></td>
+                <td>重置主节点</td>
+            </tr>
+            <tr>
+                <td><code id="sentinelslaves">SENTINEL SLAVES master-name</code><span class="copy-btn"
+                        onclick="copyText('sentinelslaves')">📋</span></td>
+                <td>获取从节点列表</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>十七、模块命令（Module）</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="modulelist">MODULE LIST</code><span class="copy-btn"
+                        onclick="copyText('modulelist')">📋</span></td>
+                <td>列出加载的模块</td>
+            </tr>
+            <tr>
+                <td><code id="moduleload">MODULE LOAD path</code><span class="copy-btn"
+                        onclick="copyText('moduleload')">📋</span></td>
+                <td>加载模块</td>
+            </tr>
+            <tr>
+                <td><code id="moduleunload">MODULE UNLOAD name</code><span class="copy-btn"
+                        onclick="copyText('moduleunload')">📋</span></td>
+                <td>卸载模块</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>十八、其他高级命令</h2>
+        <table>
+            <tr>
+                <th>命令</th>
+                <th>说明</th>
+            </tr>
+            <tr>
+                <td><code id="memorydoctor">MEMORY DOCTOR</code><span class="copy-btn"
+                        onclick="copyText('memorydoctor')">📋</span></td>
+                <td>内存使用分析</td>
+            </tr>
+            <tr>
+                <td><code id="memoryhelp">MEMORY HELP</code><span class="copy-btn"
+                        onclick="copyText('memoryhelp')">📋</span></td>
+                <td>内存命令帮助</td>
+            </tr>
+            <tr>
+                <td><code id="memorymallocstats">MEMORY MALLOC-STATS</code><span class="copy-btn"
+                        onclick="copyText('memorymallocstats')">📋</span></td>
+                <td>内存分配器统计</td>
+            </tr>
+            <tr>
+                <td><code id="memorypurge">MEMORY PURGE</code><span class="copy-btn"
+                        onclick="copyText('memorypurge')">📋</span></td>
+                <td>清理内存（适用于 jemalloc）</td>
+            </tr>
+            <tr>
+                <td><code id="memorystats">MEMORY STATS</code><span class="copy-btn"
+                        onclick="copyText('memorystats')">📋</span></td>
+                <td>内存统计</td>
+            </tr>
+            <tr>
+                <td><code id="memoryusage">MEMORY USAGE key</code><span class="copy-btn"
+                        onclick="copyText('memoryusage')">📋</span></td>
+                <td>估算键的内存使用</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="command-section">
+        <h2>注意事项</h2>
+        <div class="note">
+            <ul>
+                <li><strong>版本差异：</strong>部分命令（如 ACL、CLIENT 新特性）仅在 Redis 6.0+ 支持</li>
+                <li><strong>生产环境慎用：</strong>如 KEYS、MONITOR、FLUSHALL 等命令可能影响性能或数据安全</li>
+                <li><strong>安全性：</strong>生产环境应禁用 CONFIG SET、DEBUG 等高危命令</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    const tempToast = document.createElement('div');
+                    tempToast.style.position = 'fixed';
+                    tempToast.style.bottom = '20px';
+                    tempToast.style.right = '20px';
+                    tempToast.style.backgroundColor = '#28a745';
+                    tempToast.style.color = 'white';
+                    tempToast.style.padding = '10px 20px';
+                    tempToast.style.borderRadius = '4px';
+                    tempToast.style.zIndex = '9999';
+                    tempToast.style.opacity = '0.9';
+                    tempToast.textContent = `已复制：${text}`;
+                    document.body.appendChild(tempToast);
+
+                    setTimeout(() => {
+                        tempToast.style.opacity = '0';
+                        setTimeout(() => {
+                            tempToast.remove();
+                        }, 300);
+                    }, 1500);
+                })
+                .catch(err => {
+                    console.error('复制失败：', err);
+                    alert('复制失败，请手动选择复制');
+                });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=266dd97a-5e4f-48fc-b798-675a60c67943
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>开发者工具箱</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+
+    <!-- 使用Font Awesome图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="js/auth-config.js"></script>
+    <script src="js/auth-check.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #f9fafb;
+            --text-color: #1f2937;
+            --card-bg: #ffffff;
+            --accent-color: #3b82f6;
+            --accent-light: #dbeafe;
+            --muted-color: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.5;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .language-switch {
+            display: inline-flex;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: var(--border-color);
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            background: none;
+            border: none;
+            color: var(--muted-color);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .lang-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 10px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 12px;
+            color: var(--muted-color);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .logout-btn:hover {
+            background-color: #f3f4f6;
+            color: var(--text-color);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-color);
+            letter-spacing: -0.025em;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--muted-color);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 32px;
+            justify-content: center;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            background-color: #f3f4f6;
+            border: none;
+            border-radius: 12px;
+            color: var(--muted-color);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active,
+        .tab-btn:hover {
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .nav-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 18px;
+            text-align: left;
+            box-shadow: var(--shadow);
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            height: 100%;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-card:hover {
+            box-shadow: var(--shadow-hover);
+            border-color: #d1d5db;
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-color);
+            font-size: 24px;
+        }
+
+        .card-category {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+            min-height: 48px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-desc {
+            color: var(--muted-color);
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 14px;
+            min-height: 48px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex-grow: 1;
+        }
+
+        .nav-link {
+            display: inline-block;
+            padding: 7px 14px;
+            background-color: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            width: fit-content;
+            text-align: center;
+        }
+
+        .nav-link:hover {
+            background-color: #2563eb;
+            text-decoration: none;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--muted-color);
+            margin-top: 40px;
+            padding-top: 20px;
+            font-size: 13px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .nav-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header-actions">
+            <div class="language-switch">
+                <button class="lang-btn active" data-lang="zh">zh</button>
+                <button class="lang-btn" data-lang="en">en</button>
+            </div>
+            <button onclick="logout()" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                退出
+            </button>
+        </div>
+
+        <header>
+            <h1 id="pageTitle">开发者工具箱</h1>
+            <p class="subtitle" id="pageSubtitle">一站式技术文档与实用工具集合</p>
+        </header>
+
+        <div class="category-tabs">
+            <button class="tab-btn active" data-category="all" id="tabAll">全部</button>
+            <button class="tab-btn" data-category="docker" id="tabDocker">Docker & K8S</button>
+            <button class="tab-btn" data-category="redis" id="tabRedis">Redis</button>
+            <button class="tab-btn" data-category="markdown" id="tabMarkdown">Markdown</button>
+            <button class="tab-btn" data-category="tools" id="tabTools">实用工具</button>
+        </div>
+
+        <div class="nav-grid">
+            <!-- 工具卡片将由JavaScript动态生成 -->
+        </div>
+
+        <footer>
+            <p id="footerText">&copy; 2024 开发者工具箱. 让技术更简单.</p>
+        </footer>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>

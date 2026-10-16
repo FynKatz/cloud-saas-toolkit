@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=266dd97a-5e4f-48fc-b798-675a60c67943
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+  <title>Markdown 标题层级调整器 + 清空按钮</title>
+
+  <!-- 使用Font Awesome图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .left-panel,
+    .right-panel {
+      width: 48%;
+    }
+
+    .left-panel textarea,
+    .right-panel textarea {
+      width: 100%;
+      height: 300px;
+      font-family: monospace;
+      padding: 10px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      resize: vertical;
+    }
+
+    label,
+    select,
+    button {
+      display: block;
+      margin: 10px 0;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap; /* 确保小屏幕时按钮换行 */
+    }
+
+    .button-group button {
+      width: auto;
+      flex: 1 1 0;       /* 让按钮平均分配宽度 */
+      min-width: 120px;  /* 保持最小宽度，三个按钮刚好 */
+    }
+
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .right-panel textarea {
+      align-self: flex-end;
+    }
+  </style>
+  <link rel="stylesheet" href="css/auth-styles.css">
+  <script src="js/auth-config.js"></script>
+  <script src="js/auth-check.js"></script>
+</head>
+
+<body>
+  <div class="header-actions">
+      <div class="header-left">
+          <button onclick="goToHome()" class="home-btn">
+              <i class="fas fa-home"></i>
+              首页
+          </button>
+      </div>
+      <div class="header-right">
+          <button onclick="logout()" class="logout-btn">
+              <i class="fas fa-sign-out-alt"></i>
+              退出
+          </button>
+      </div>
+  </div>
+
+  <h1>Markdown 标题层级调整器（最终版 + 清空）</h1>
+
+  <label for="adjustType">选择调整方式：</label>
+  <select id="adjustType">
+    <option value="increase">提升一级</option>
+    <option value="decrease">降低一级</option>
+  </select>
+
+  <div class="container">
+    <div class="left-panel">
+      <textarea id="input" placeholder="在此粘贴你的 Markdown 内容..."></textarea>
+      <div class="button-group">
+        <button onclick="processMarkdown()">标题升降</button>
+        <button onclick="removeHeaderPrefix()">删除标题前缀数字</button>
+        <!-- 新增的清除按钮：同时清空输入和输出区域，方便重新粘贴 -->
+        <button onclick="clearAll()"><i class="fas fa-eraser"></i> 清空内容</button>
+      </div>
+    </div>
+
+    <div class="right-panel">
+      <textarea id="output" readonly placeholder="处理后的内容会显示在这里..."></textarea>
+      <button onclick="copyOutput()">📋 复制处理后的内容</button>
+    </div>
+  </div>
+
+  <script>
+    // 调整标题层级（核心逻辑）
+    function adjustHeaders(text, delta) {
+      const headerRegex = /^(\#{1,6})\s+(.+)$/gm;
+      return text.replace(headerRegex, (match, hashes, title) => {
+        let level = hashes.length;
+        if (delta === -1 && level > 1) level -= 1; // 提升一级
+        else if (delta === 1 && level < 6) level += 1; // 降低一级
+        return '#'.repeat(level) + ' ' + title;
+      });
+    }
+
+    // 删除标题前的数字/序号（核心逻辑）
+    function removeHeaderPrefixes(text) {
+      const pattern = /^(\#{1,6}\s+)(?:[0-9\.]+|[(（][0-9A-Za-z][））]|[一二三四五六七八九十]+)(?:[\.\．\、\，\,]|\s)+/gm;
+      return text.replace(pattern, '$1');
+    }
+
+    // 处理升降级（优先使用输出框内容，兼容直接处理输入框）
+    function processMarkdown() {
+      const adjustType = document.getElementById('adjustType').value;
+      const inputArea = document.getElementById('input');
+      const outputArea = document.getElementById('output');
+
+      const input = outputArea.value.trim() !== '' ? outputArea.value : inputArea.value;
+      const delta = adjustType === 'increase' ? -1 : 1;
+      const adjusted = adjustHeaders(input, delta);
+      outputArea.value = adjusted;
+    }
+
+    // 删除标题前缀数字（优先使用输出框内容）
+    function removeHeaderPrefix() {
+      const outputArea = document.getElementById('output');
+      const input = outputArea.value.trim() !== '' ? outputArea.value : document.getElementById('input').value;
+      const cleaned = removeHeaderPrefixes(input);
+      outputArea.value = cleaned;
+    }
+
+    // 新增：清空输入框和输出框，并将焦点放回输入框
+    function clearAll() {
+      document.getElementById('input').value = '';
+      document.getElementById('output').value = '';
+      // 让用户可以直接粘贴新内容
+      document.getElementById('input').focus();
+    }
+
+    // 复制输出内容到剪贴板
+    function copyOutput() {
+      const output = document.getElementById('output');
+      output.select();
+      output.setSelectionRange(0, 99999); // For mobile devices
+      document.execCommand("copy");
+      alert("内容已复制到剪贴板！");
+    }
+  </script>
+
+</body>
+
+</html>

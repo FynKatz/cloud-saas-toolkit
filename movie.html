@@ -1,0 +1,2991 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=266dd97a-5e4f-48fc-b798-675a60c67943
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>个人电影手册</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      /* 样式保持不变，与原始代码完全相同 */
+      :root {
+        --bg-primary: #121212;
+        --bg-secondary: #1e1e1e;
+        --bg-tertiary: #2d2d2d;
+        --text-primary: #ffffff;
+        --text-secondary: #b3b3b3;
+        --accent: #bb86fc;
+        --accent-variant: #3700b3;
+        --success: #03dac6;
+        --warning: #ffc107;
+        --error: #cf6679;
+        --border-radius: 12px;
+        --transition: all 0.3s ease;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+      }
+
+      .app-container {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      /* 顶部导航栏 */
+      .top-navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 24px;
+        background-color: var(--bg-secondary);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .app-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent);
+      }
+
+      .app-title i {
+        font-size: 1.8rem;
+      }
+
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .nav-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: var(--bg-tertiary);
+        border: none;
+        border-radius: var(--border-radius);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 500;
+      }
+
+      .nav-btn:hover {
+        background: var(--accent-variant);
+        transform: translateY(-2px);
+      }
+
+      .nav-btn i {
+        font-size: 1.1rem;
+      }
+
+      /* 主内容区 */
+      .main-content {
+        flex: 1;
+        padding: 24px;
+        display: flex;
+        gap: 24px;
+      }
+
+      /* 侧边栏 */
+      .sidebar {
+        width: 280px;
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        height: fit-content;
+        position: sticky;
+        top: 90px;
+      }
+
+      .sidebar-section {
+        margin-bottom: 24px;
+      }
+
+      .sidebar-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .sidebar-title i {
+        font-size: 1.2rem;
+        color: var(--accent);
+        transition: var(--transition);
+      }
+
+      .filter-list {
+        list-style: none;
+      }
+
+      .filter-item {
+        padding: 10px 12px;
+        border-radius: 8px;
+        margin-bottom: 6px;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .filter-item:hover {
+        background: var(--bg-tertiary);
+      }
+
+      .filter-item.active {
+        background: var(--accent-variant);
+        color: var(--text-primary);
+      }
+
+      .filter-count {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+      }
+
+      /* 电影网格 */
+      .movie-grid-container {
+        flex: 1;
+      }
+
+      .grid-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .grid-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      .view-controls {
+        display: flex;
+        gap: 12px;
+      }
+
+      .view-btn {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: var(--bg-secondary);
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .view-btn.active {
+        background: var(--accent);
+        color: var(--text-primary);
+      }
+
+      .movie-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 24px;
+      }
+
+      /* 列表视图样式 */
+      .movie-grid.list-view {
+        display: block;
+        grid-template-columns: 1fr;
+      }
+
+      .movie-card {
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        transition: var(--transition);
+        cursor: pointer;
+        position: relative;
+      }
+
+      .movie-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .movie-poster {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+      }
+
+      .movie-info {
+        padding: 16px;
+      }
+
+      .movie-title {
+        font-weight: 600;
+        margin-bottom: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .movie-year {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+      }
+
+      .movie-rating {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--warning);
+        font-weight: 500;
+      }
+
+      .movie-status {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: var(--accent);
+        color: var(--text-primary);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+
+      /* 列表视图样式 */
+      .movie-list-item {
+        display: flex;
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        margin-bottom: 16px;
+        overflow: hidden;
+        transition: var(--transition);
+        cursor: pointer;
+        position: relative;
+      }
+
+      .movie-list-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .movie-list-poster {
+        width: 100px;
+        flex-shrink: 0;
+      }
+
+      .movie-list-poster img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+      }
+
+      .movie-list-info {
+        padding: 16px;
+        flex: 1;
+      }
+
+      .movie-list-title {
+        font-weight: 600;
+        margin-bottom: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .movie-list-year,
+      .movie-list-genre {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .movie-list-rating {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--warning);
+        font-weight: 500;
+      }
+
+      .movie-list-status {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: var(--accent);
+        color: var(--text-primary);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+
+      /* 添加按钮 */
+      .add-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(187, 134, 252, 0.4);
+        transition: var(--transition);
+        z-index: 90;
+      }
+
+      .add-btn:hover {
+        transform: scale(1.1) rotate(90deg);
+      }
+
+      /* 模态框 */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .modal-content {
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        width: 100%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid var(--bg-tertiary);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .modal-close {
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: var(--text-secondary);
+        transition: var(--transition);
+        background: none;
+        border: none;
+      }
+
+      .modal-close:hover {
+        color: var(--text-primary);
+      }
+
+      .modal-body {
+        padding: 20px;
+      }
+
+      /* 表单元素 */
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid var(--bg-tertiary);
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        font-size: 1rem;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .btn {
+        padding: 12px 20px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: var(--text-primary);
+      }
+
+      .btn-primary:hover {
+        background: var(--accent-variant);
+      }
+
+      .btn-outline {
+        background: transparent;
+        border: 1px solid var(--bg-tertiary);
+        color: var(--text-primary);
+      }
+
+      .btn-outline:hover {
+        background: var(--bg-tertiary);
+      }
+
+      /* 电影详情模态框 */
+      .movie-detail {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 24px;
+      }
+
+      .movie-detail-poster {
+        width: 100%;
+        border-radius: var(--border-radius);
+      }
+
+      .movie-detail-title {
+        font-size: 2rem;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .movie-detail-meta {
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .movie-detail-rating {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        font-size: 1.2rem;
+        color: var(--warning);
+      }
+
+      .movie-detail-plot {
+        line-height: 1.6;
+        margin-bottom: 20px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        background: var(--bg-tertiary);
+        border: none;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .action-btn.active {
+        background: var(--accent);
+      }
+
+      .action-btn:hover {
+        background: var(--accent-variant);
+      }
+
+      /* 响应式设计 */
+      @media (max-width: 1024px) {
+        .main-content {
+          flex-direction: column;
+        }
+
+        .sidebar {
+          width: 100%;
+          position: static;
+        }
+
+        .movie-detail {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .top-navbar {
+          padding: 12px 16px;
+        }
+
+        .btn-text {
+          display: none;
+        }
+
+        .nav-btn {
+          padding: 10px;
+        }
+
+        .main-content {
+          padding: 16px;
+        }
+
+        .movie-grid {
+          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+          gap: 16px;
+        }
+
+        .movie-poster {
+          height: 220px;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* 登录模态框 */
+      .auth-container {
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .auth-tabs {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--bg-tertiary);
+      }
+
+      .auth-tab {
+        padding: 12px 20px;
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-weight: 500;
+        transition: var(--transition);
+        position: relative;
+      }
+
+      .auth-tab.active {
+        color: var(--accent);
+      }
+
+      .auth-tab.active::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--accent);
+      }
+
+      /* 评分控件 */
+      .rating-widget {
+        display: flex;
+        gap: 4px;
+        margin: 10px 0;
+        justify-content: center;
+      }
+
+      .rating-star {
+        font-size: 24px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .rating-star.active,
+      .rating-star:hover {
+        color: var(--warning);
+      }
+
+      /* 加载动画 */
+      .loader {
+        border: 3px solid var(--bg-tertiary);
+        border-top: 3px solid var(--accent);
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* 通知消息 */
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: var(--border-radius);
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      }
+
+      .notification.show {
+        transform: translateX(0);
+      }
+
+      .notification.success {
+        border-left: 4px solid var(--success);
+      }
+
+      .notification.error {
+        border-left: 4px solid var(--error);
+      }
+
+      /* 搜索结果 */
+      .search-results {
+        margin-top: 20px;
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid var(--bg-tertiary);
+        border-radius: var(--border-radius);
+      }
+
+      .search-result-item {
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: var(--transition);
+        border-bottom: 1px solid var(--bg-tertiary);
+      }
+
+      .search-result-item:hover {
+        background: var(--bg-tertiary);
+        transform: translateY(-2px);
+      }
+
+      .search-result-poster {
+        width: 40px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 4px;
+        background: var(--bg-tertiary);
+      }
+
+      .search-result-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .search-result-title {
+        font-weight: 500;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--text-primary);
+      }
+
+      .search-result-year {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .select-movie-btn {
+        padding: 6px 12px;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: var(--transition);
+      }
+
+      .select-movie-btn:hover {
+        background: var(--accent-variant);
+      }
+
+      /* 调试信息样式 */
+      .debug-info {
+        background-color: #f8f9fa;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+        padding: 12px;
+        font-family: monospace;
+        font-size: 12px;
+        margin-top: 16px;
+        max-height: 200px;
+        overflow-y: auto;
+        display: none;
+        color: #000;
+      }
+
+      .debug-toggle {
+        cursor: pointer;
+        color: var(--accent);
+        text-decoration: underline;
+        font-size: 12px;
+        margin-top: 8px;
+        display: inline-block;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 20px;
+        color: var(--text-secondary);
+      }
+
+      .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-left-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 8px;
+      }
+
+      .error-message {
+        color: var(--error);
+        font-size: 14px;
+        margin-top: 8px;
+      }
+
+      .delete-btn {
+        background: var(--error) !important;
+      }
+
+      .delete-btn:hover {
+        background: #b00020 !important;
+      }
+
+      .confirmation-dialog {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        z-index: 1100;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .confirmation-content {
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        padding: 20px;
+        max-width: 400px;
+        width: 90%;
+      }
+
+      .confirmation-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      /* 页面容器 */
+      .page-container {
+        display: none;
+      }
+
+      .page-container.active {
+        display: flex;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-secondary);
+      }
+
+      .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 16px;
+        color: var(--bg-tertiary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="top-navbar">
+        <div class="app-title">
+          <i class="fas fa-film"></i>
+          <span>家庭电影手册</span>
+        </div>
+
+        <div class="nav-right">
+          <!-- 添加首页按钮 -->
+          <button class="nav-btn" onclick="goToHome()">
+            <i class="fas fa-home"></i>
+            <span class="btn-text">首页</span>
+          </button>
+          <button class="nav-btn" id="switch-user-btn">
+            <i class="fas fa-user-circle"></i>
+            <span class="btn-text">切换账户</span>
+          </button>
+
+          <button class="nav-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span class="btn-text">退出</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 加载状态 -->
+      <div id="loading" class="loading" style="display: none">
+        <span class="spinner"></span>
+        <span id="loading-text">正在加载...</span>
+      </div>
+
+      <!-- 个人页面 -->
+      <div id="personal-page" class="page-container active">
+        <!-- 主内容区域 -->
+        <div class="main-content">
+          <!-- 侧边栏 -->
+          <aside class="sidebar">
+            <div class="sidebar-section">
+              <h3 class="sidebar-title">
+                <i class="fas fa-layer-group"></i>
+                分组
+              </h3>
+              <ul class="filter-list" id="status-filters">
+                <li class="filter-item active" data-status="all">
+                  <span>全部电影</span>
+                  <span class="filter-count" id="count-all">0</span>
+                </li>
+                <li class="filter-item" data-status="watched">
+                  <span>已观看</span>
+                  <span class="filter-count" id="count-watched">0</span>
+                </li>
+                <li class="filter-item" data-status="want">
+                  <span>想观看</span>
+                  <span class="filter-count" id="count-want">0</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="sidebar-section">
+              <h3 class="sidebar-title">
+                <i class="fas fa-tags"></i>
+                类型
+              </h3>
+              <ul class="filter-list" id="genre-filters">
+                <li class="filter-item active" data-genre="all">
+                  <span>全部类型</span>
+                  <span class="filter-count" id="count-all-genres">0</span>
+                </li>
+                <!-- 动态生成的类型过滤器 -->
+              </ul>
+            </div>
+
+            <div class="sidebar-section">
+              <h3 class="sidebar-title">
+                <i class="fas fa-star"></i>
+                评分
+              </h3>
+              <ul class="filter-list" id="rating-filters">
+                <li class="filter-item active" data-rating="all">
+                  <span>全部评分</span>
+                  <span class="filter-count" id="count-all-ratings">0</span>
+                </li>
+                <li class="filter-item" data-rating="5">
+                  <span>★★★★★</span>
+                  <span class="filter-count" id="count-rating-5">0</span>
+                </li>
+                <li class="filter-item" data-rating="4">
+                  <span>★★★★☆</span>
+                  <span class="filter-count" id="count-rating-4">0</span>
+                </li>
+                <li class="filter-item" data-rating="3">
+                  <span>★★★☆☆</span>
+                  <span class="filter-count" id="count-rating-3">0</span>
+                </li>
+              </ul>
+            </div>
+          </aside>
+
+          <!-- 电影网格 -->
+          <div class="movie-grid-container">
+            <div class="grid-header">
+              <h2 class="grid-title" id="personal-grid-title">我的电影库</h2>
+              <div class="view-controls">
+                <button class="view-btn active" data-view="grid">
+                  <i class="fas fa-th"></i>
+                </button>
+                <button class="view-btn" data-view="list">
+                  <i class="fas fa-list"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="movie-grid" id="personal-movie-grid">
+              <!-- 动态生成的电影卡片 -->
+              <div class="loader" id="personal-loader"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 添加按钮 -->
+      <button class="add-btn" id="add-movie-btn">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+
+    <!-- 登录/注册模态框 -->
+    <div id="auth-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">欢迎使用个人电影手册</h2>
+          <span class="modal-close">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="auth-container">
+            <div class="auth-tabs">
+              <button class="auth-tab active" data-tab="login">登录</button>
+              <button class="auth-tab" data-tab="register">注册</button>
+            </div>
+
+            <form id="login-form">
+              <div class="form-group">
+                <label class="form-label">邮箱</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="login-email"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">密码</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="login-password"
+                  required
+                />
+              </div>
+              <div
+                id="login-error"
+                class="error-message"
+                style="display: none"
+              ></div>
+              <button type="submit" class="btn btn-primary" style="width: 100%">
+                登录
+              </button>
+            </form>
+
+            <form id="register-form" style="display: none">
+              <div class="form-group">
+                <label class="form-label">用户名</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="register-username"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">邮箱</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="register-email"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">密码</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="register-password"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">确认密码</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="register-confirm-password"
+                  required
+                />
+              </div>
+              <div
+                id="register-error"
+                class="error-message"
+                style="display: none"
+              ></div>
+              <button type="submit" class="btn btn-primary" style="width: 100%">
+                注册
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 电影详情模态框 -->
+    <div id="movie-detail-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">电影详情</h2>
+          <span class="modal-close">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="movie-detail" id="movie-detail-content">
+            <!-- 动态生成的电影详情 -->
+            <div class="loader"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 添加电影模态框 -->
+    <div id="add-movie-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">添加电影</h2>
+          <span class="modal-close">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">搜索电影</label>
+            <input
+              type="text"
+              class="form-control"
+              id="movie-search"
+              placeholder="输入电影名称"
+            />
+            <div
+              class="search-results"
+              id="search-results"
+              style="display: none"
+            ></div>
+          </div>
+
+          <form id="manual-movie-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">电影名称</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="movie-title"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">上映年份</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="movie-year"
+                  min="1900"
+                  max="2030"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">导演</label>
+              <input type="text" class="form-control" id="movie-director" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">主演</label>
+              <input
+                type="text"
+                class="form-control"
+                id="movie-actors"
+                placeholder="多个主演用逗号分隔"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">类型</label>
+              <select class="form-control" id="movie-genre" multiple>
+                <option value="剧情">剧情</option>
+                <option value="喜剧">喜剧</option>
+                <option value="动作">动作</option>
+                <option value="科幻">科幻</option>
+                <option value="爱情">爱情</option>
+                <option value="动画">动画</option>
+                <option value="惊悚">惊悚</option>
+                <option value="恐怖">恐怖</option>
+                <option value="悬疑">悬疑</option>
+                <option value="犯罪">犯罪</option>
+                <option value="战争">战争</option>
+                <option value="奇幻">奇幻</option>
+                <option value="冒险">冒险</option>
+                <option value="歌舞">歌舞</option>
+                <option value="音乐">音乐</option>
+                <option value="传记">传记</option>
+                <option value="历史">历史</option>
+                <option value="纪录片">纪录片</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">剧情简介</label>
+              <textarea
+                class="form-control"
+                id="movie-plot"
+                rows="3"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">海报URL</label>
+              <input type="url" class="form-control" id="movie-poster" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">评分</label>
+              <input
+                type="number"
+                class="form-control"
+                id="movie-rating"
+                min="0"
+                max="10"
+                step="0.1"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">片长（分钟）</label>
+              <input type="number" class="form-control" id="movie-duration" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">状态</label>
+              <select class="form-control" id="movie-status">
+                <option value="want">想观看</option>
+                <option value="watched">已观看</option>
+              </select>
+            </div>
+            <div
+              id="add-movie-error"
+              class="error-message"
+              style="display: none"
+            ></div>
+            <div
+              style="
+                display: flex;
+                justify-content: flex-end;
+                gap: 12px;
+                margin-top: 20px;
+              "
+            >
+              <button
+                type="button"
+                class="btn btn-outline"
+                id="cancel-add-movie"
+              >
+                取消
+              </button>
+              <button type="submit" class="btn btn-primary">添加</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 确认删除对话框 -->
+    <div id="delete-confirmation" class="confirmation-dialog">
+      <div class="confirmation-content">
+        <h3>确认删除</h3>
+        <p>您确定要删除这部电影吗？此操作无法撤销。</p>
+        <div class="confirmation-buttons">
+          <button class="btn btn-outline" id="cancel-delete">取消</button>
+          <button class="btn btn-primary delete-btn" id="confirm-delete">
+            确认删除
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 评分对话框 -->
+    <div id="rating-dialog" class="confirmation-dialog">
+      <div class="confirmation-content">
+        <h3>评分</h3>
+        <p>请为这部电影评分（0-10分）：</p>
+        <div class="rating-widget" id="rating-stars">
+          <span class="rating-star" data-rating="1">★</span>
+          <span class="rating-star" data-rating="2">★</span>
+          <span class="rating-star" data-rating="3">★</span>
+          <span class="rating-star" data-rating="4">★</span>
+          <span class="rating-star" data-rating="5">★</span>
+          <span class="rating-star" data-rating="6">★</span>
+          <span class="rating-star" data-rating="7">★</span>
+          <span class="rating-star" data-rating="8">★</span>
+          <span class="rating-star" data-rating="9">★</span>
+          <span class="rating-star" data-rating="10">★</span>
+        </div>
+        <div class="confirmation-buttons">
+          <button class="btn btn-outline" id="cancel-rating">取消</button>
+          <button class="btn btn-primary" id="submit-rating">提交评分</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 通知消息 -->
+    <div class="notification" id="notification"></div>
+
+    <!-- 调试信息 -->
+    <div class="debug-toggle" onclick="toggleDebugInfo()">
+      显示/隐藏调试信息
+    </div>
+    <div class="debug-info" id="debug-info"></div>
+
+    <!-- Supabase客户端库 -->
+    <script src="js/supabase-js.js"></script>
+
+    <!-- 引入认证配置和检查脚本 -->
+    <script src="js/auth-config.js"></script>
+    <script src="js/auth-check.js"></script>
+
+    <script>
+      // 【必须配置】⬇️⬇️⬇️ 以下两行是唯一需要修改的地方 ⬇️⬇️⬇️
+      // 替换为你的Supabase URL (从Supabase仪表板 > Project Settings > API 获取)
+      const SUPABASE_URL = "https://dpakuvyvyjfvkfkkpjou.supabase.co";
+
+      // 替换为你的Supabase Anon Key (从Supabase仪表板 > Project Settings > API 获取)
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwYWt1dnl2eWpmdmtma2twam91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY5MDkwNjMsImV4cCI6MjA3MjQ4NTA2M30.wEQQVMpisLSnfmTHsvTGclERCJTOXbHDSW8EejTiK0k";
+      // 【必须配置】⬆️⬆️⬆️ 以上两行是唯一需要修改的地方 ⬆️⬆️⬆️
+
+      // 【TMDB API配置】⬇️⬇️⬇️ 替换为你的TMDB API Key ⬇️⬇️⬇️
+      const TMDB_API_KEY =
+        "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJlZmU0YmIzMTM0NzZlMDU5OTI4YzUzMGRkMWRiNWQ2ZCIsIm5iZiI6MTc1NzU5MzY2NC4wNzEsInN1YiI6IjY4YzJjMDQwZDgyNmM3ZDUwOTA2YjM5NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.-k-EpZijdNs7JGyvq5Kkpwa6zMVmKdvisl7HredEiTo";
+      // 【TMDB API配置】⬆️⬆️⬆️ 以上需要替换为你的TMDB API Key ⬆️⬆️⬆️
+
+      // 初始化全局变量
+      let supabase;
+      let currentUser = null;
+      let currentPage = "personal";
+      let personalMovies = [];
+      let personalFilters = {
+        status: "all",
+        genre: "all",
+        rating: "all",
+      };
+      let debugEnabled = false;
+      let isAppInitialized = false;
+      let viewMode = "grid";
+      let currentRatingMovieId = null;
+      let selectedRating = 0;
+
+      // TMDB类型映射
+      const genreMap = {
+        28: "动作",
+        12: "冒险",
+        16: "动画",
+        35: "喜剧",
+        80: "犯罪",
+        99: "纪录片",
+        18: "剧情",
+        10751: "家庭",
+        14: "奇幻",
+        36: "历史",
+        27: "恐怖",
+        10402: "音乐",
+        9648: "悬疑",
+        10749: "爱情",
+        878: "科幻",
+        10770: "电视电影",
+        53: "惊悚",
+        10752: "战争",
+        37: "西部",
+      };
+
+      // DOM元素
+      const elements = {
+        authModal: document.getElementById("auth-modal"),
+        movieDetailModal: document.getElementById("movie-detail-modal"),
+        addMovieModal: document.getElementById("add-movie-modal"),
+        personalMovieGrid: document.getElementById("personal-movie-grid"),
+        personalGridTitle: document.getElementById("personal-grid-title"),
+        notification: document.getElementById("notification"),
+        personalLoader: document.getElementById("personal-loader"),
+        loading: document.getElementById("loading"),
+        loadingText: document.getElementById("loading-text"),
+        loginError: document.getElementById("login-error"),
+        registerError: document.getElementById("register-error"),
+        addMovieError: document.getElementById("add-movie-error"),
+        debugInfo: document.getElementById("debug-info"),
+        ratingDialog: document.getElementById("rating-dialog"),
+        ratingStars: document.getElementById("rating-stars"),
+        submitRating: document.getElementById("submit-rating"),
+        cancelRating: document.getElementById("cancel-rating"),
+      };
+
+      // 显示调试信息
+      function logDebug(message) {
+        if (!debugEnabled) return;
+
+        const debugEl = elements.debugInfo;
+        if (debugEl) {
+          const timestamp = new Date().toLocaleTimeString();
+          debugEl.innerHTML += `[${timestamp}] ${message}<br>`;
+          debugEl.scrollTop = debugEl.scrollHeight;
+        }
+      }
+
+      // 切换调试信息显示
+      function toggleDebugInfo() {
+        debugEnabled = !debugEnabled;
+        const debugEl = elements.debugInfo;
+        if (debugEl) {
+          debugEl.style.display = debugEnabled ? "block" : "none";
+        }
+
+        logDebug("调试模式已" + (debugEnabled ? "启用" : "禁用"));
+      }
+
+      // 显示加载状态
+      function showLoading(message = "正在加载...") {
+        logDebug(`显示加载状态: ${message}`);
+        if (elements.loading) {
+          elements.loadingText.textContent = message;
+          elements.loading.style.display = "block";
+        }
+      }
+
+      // 隐藏加载状态
+      function hideLoading() {
+        logDebug("隐藏加载状态");
+        if (elements.loading) {
+          elements.loading.style.display = "none";
+        }
+      }
+
+      // 检查配置是否完整
+      function checkConfig() {
+        logDebug("检查配置完整性");
+
+        if (
+          !SUPABASE_URL ||
+          SUPABASE_URL === "https://your-project.supabase.co" ||
+          SUPABASE_URL.includes("your-project")
+        ) {
+          logDebug("错误: SUPABASE_URL 未正确配置");
+          return false;
+        }
+
+        if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY === "your-anon-key") {
+          logDebug("错误: SUPABASE_ANON_KEY 未正确配置");
+          return false;
+        }
+
+        logDebug("配置检查通过");
+        return true;
+      }
+
+      // 初始化Supabase
+      function initSupabase() {
+        logDebug("初始化 Supabase 客户端");
+
+        try {
+          // 创建客户端实例
+          supabase = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY,
+          );
+
+          logDebug("Supabase 客户端创建成功");
+          logDebug(`连接到: ${SUPABASE_URL}`);
+
+          // 设置认证状态监听
+          supabase.auth.onAuthStateChange((event, session) => {
+            logDebug(`认证状态变化: ${event}`);
+            if (event === "SIGNED_IN" && session) {
+              currentUser = session.user;
+              loadUserProfile();
+              loadPersonalMovies();
+              elements.authModal.style.display = "none";
+            } else if (event === "SIGNED_OUT") {
+              currentUser = null;
+              personalMovies = [];
+              renderPersonalMovies();
+              elements.authModal.style.display = "flex";
+            }
+          });
+
+          return true;
+        } catch (err) {
+          logDebug(`Supabase 初始化失败: ${err.message}`);
+          alert(
+            "Supabase初始化失败: " +
+              err.message +
+              "\n\n请检查Supabase配置是否正确",
+          );
+          return false;
+        }
+      }
+
+      // 初始化应用
+      async function initApp() {
+        if (isAppInitialized) {
+          logDebug("应用已初始化，跳过");
+          return;
+        }
+
+        logDebug("开始初始化应用");
+        isAppInitialized = true;
+
+        showLoading("初始化应用...");
+
+        try {
+          // 检查配置
+          if (!checkConfig()) {
+            logDebug("配置检查失败");
+            elements.authModal.style.display = "flex";
+            hideLoading();
+            return;
+          }
+
+          // 初始化Supabase
+          if (!initSupabase()) {
+            logDebug("Supabase 初始化失败");
+            elements.authModal.style.display = "flex";
+            hideLoading();
+            return;
+          }
+
+          // 检查会话
+          checkSession();
+        } catch (err) {
+          logDebug(`Supabase加载失败: ${err.message}`);
+          hideLoading();
+
+          // 显示错误信息
+          const errorDiv = document.createElement("div");
+          errorDiv.style.cssText =
+            "padding: 20px; margin: 20px; background: #fff3f3; border: 1px solid #ffcdd2; border-radius: 4px;";
+          errorDiv.innerHTML = `
+                    <h3 style="color: #d32f2f; margin-top: 0;">Supabase加载失败</h3>
+                    <p>错误信息: ${err.message}</p>
+                    <p>可能的原因:</p>
+                    <ul>
+                        <li>网络连接问题</li>
+                        <li>CDN服务暂时不可用</li>
+                    </ul>
+                    <button onclick="window.location.reload()" style="padding: 8px 16px; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        刷新页面重试
+                    </button>
+                `;
+
+          document.body.appendChild(errorDiv);
+        }
+      }
+
+      // 检查会话
+      function checkSession() {
+        logDebug("检查用户会话");
+        showLoading("检查登录状态...");
+
+        supabase.auth
+          .getSession()
+          .then(({ data, error }) => {
+            if (error) {
+              logDebug(`获取会话失败: ${error.message}`);
+              console.error("获取会话失败:", error);
+              hideLoading();
+              elements.authModal.style.display = "flex";
+              return;
+            }
+
+            const session = data.session;
+            if (session) {
+              logDebug("检测到有效会话");
+              currentUser = session.user;
+              loadUserProfile();
+              loadPersonalMovies();
+              elements.authModal.style.display = "none";
+            } else {
+              logDebug("没有检测到会话");
+              elements.authModal.style.display = "flex";
+            }
+
+            hideLoading();
+          })
+          .catch((err) => {
+            logDebug(`检查会话时出错: ${err.message}`);
+            console.error("检查会话时出错:", err);
+            hideLoading();
+            elements.authModal.style.display = "flex";
+            showNotification("检查会话失败: " + err.message, "error");
+          });
+      }
+
+      // 显示错误信息
+      function showLoginError(message) {
+        logDebug(`显示登录错误: ${message}`);
+        if (elements.loginError) {
+          elements.loginError.textContent = message;
+          elements.loginError.style.display = "block";
+          setTimeout(() => {
+            elements.loginError.style.display = "none";
+          }, 5000);
+        }
+      }
+
+      // 显示注册错误信息
+      function showRegisterError(message) {
+        logDebug(`显示注册错误: ${message}`);
+        if (elements.registerError) {
+          elements.registerError.textContent = message;
+          elements.registerError.style.display = "block";
+          setTimeout(() => {
+            elements.registerError.style.display = "none";
+          }, 5000);
+        }
+      }
+
+      // 显示添加电影错误信息
+      function showAddMovieError(message) {
+        logDebug(`显示添加电影错误: ${message}`);
+        if (elements.addMovieError) {
+          elements.addMovieError.textContent = message;
+          elements.addMovieError.style.display = "block";
+          setTimeout(() => {
+            elements.addMovieError.style.display = "none";
+          }, 5000);
+        }
+      }
+
+      // 显示通知
+      function showNotification(message, type) {
+        const notification = document.getElementById("notification");
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.classList.add("show");
+
+        setTimeout(() => {
+          notification.classList.remove("show");
+        }, 3000);
+      }
+
+      // 用户登录
+      async function loginUser(email, password) {
+        logDebug("用户尝试登录");
+
+        if (!email || !password) {
+          logDebug("错误: 请输入邮箱和密码");
+          showLoginError("请输入邮箱和密码");
+          return;
+        }
+
+        logDebug(`尝试登录: ${email}`);
+        showLoading("正在登录...");
+
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+          });
+
+          if (error) {
+            logDebug(`登录失败: ${error.message}`);
+            throw error;
+          }
+
+          logDebug("登录成功");
+          currentUser = data.user;
+          await loadUserProfile();
+          await loadPersonalMovies();
+          elements.authModal.style.display = "none";
+
+          hideLoading();
+          showNotification("登录成功", "success");
+        } catch (err) {
+          logDebug(`登录过程中出错: ${err.message}`);
+          hideLoading();
+          let errorMessage = "登录失败";
+
+          if (err.message) {
+            errorMessage += ": " + err.message;
+
+            // 特定错误处理
+            if (err.message.includes("Invalid login credentials")) {
+              errorMessage = "邮箱或密码错误";
+            } else if (err.message.includes("Network Error")) {
+              errorMessage = "网络错误，请稍后再试";
+            }
+          }
+
+          showLoginError(errorMessage);
+        }
+      }
+
+      // 用户注册
+      async function registerUser(username, email, password, confirmPassword) {
+        logDebug("用户尝试注册");
+
+        if (!email || !password || !username) {
+          logDebug("错误: 请输入必填字段");
+          showRegisterError("请输入必填字段");
+          return;
+        }
+
+        if (password.length < 6) {
+          logDebug("错误: 密码长度不足");
+          showRegisterError("密码长度至少6位");
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          logDebug("错误: 密码不匹配");
+          showRegisterError("密码不匹配");
+          return;
+        }
+
+        logDebug(`尝试注册: ${email}`);
+        showLoading("正在注册...");
+
+        try {
+          const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+              data: {
+                username: username,
+              },
+            },
+          });
+
+          if (error) {
+            logDebug(`注册失败: ${error.message}`);
+            throw error;
+          }
+
+          logDebug("注册成功");
+          if (data.session) {
+            // 自动登录新注册的用户
+            logDebug("新用户已自动登录");
+            currentUser = data.user;
+            await loadUserProfile();
+            await loadPersonalMovies();
+            elements.authModal.style.display = "none";
+            showNotification("注册成功", "success");
+          } else {
+            logDebug("需要邮箱确认");
+            showRegisterError("注册成功！请检查邮箱确认账户");
+          }
+
+          hideLoading();
+        } catch (err) {
+          logDebug(`注册过程中出错: ${err.message}`);
+          hideLoading();
+          let errorMessage = "注册失败";
+
+          if (err.message) {
+            errorMessage += ": " + err.message;
+
+            // 特定错误处理
+            if (err.message.includes("already exists")) {
+              errorMessage = "该邮箱已被注册";
+            } else if (err.message.includes("Network Error")) {
+              errorMessage = "网络错误，请稍后再试";
+            } else if (err.message.includes("500")) {
+              errorMessage = "服务器错误，请检查Supabase配置";
+            }
+          }
+
+          showRegisterError(errorMessage);
+        }
+      }
+
+      // 用户登出
+      async function logoutUser() {
+        logDebug("用户尝试登出");
+
+        showLoading("正在登出...");
+
+        try {
+          const { error } = await supabase.auth.signOut();
+          if (error) {
+            logDebug(`登出失败: ${error.message}`);
+            throw error;
+          }
+
+          logDebug("登出成功");
+          currentUser = null;
+          personalMovies = [];
+          renderPersonalMovies();
+          elements.authModal.style.display = "flex";
+
+          hideLoading();
+          showNotification("已成功登出", "success");
+        } catch (err) {
+          logDebug(`登出过程中出错: ${err.message}`);
+          hideLoading();
+          console.error("登出失败:", err);
+          showNotification("登出失败: " + err.message, "error");
+        }
+      }
+
+      // 加载用户资料
+      async function loadUserProfile() {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, username, avatar_url")
+          .eq("id", currentUser.id)
+          .single();
+
+        if (!error && data) {
+          // 更新UI显示用户名等
+          document
+            .getElementById("profile-btn")
+            .querySelector(".btn-text").textContent = data.username || "用户";
+        }
+      }
+
+      // 加载个人电影
+      async function loadPersonalMovies() {
+        elements.personalLoader.style.display = "block";
+
+        const { data, error } = await supabase
+          .from("user_movies")
+          .select(
+            `
+                    movie:movies(*),
+                    status,
+                    rating,
+                    comment,
+                    watched_date
+                `,
+          )
+          .eq("user_id", currentUser.id)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("加载电影失败:", error);
+          showNotification("加载电影失败", "error");
+          elements.personalLoader.style.display = "none";
+          return;
+        }
+
+        personalMovies = data.map((item) => ({
+          ...item.movie,
+          userStatus: {
+            status: item.status,
+            rating: item.rating,
+            comment: item.comment,
+            watched_date: item.watched_date,
+          },
+        }));
+
+        elements.personalLoader.style.display = "none";
+        renderPersonalMovies();
+        updatePersonalFilterCounts();
+      }
+
+      // 渲染个人电影到UI
+      function renderPersonalMovies() {
+        const movieGrid = document.getElementById("personal-movie-grid");
+        movieGrid.innerHTML = "";
+
+        if (personalMovies.length === 0) {
+          movieGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <i class="fas fa-film" style="font-size: 3rem; margin-bottom: 16px;"></i>
+                        <h3>暂无电影</h3>
+                        <p>点击右下角 + 按钮添加电影</p>
+                    </div>
+                `;
+          return;
+        }
+
+        const filteredMovies = filterPersonalMovies();
+
+        if (viewMode === "grid") {
+          movieGrid.style.display = "grid";
+          movieGrid.classList.remove("list-view");
+          filteredMovies.forEach((movie) => {
+            const card = createMovieCard(movie);
+            movieGrid.appendChild(card);
+          });
+        } else {
+          movieGrid.style.display = "block";
+          movieGrid.classList.add("list-view");
+          filteredMovies.forEach((movie) => {
+            const listItem = createMovieListItem(movie);
+            movieGrid.appendChild(listItem);
+          });
+        }
+      }
+
+      // 创建电影卡片
+      function createMovieCard(movie) {
+        const card = document.createElement("div");
+        card.className = "movie-card";
+        card.dataset.id = movie.id;
+
+        const statusText =
+          movie.userStatus?.status === "watched" ? "已看" : "想看";
+        const rating = movie.userStatus?.rating || movie.douban_rating;
+
+        card.innerHTML = `
+                <div class="movie-status">${statusText}</div>
+                <img src="${movie.poster_url || "https://via.placeholder.com/200x300/2d2d2d/ffffff?text=No+Image"}" alt="${movie.title}" class="movie-poster">
+                <div class="movie-info">
+                    <h3 class="movie-title">${movie.title}</h3>
+                    <p class="movie-year">${movie.year || "未知年份"}</p>
+                    <div class="movie-rating">
+                        <i class="fas fa-star"></i>
+                        <span>${rating || "暂无评分"}</span>
+                    </div>
+                </div>
+            `;
+
+        card.addEventListener("click", () => showMovieDetail(movie));
+        return card;
+      }
+
+      // 创建电影列表项
+      function createMovieListItem(movie) {
+        const item = document.createElement("div");
+        item.className = "movie-list-item";
+        item.dataset.id = movie.id;
+
+        const statusText =
+          movie.userStatus?.status === "watched" ? "已看" : "想看";
+        const rating = movie.userStatus?.rating || movie.douban_rating;
+
+        item.innerHTML = `
+                <div class="movie-list-poster">
+                    <img src="${movie.poster_url || "https://via.placeholder.com/100x150/2d2d2d/ffffff?text=No+Image"}" alt="${movie.title}">
+                </div>
+                <div class="movie-list-info">
+                    <h3 class="movie-list-title">${movie.title}</h3>
+                    <p class="movie-list-year">${movie.year || "未知年份"}</p>
+                    <p class="movie-list-genre">${movie.genre ? movie.genre.join(" / ") : "未知类型"}</p>
+                    <div class="movie-list-rating">
+                        <i class="fas fa-star"></i>
+                        <span>${rating || "暂无评分"}</span>
+                    </div>
+                    <div class="movie-list-status">${statusText}</div>
+                </div>
+            `;
+
+        item.addEventListener("click", () => showMovieDetail(movie));
+        return item;
+      }
+
+      // 过滤个人电影
+      function filterPersonalMovies() {
+        let filteredMovies = [...personalMovies];
+
+        // 应用状态过滤器
+        if (personalFilters.status !== "all") {
+          filteredMovies = filteredMovies.filter(
+            (movie) => movie.userStatus?.status === personalFilters.status,
+          );
+        }
+
+        // 应用类型过滤器
+        if (personalFilters.genre !== "all") {
+          filteredMovies = filteredMovies.filter(
+            (movie) =>
+              movie.genre && movie.genre.includes(personalFilters.genre),
+          );
+        }
+
+        // 应用评分过滤器
+        if (personalFilters.rating !== "all") {
+          const minRating = parseInt(personalFilters.rating);
+          filteredMovies = filteredMovies.filter((movie) => {
+            const rating = movie.userStatus?.rating || movie.douban_rating;
+            return rating && Math.floor(rating) === minRating;
+          });
+        }
+
+        return filteredMovies;
+      }
+
+      // 更新个人过滤器计数
+      function updatePersonalFilterCounts() {
+        // 更新状态计数
+        document.getElementById("count-all").textContent =
+          personalMovies.length;
+        document.getElementById("count-watched").textContent =
+          personalMovies.filter(
+            (m) => m.userStatus?.status === "watched",
+          ).length;
+        document.getElementById("count-want").textContent =
+          personalMovies.filter((m) => m.userStatus?.status === "want").length;
+
+        // 更新类型计数
+        const genreCounts = {};
+        personalMovies.forEach((movie) => {
+          if (movie.genre) {
+            movie.genre.forEach((g) => {
+              genreCounts[g] = (genreCounts[g] || 0) + 1;
+            });
+          }
+        });
+
+        const genreFilters = document.getElementById("genre-filters");
+        genreFilters.innerHTML = `
+                <li class="filter-item active" data-genre="all">
+                    <span>全部类型</span>
+                    <span class="filter-count">${personalMovies.length}</span>
+                </li>
+            `;
+
+        // 为"全部类型"选项添加事件监听器
+        const allGenreItem = genreFilters.querySelector(
+          '.filter-item[data-genre="all"]',
+        );
+        allGenreItem.addEventListener("click", function () {
+          document
+            .querySelectorAll("#genre-filters .filter-item")
+            .forEach((i) => i.classList.remove("active"));
+          this.classList.add("active");
+          personalFilters.genre = this.dataset.genre;
+          renderPersonalMovies();
+        });
+
+        Object.keys(genreCounts)
+          .sort()
+          .forEach((genre) => {
+            const li = document.createElement("li");
+            li.className = "filter-item";
+            li.dataset.genre = genre;
+            li.innerHTML = `
+                    <span>${genre}</span>
+                    <span class="filter-count">${genreCounts[genre]}</span>
+                `;
+            li.addEventListener("click", function () {
+              document
+                .querySelectorAll("#genre-filters .filter-item")
+                .forEach((i) => i.classList.remove("active"));
+              this.classList.add("active");
+              personalFilters.genre = this.dataset.genre;
+              renderPersonalMovies();
+            });
+            genreFilters.appendChild(li);
+          });
+
+        // 更新评分计数
+        document.getElementById("count-all-ratings").textContent =
+          personalMovies.length;
+        document.getElementById("count-rating-5").textContent =
+          personalMovies.filter((m) => {
+            const rating = m.userStatus?.rating || m.douban_rating;
+            return rating && Math.floor(rating) === 5;
+          }).length;
+        document.getElementById("count-rating-4").textContent =
+          personalMovies.filter((m) => {
+            const rating = m.userStatus?.rating || m.douban_rating;
+            return rating && Math.floor(rating) === 4;
+          }).length;
+        document.getElementById("count-rating-3").textContent =
+          personalMovies.filter((m) => {
+            const rating = m.userStatus?.rating || m.douban_rating;
+            return rating && Math.floor(rating) === 3;
+          }).length;
+      }
+
+      // 显示电影详情
+      async function showMovieDetail(movie) {
+        const modal = document.getElementById("movie-detail-modal");
+        const detailContent = document.getElementById("movie-detail-content");
+
+        detailContent.innerHTML = `
+                <div class="loader"></div>
+            `;
+
+        modal.style.display = "flex";
+
+        detailContent.innerHTML = `
+                <img src="${movie.poster_url || "https://via.placeholder.com/300x450/2d2d2d/ffffff?text=No+Image"}" alt="${movie.title}" class="movie-detail-poster">
+                <div class="movie-detail-info">
+                    <h2 class="movie-detail-title">${movie.title}</h2>
+                    <div class="movie-detail-meta">
+                        <p>${movie.year || "未知年份"} · ${movie.genre ? movie.genre.join(" / ") : "未知类型"}</p>
+                        ${movie.director ? `<p>导演: ${movie.director}</p>` : ""}
+                        ${movie.actors && movie.actors.length > 0 ? `<p>主演: ${movie.actors.join(", ")}</p>` : ""}
+                        ${movie.duration ? `<p>片长: ${movie.duration}分钟</p>` : ""}
+                    </div>
+                    <div class="movie-detail-rating">
+                        <i class="fas fa-star"></i>
+                        <span>${movie.douban_rating || "暂无"}</span>
+                        <span>豆瓣评分</span>
+                    </div>
+                    ${
+                      movie.userStatus?.rating
+                        ? `
+                        <div class="movie-detail-rating">
+                            <i class="fas fa-star"></i>
+                            <span>${movie.userStatus.rating}</span>
+                            <span>我的评分</span>
+                        </div>
+                    `
+                        : ""
+                    }
+                    ${movie.plot ? `<p class="movie-detail-plot">${movie.plot}</p>` : ""}
+                    <div class="action-buttons">
+                        <button class="action-btn ${movie.userStatus?.status === "watched" ? "active" : ""}" data-action="status" data-value="watched">
+                            <i class="fas fa-eye"></i>
+                            <span>已看</span>
+                        </button>
+                        <button class="action-btn ${movie.userStatus?.status === "want" ? "active" : ""}" data-action="status" data-value="want">
+                            <i class="fas fa-bookmark"></i>
+                            <span>想看</span>
+                        </button>
+                        <button class="action-btn" data-action="rate">
+                            <i class="fas fa-star"></i>
+                            <span>评分</span>
+                        </button>
+                        <button class="action-btn" data-action="comment">
+                            <i class="fas fa-edit"></i>
+                            <span>评论</span>
+                        </button>
+                        <button class="action-btn delete-btn" data-action="delete">
+                            <i class="fas fa-trash"></i>
+                            <span>删除</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+        // 添加事件监听器
+        detailContent.querySelectorAll(".action-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const action = btn.dataset.action;
+            const value = btn.dataset.value;
+
+            if (action === "status") {
+              updateMovieStatus(movie.id, value);
+            } else if (action === "rate") {
+              showRatingDialog(movie.id);
+            } else if (action === "comment") {
+              showCommentDialog(movie.id);
+            } else if (action === "delete") {
+              showDeleteConfirmation(movie.id);
+            }
+          });
+        });
+      }
+
+      // 更新电影状态
+      async function updateMovieStatus(movieId, status) {
+        showLoading("更新状态中...");
+
+        try {
+          // 首先尝试更新现有记录
+          const { data: existingRecord, error: checkError } = await supabase
+            .from("user_movies")
+            .select("*")
+            .eq("user_id", currentUser.id)
+            .eq("movie_id", movieId)
+            .single();
+
+          let error = null;
+
+          if (existingRecord) {
+            // 更新现有记录
+            const { error: updateError } = await supabase
+              .from("user_movies")
+              .update({
+                status: status,
+                watched_date:
+                  status === "watched" ? new Date().toISOString() : null,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", existingRecord.id);
+
+            error = updateError;
+          } else {
+            // 插入新记录
+            const { error: insertError } = await supabase
+              .from("user_movies")
+              .insert({
+                user_id: currentUser.id,
+                movie_id: movieId,
+                status: status,
+                watched_date:
+                  status === "watched" ? new Date().toISOString() : null,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              });
+
+            error = insertError;
+          }
+
+          if (error) {
+            throw error;
+          }
+
+          // 更新本地数据
+          const movieIndex = personalMovies.findIndex((m) => m.id === movieId);
+          if (movieIndex !== -1) {
+            if (!personalMovies[movieIndex].userStatus) {
+              personalMovies[movieIndex].userStatus = {};
+            }
+            personalMovies[movieIndex].userStatus.status = status;
+            if (status === "watched") {
+              personalMovies[movieIndex].userStatus.watched_date =
+                new Date().toISOString();
+            }
+          }
+
+          // 更新UI
+          const statusBtn = document.querySelector(
+            `.action-btn[data-action="status"][data-value="${status}"]`,
+          );
+          if (statusBtn) {
+            document
+              .querySelectorAll('.action-btn[data-action="status"]')
+              .forEach((btn) => {
+                btn.classList.remove("active");
+              });
+            statusBtn.classList.add("active");
+          }
+
+          // 更新卡片状态
+          const card = document.querySelector(
+            `.movie-card[data-id="${movieId}"]`,
+          );
+          if (card) {
+            const statusElement = card.querySelector(".movie-status");
+            if (statusElement) {
+              statusElement.textContent =
+                status === "watched" ? "已看" : "想看";
+            }
+          }
+
+          hideLoading();
+          showNotification("状态已更新", "success");
+          updatePersonalFilterCounts();
+          renderPersonalMovies();
+        } catch (err) {
+          console.error("更新状态失败:", err);
+          hideLoading();
+          showNotification("更新状态失败: " + err.message, "error");
+        }
+      }
+
+      // 显示评分对话框
+      function showRatingDialog(movieId) {
+        currentRatingMovieId = movieId;
+        selectedRating = 0;
+
+        // 重置星星
+        document.querySelectorAll(".rating-star").forEach((star) => {
+          star.classList.remove("active");
+        });
+
+        // 显示对话框
+        elements.ratingDialog.style.display = "flex";
+
+        // 设置提交评分的事件处理
+        elements.submitRating.onclick = function () {
+          if (selectedRating > 0 && currentRatingMovieId) {
+            submitRating(currentRatingMovieId, selectedRating);
+            elements.ratingDialog.style.display = "none";
+          } else {
+            showNotification("请选择评分", "error");
+          }
+        };
+      }
+
+      // 提交评分
+      async function submitRating(movieId, rating) {
+        const { error } = await supabase.from("user_movies").upsert({
+          user_id: currentUser.id,
+          movie_id: movieId,
+          rating: rating,
+        });
+
+        if (error) {
+          showNotification("评分失败", "error");
+          return;
+        }
+
+        // 更新本地数据
+        const movieIndex = personalMovies.findIndex((m) => m.id === movieId);
+        if (movieIndex !== -1) {
+          if (!personalMovies[movieIndex].userStatus) {
+            personalMovies[movieIndex].userStatus = {};
+          }
+          personalMovies[movieIndex].userStatus.rating = rating;
+        }
+
+        showNotification("评分已提交", "success");
+
+        // 重新加载电影详情
+        const movie = personalMovies.find((m) => m.id === movieId);
+        if (movie) {
+          showMovieDetail(movie);
+        }
+      }
+
+      // 显示评论对话框
+      function showCommentDialog(movieId) {
+        // 在实际应用中，这里应该显示一个评论对话框
+        const comment = prompt("请输入评论:");
+        if (comment !== null) {
+          submitComment(movieId, comment);
+        }
+      }
+
+      // 提交评论
+      async function submitComment(movieId, comment) {
+        const { error } = await supabase.from("user_movies").upsert({
+          user_id: currentUser.id,
+          movie_id: movieId,
+          comment: comment,
+        });
+
+        if (error) {
+          showNotification("评论提交失败", "error");
+          return;
+        }
+
+        // 更新本地数据
+        const movieIndex = personalMovies.findIndex((m) => m.id === movieId);
+        if (movieIndex !== -1) {
+          if (!personalMovies[movieIndex].userStatus) {
+            personalMovies[movieIndex].userStatus = {};
+          }
+          personalMovies[movieIndex].userStatus.comment = comment;
+        }
+
+        showNotification("评论已提交", "success");
+      }
+
+      // 搜索TMDB电影
+      async function searchTMDBMovies(query) {
+        if (!TMDB_API_KEY || TMDB_API_KEY === "你的TMDB_API_KEY") {
+          showNotification("请配置TMDB API密钥", "error");
+          return [];
+        }
+
+        try {
+          // 修复API调用方式
+          const response = await fetch(
+            `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}&include_adult=false&language=zh-CN&page=1`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${TMDB_API_KEY}`,
+                Accept: "application/json",
+              },
+            },
+          );
+
+          if (!response.ok) {
+            throw new Error(`TMDB API错误: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          return data.results.map((movie) => ({
+            id: movie.id,
+            title: movie.title,
+            original_title: movie.original_title,
+            year: movie.release_date
+              ? movie.release_date.split("-")[0]
+              : "未知年份",
+            poster: movie.poster_path
+              ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+              : null,
+            rating: movie.vote_average,
+            overview: movie.overview,
+          }));
+        } catch (error) {
+          console.error("搜索TMDB电影失败:", error);
+          showNotification("搜索电影失败: " + error.message, "error");
+          return [];
+        }
+      }
+
+      // 获取TMDB电影详情
+      async function getTMDBMovieDetails(movieId) {
+        if (!TMDB_API_KEY || TMDB_API_KEY === "你的TMDB_API_KEY") {
+          showNotification("请配置TMDB API密钥", "error");
+          return null;
+        }
+
+        try {
+          // 获取电影基本信息
+          const movieResponse = await fetch(
+            `https://api.themoviedb.org/3/movie/${movieId}?language=zh-CN`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${TMDB_API_KEY}`,
+                Accept: "application/json",
+              },
+            },
+          );
+
+          if (!movieResponse.ok) {
+            throw new Error(`TMDB电影详情API错误: ${movieResponse.status}`);
+          }
+
+          const movieData = await movieResponse.json();
+
+          // 获取演职人员信息
+          const creditsResponse = await fetch(
+            `https://api.themoviedb.org/3/movie/${movieId}/credits?language=zh-CN`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${TMDB_API_KEY}`,
+                Accept: "application/json",
+              },
+            },
+          );
+
+          if (!creditsResponse.ok) {
+            throw new Error(`TMDB演职员API错误: ${creditsResponse.status}`);
+          }
+
+          const creditsData = await creditsResponse.json();
+
+          // 获取导演信息
+          const director =
+            creditsData.crew.find((person) => person.job === "Director")
+              ?.name || "未知";
+
+          // 获取主要演员
+          const actors = creditsData.cast
+            .slice(0, 5)
+            .map((actor) => actor.name);
+
+          // 获取类型
+          const genres = movieData.genres.map((genre) => genre.name);
+
+          return {
+            title: movieData.title,
+            original_title: movieData.original_title,
+            year: movieData.release_date
+              ? movieData.release_date.split("-")[0]
+              : "未知年份",
+            director: director,
+            actors: actors,
+            genre: genres,
+            plot: movieData.overview,
+            poster: movieData.poster_path
+              ? `https://image.tmdb.org/t/p/w500${movieData.poster_path}`
+              : null,
+            rating: movieData.vote_average,
+            duration: movieData.runtime,
+          };
+        } catch (error) {
+          console.error("获取TMDB电影详情失败:", error);
+          showNotification("获取电影详情失败: " + error.message, "error");
+          return null;
+        }
+      }
+
+      // 显示搜索结果
+      function displaySearchResults(results) {
+        const resultsContainer = document.getElementById("search-results");
+
+        if (results.length === 0) {
+          resultsContainer.innerHTML =
+            '<div class="search-result-item">未找到结果</div>';
+          resultsContainer.style.display = "block";
+          return;
+        }
+
+        resultsContainer.innerHTML = "";
+        results.forEach((movie) => {
+          const item = document.createElement("div");
+          item.className = "search-result-item";
+          item.innerHTML = `
+                    <img src="${movie.poster || "https://via.placeholder.com/40x60/2d2d2d/ffffff?text=No+Image"}" class="search-result-poster">
+                    <div class="search-result-info">
+                        <div class="search-result-title">${movie.title} (${movie.year})</div>
+                        <div class="search-result-year">评分: ${movie.rating || "暂无"}</div>
+                    </div>
+                    <button class="select-movie-btn" data-movie-id="${movie.id}">选择</button>
+                `;
+
+          // 添加事件监听器到选择按钮
+          const selectBtn = item.querySelector(".select-movie-btn");
+          selectBtn.addEventListener("click", async () => {
+            showLoading("获取电影详情中...");
+            const movieDetails = await getTMDBMovieDetails(movie.id);
+            hideLoading();
+
+            if (movieDetails) {
+              // 保存电影数据到Supabase
+              const success = await saveMovieToSupabase(movieDetails);
+              if (success) {
+                fillMovieForm(movieDetails);
+                resultsContainer.style.display = "none";
+                showNotification("电影数据已保存", "success");
+              }
+            }
+          });
+
+          resultsContainer.appendChild(item);
+        });
+
+        resultsContainer.style.display = "block";
+      }
+
+      // 保存电影数据到Supabase
+      async function saveMovieToSupabase(movieData) {
+        try {
+          // 检查电影是否已存在
+          const { data: existingMovies, error: searchError } = await supabase
+            .from("movies")
+            .select("id")
+            .ilike("title", movieData.title)
+            .eq("year", movieData.year || "");
+
+          if (searchError) {
+            console.error("搜索电影失败:", searchError);
+            return false;
+          }
+
+          let movieId = null;
+
+          if (existingMovies && existingMovies.length > 0) {
+            movieId = existingMovies[0].id;
+          }
+
+          // 如果电影不存在，先创建电影记录
+          if (!movieId) {
+            const movieRecord = {
+              title: movieData.title,
+              year: movieData.year ? parseInt(movieData.year) : null,
+              director: movieData.director || null,
+              actors: movieData.actors || [],
+              genre: movieData.genre || [],
+              plot: movieData.plot || null,
+              poster_url: movieData.poster || null,
+              douban_rating: movieData.rating
+                ? parseFloat(movieData.rating)
+                : null,
+              duration: movieData.duration || null,
+            };
+
+            const { data: newMovie, error: insertError } = await supabase
+              .from("movies")
+              .insert(movieRecord)
+              .select("id")
+              .single();
+
+            if (insertError) {
+              console.error("插入电影失败:", insertError);
+              return false;
+            }
+
+            movieId = newMovie.id;
+          }
+
+          return true;
+        } catch (error) {
+          console.error("保存电影到Supabase失败:", error);
+          return false;
+        }
+      }
+
+      // 填充电影表单
+      function fillMovieForm(movie) {
+        document.getElementById("movie-title").value = movie.title;
+        document.getElementById("movie-year").value = movie.year || "";
+        document.getElementById("movie-director").value = movie.director || "";
+        document.getElementById("movie-actors").value = movie.actors
+          ? movie.actors.join(", ")
+          : "";
+        document.getElementById("movie-plot").value = movie.plot || "";
+        document.getElementById("movie-poster").value = movie.poster || "";
+        document.getElementById("movie-rating").value = movie.rating || "";
+        document.getElementById("movie-duration").value = movie.duration || "";
+
+        // 设置类型
+        const genreSelect = document.getElementById("movie-genre");
+        Array.from(genreSelect.options).forEach((option) => {
+          option.selected = movie.genre && movie.genre.includes(option.value);
+        });
+      }
+
+      // 添加到个人收藏
+      async function addMovieToCollection(movieData, status) {
+        showLoading("添加电影中...");
+
+        try {
+          // 首先检查电影是否已存在
+          let movieId = null;
+
+          // 使用更精确的匹配逻辑
+          let query = supabase
+            .from("movies")
+            .select("id")
+            .ilike("title", movieData.title);
+          if (movieData.year) {
+            query = query.eq("year", movieData.year);
+          }
+
+          const { data: existingMovies, error: searchError } = await query;
+
+          if (searchError) {
+            console.error("搜索电影失败:", searchError);
+            showAddMovieError("搜索电影失败: " + searchError.message);
+            hideLoading();
+            return false;
+          }
+
+          if (existingMovies && existingMovies.length > 0) {
+            movieId = existingMovies[0].id;
+          }
+
+          // 如果电影不存在，先创建电影记录
+          if (!movieId) {
+            const { data: newMovie, error: insertError } = await supabase
+              .from("movies")
+              .insert(movieData)
+              .select("id")
+              .single();
+
+            if (insertError) {
+              console.error("插入电影失败:", insertError);
+              showAddMovieError("添加电影失败: " + insertError.message);
+              hideLoading();
+              return false;
+            }
+
+            movieId = newMovie.id;
+          }
+
+          // 添加到个人收藏
+          const { data: existingUserMovie, error: checkUserError } =
+            await supabase
+              .from("user_movies")
+              .select("id")
+              .eq("user_id", currentUser.id)
+              .eq("movie_id", movieId)
+              .maybeSingle();
+
+          if (checkUserError && checkUserError.code !== "PGRST116") {
+            showAddMovieError("检查个人收藏失败: " + checkUserError.message);
+            hideLoading();
+            return false;
+          }
+
+          if (!existingUserMovie) {
+            const { error: userError } = await supabase
+              .from("user_movies")
+              .insert({
+                user_id: currentUser.id,
+                movie_id: movieId,
+                status: status,
+              });
+
+            if (userError) {
+              showAddMovieError("添加到个人收藏失败: " + userError.message);
+              hideLoading();
+              return false;
+            }
+          } else {
+            // 更新现有记录的状态
+            const { error: updateError } = await supabase
+              .from("user_movies")
+              .update({
+                status: status,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", existingUserMovie.id);
+
+            if (updateError) {
+              showAddMovieError("更新个人收藏失败: " + updateError.message);
+              hideLoading();
+              return false;
+            }
+          }
+
+          // 重新加载电影列表
+          await loadPersonalMovies();
+          renderPersonalMovies();
+          updatePersonalFilterCounts();
+
+          hideLoading();
+          showNotification("电影添加成功", "success");
+          return true;
+        } catch (error) {
+          console.error("添加电影失败:", error);
+          hideLoading();
+          showAddMovieError("添加电影失败: " + error.message);
+          return false;
+        }
+      }
+
+      // 显示删除确认对话框
+      function showDeleteConfirmation(movieId) {
+        const dialog = document.getElementById("delete-confirmation");
+        dialog.style.display = "flex";
+
+        // 设置确认删除按钮的事件
+        document.getElementById("confirm-delete").onclick = function () {
+          deleteMovie(movieId);
+          dialog.style.display = "none";
+        };
+
+        // 设置取消按钮的事件
+        document.getElementById("cancel-delete").onclick = function () {
+          dialog.style.display = "none";
+        };
+      }
+
+      // 删除电影
+      async function deleteMovie(movieId) {
+        showLoading("删除中...");
+
+        try {
+          // 首先删除用户与电影的关联
+          const { error: userMovieError } = await supabase
+            .from("user_movies")
+            .delete()
+            .eq("user_id", currentUser.id)
+            .eq("movie_id", movieId);
+
+          if (userMovieError) {
+            throw userMovieError;
+          }
+
+          // 从本地电影列表中移除
+          personalMovies = personalMovies.filter((m) => m.id !== movieId);
+
+          // 关闭详情模态框
+          document.getElementById("movie-detail-modal").style.display = "none";
+
+          // 重新渲染电影列表
+          renderPersonalMovies();
+          updatePersonalFilterCounts();
+
+          hideLoading();
+          showNotification("电影已成功删除", "success");
+        } catch (error) {
+          console.error("删除电影失败:", error);
+          hideLoading();
+          showNotification("删除电影失败: " + error.message, "error");
+        }
+      }
+
+      // 防抖函数
+      function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
+
+      // 设置事件监听器
+      function setupEventListeners() {
+        // 筛选器点击
+        document
+          .querySelectorAll("#status-filters .filter-item")
+          .forEach((item) => {
+            item.addEventListener("click", function () {
+              document
+                .querySelectorAll("#status-filters .filter-item")
+                .forEach((i) => i.classList.remove("active"));
+              this.classList.add("active");
+              personalFilters.status = this.dataset.status;
+              renderPersonalMovies();
+            });
+          });
+
+        document
+          .querySelectorAll("#rating-filters .filter-item")
+          .forEach((item) => {
+            item.addEventListener("click", function () {
+              document
+                .querySelectorAll("#rating-filters .filter-item")
+                .forEach((i) => i.classList.remove("active"));
+              this.classList.add("active");
+              personalFilters.rating = this.dataset.rating;
+              renderPersonalMovies();
+            });
+          });
+
+        // 视图切换
+        document.querySelectorAll(".view-btn").forEach((button) => {
+          button.addEventListener("click", function () {
+            document
+              .querySelectorAll(".view-btn")
+              .forEach((btn) => btn.classList.remove("active"));
+            this.classList.add("active");
+            viewMode = this.dataset.view;
+            renderPersonalMovies();
+          });
+        });
+
+        // 添加按钮点击
+        document
+          .getElementById("add-movie-btn")
+          .addEventListener("click", function () {
+            // 重置表单
+            document.getElementById("manual-movie-form").reset();
+            document.getElementById("search-results").style.display = "none";
+
+            elements.addMovieModal.style.display = "flex";
+          });
+
+        // 关闭模态框
+        document.querySelectorAll(".modal-close, .modal").forEach((element) => {
+          element.addEventListener("click", function (e) {
+            if (
+              e.target === this ||
+              e.target.classList.contains("modal-close")
+            ) {
+              this.closest(".modal").style.display = "none";
+            }
+          });
+        });
+
+        // 阻止模态框内容点击时关闭
+        document.querySelectorAll(".modal-content").forEach((content) => {
+          content.addEventListener("click", function (e) {
+            e.stopPropagation();
+          });
+        });
+
+        // 认证标签切换
+        document.querySelectorAll(".auth-tab").forEach((tab) => {
+          tab.addEventListener("click", function () {
+            document
+              .querySelectorAll(".auth-tab")
+              .forEach((t) => t.classList.remove("active"));
+            this.classList.add("active");
+
+            if (this.dataset.tab === "login") {
+              document.getElementById("login-form").style.display = "block";
+              document.getElementById("register-form").style.display = "none";
+            } else {
+              document.getElementById("login-form").style.display = "none";
+              document.getElementById("register-form").style.display = "block";
+            }
+          });
+        });
+
+        // 登录表单提交
+        document
+          .getElementById("login-form")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const email = document.getElementById("login-email").value;
+            const password = document.getElementById("login-password").value;
+
+            await loginUser(email, password);
+          });
+
+        // 注册表单提交
+        document
+          .getElementById("register-form")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const username = document.getElementById("register-username").value;
+            const email = document.getElementById("register-email").value;
+            const password = document.getElementById("register-password").value;
+            const confirmPassword = document.getElementById(
+              "register-confirm-password",
+            ).value;
+
+            await registerUser(username, email, password, confirmPassword);
+          });
+
+        // 退出按钮
+        document
+          .getElementById("switch-user-btn")
+          .addEventListener("click", async function () {
+            await logoutUser();
+          });
+
+        // 电影搜索
+        document.getElementById("movie-search").addEventListener(
+          "input",
+          debounce(async function (e) {
+            const query = e.target.value.trim();
+            if (query.length < 2) {
+              document.getElementById("search-results").style.display = "none";
+              return;
+            }
+
+            showLoading("搜索电影中...");
+            const results = await searchTMDBMovies(query);
+            hideLoading();
+
+            displaySearchResults(results);
+          }, 300),
+        );
+
+        // 手动添加电影表单
+        document
+          .getElementById("manual-movie-form")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const movieData = {
+              title: document.getElementById("movie-title").value,
+              year: document.getElementById("movie-year").value
+                ? parseInt(document.getElementById("movie-year").value)
+                : null,
+              director: document.getElementById("movie-director").value || null,
+              actors: document.getElementById("movie-actors").value
+                ? document
+                    .getElementById("movie-actors")
+                    .value.split(",")
+                    .map((a) => a.trim())
+                : [],
+              genre: Array.from(
+                document.getElementById("movie-genre").selectedOptions,
+              ).map((o) => o.value),
+              plot: document.getElementById("movie-plot").value || null,
+              poster_url: document.getElementById("movie-poster").value || null,
+              douban_rating: document.getElementById("movie-rating").value
+                ? parseFloat(document.getElementById("movie-rating").value)
+                : null,
+              duration: document.getElementById("movie-duration").value
+                ? parseInt(document.getElementById("movie-duration").value)
+                : null,
+            };
+
+            const status = document.getElementById("movie-status").value;
+
+            const success = await addMovieToCollection(movieData, status);
+
+            if (success) {
+              elements.addMovieModal.style.display = "none";
+              showNotification("电影添加成功", "success");
+            }
+          });
+
+        // 取消添加电影
+        document
+          .getElementById("cancel-add-movie")
+          .addEventListener("click", function () {
+            elements.addMovieModal.style.display = "none";
+          });
+
+        // 评分星星点击事件
+        document.querySelectorAll(".rating-star").forEach((star) => {
+          star.addEventListener("click", function () {
+            const rating = parseInt(this.dataset.rating);
+            selectedRating = rating;
+
+            // 更新星星显示
+            document.querySelectorAll(".rating-star").forEach((s, index) => {
+              if (index < rating) {
+                s.classList.add("active");
+              } else {
+                s.classList.remove("active");
+              }
+            });
+          });
+        });
+
+        // 取消评分按钮
+        elements.cancelRating.addEventListener("click", function () {
+          elements.ratingDialog.style.display = "none";
+        });
+      }
+
+      // 初始化应用
+      document.addEventListener("DOMContentLoaded", function () {
+        logDebug("页面加载完成");
+        setupEventListeners();
+        initApp();
+      });
+    </script>
+  </body>
+</html>
