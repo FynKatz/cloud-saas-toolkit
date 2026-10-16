@@ -8,3 +8,4 @@ build/
 .netlify/
 .supabase/
 *.log
+gh_token.txt
