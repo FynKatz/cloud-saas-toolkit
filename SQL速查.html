@@ -1,0 +1,1945 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=266dd97a-5e4f-48fc-b798-675a60c67943
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据库命令速查</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/sql_query.css">
+    <link rel="stylesheet" href="css/auth-styles.css">
+    <script src="js/auth-config.js"></script>
+    <script src="js/auth-check.js"></script>
+</head>
+
+<body>
+    <div class="header-actions">
+        <div class="header-left">
+            <button onclick="goToHome()" class="home-btn">
+                <i class="fas fa-home"></i>
+                首页
+            </button>
+        </div>
+        <div class="header-right">
+            <button onclick="logout()" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                退出
+            </button>
+        </div>
+    </div>
+
+    <!-- 左侧导航栏 -->
+    <div class="sidebar">
+        <div class="logo">
+            <h1><i class="fas fa-database"></i> 数据库</h1>
+        </div>
+        <div class="nav-items">
+            <div class="nav-item active" data-target="pgsql">
+                <i class="fas fa-server"></i> PostgreSQL
+            </div>
+            <div class="nav-item" data-target="mysql">
+                <i class="fas fa-database"></i> MySQL
+            </div>
+            <div class="nav-item" data-target="redis">
+                <i class="fas fa-bolt"></i> Redis
+            </div>
+            <div class="nav-item" data-target="mongodb">
+                <i class="fas fa-leaf"></i> MongoDB
+            </div>
+            <div class="nav-item" data-target="sqlite">
+                <i class="fas fa-database"></i> SQLite
+            </div>
+            <div class="nav-item" data-target="oracle">
+                <i class="fas fa-database"></i> Oracle
+            </div>
+            <div class="nav-item" data-target="sqlserver">
+                <i class="fas fa-server"></i> SQL Server
+            </div>
+            <div class="nav-item" data-target="elasticsearch">
+                <i class="fas fa-search-plus"></i> Elasticsearch
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="content">
+        <!-- PostgreSQL 内容 -->
+        <div id="pgsql-content" class="database-content">
+            <div class="database-header">
+                <h2 class="database-title"><i class="fas fa-server"></i> PostgreSQL 命令参考</h2>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索PostgreSQL命令..." id="pgsql-search">
+                </div>
+            </div>
+
+            <!-- 命令分类选项卡 -->
+            <div class="category-tabs">
+                <div class="category-tab active" data-category="pgsql-basic">基础命令</div>
+                <div class="category-tab" data-category="pgsql-ddl">DDL操作</div>
+                <div class="category-tab" data-category="pgsql-dml">DML操作</div>
+                <div class="category-tab" data-category="pgsql-admin">管理命令</div>
+                <div class="category-tab" data-category="pgsql-advanced">高级功能</div>
+            </div>
+
+            <!-- 基础命令 -->
+            <div class="command-section active" id="pgsql-basic">
+                <div class="command-card">
+                    <h3><i class="fas fa-terminal"></i> 连接与退出</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>psql -h host -p port -U user -d db</code></td>
+                            <td>使用参数连接数据库</td>
+                            <td><code>psql -h 127.0.0.1 -p 5432 -U myuser -d mydb</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>\q</code> 或 <code>quit</code></td>
+                            <td>退出 psql 命令行工具</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>\c dbname</code></td>
+                            <td>切换数据库</td>
+                            <td><code>\c my_new_database</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>\conninfo</code></td>
+                            <td>显示当前连接信息</td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="command-card">
+                    <h3><i class="fas fa-info-circle"></i> 信息查询</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="70%">说明</th>
+                        </tr>
+                        <tr>
+                            <td><code>\?</code></td>
+                            <td>查看所有 psql 元命令的帮助</td>
+                        </tr>
+                        <tr>
+                            <td><code>\h command</code></td>
+                            <td>查看 SQL 命令的帮助</td>
+                        </tr>
+                        <tr>
+                            <td><code>\l</code> 或 <code>\list</code></td>
+                            <td>列出所有数据库</td>
+                        </tr>
+                        <tr>
+                            <td><code>\dt</code></td>
+                            <td>列出当前数据库中的所有表</td>
+                        </tr>
+                        <tr>
+                            <td><code>\d table_name</code></td>
+                            <td>查看表的结构</td>
+                        </tr>
+                        <tr>
+                            <td><code>\du</code> 或 <code>\dg</code></td>
+                            <td>列出所有角色/用户</td>
+                        </tr>
+                        <tr>
+                            <td><code>\x</code></td>
+                            <td>切换扩展显示模式（宽结果集）</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DDL操作 -->
+            <div class="command-section" id="pgsql-ddl">
+                <div class="command-card">
+                    <h3><i class="fas fa-table"></i> 数据库操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE DATABASE dbname;</code></td>
+                            <td>创建数据库</td>
+                            <td><code>CREATE DATABASE mydb;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DROP DATABASE dbname;</code></td>
+                            <td>删除数据库</td>
+                            <td><code>DROP DATABASE olddb;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER DATABASE dbname RENAME TO newname;</code></td>
+                            <td>重命名数据库</td>
+                            <td><code>ALTER DATABASE mydb RENAME TO newdb;</code></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="command-card">
+                    <h3><i class="fas fa-columns"></i> 表操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE TABLE table_name (column1 datatype, ...);</code></td>
+                            <td>创建表</td>
+                            <td><code>CREATE TABLE users (id SERIAL, name VARCHAR(50));</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DROP TABLE table_name;</code></td>
+                            <td>删除表</td>
+                            <td><code>DROP TABLE users;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER TABLE table_name ADD COLUMN column_name datatype;</code></td>
+                            <td>添加列</td>
+                            <td><code>ALTER TABLE users ADD COLUMN email VARCHAR(100);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER TABLE table_name DROP COLUMN column_name;</code></td>
+                            <td>删除列</td>
+                            <td><code>ALTER TABLE users DROP COLUMN email;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DML操作 -->
+            <div class="command-section" id="pgsql-dml">
+                <div class="command-card">
+                    <h3><i class="fas fa-edit"></i> 数据操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>INSERT INTO table (col1, col2) VALUES (val1, val2);</code></td>
+                            <td>插入数据</td>
+                            <td><code>INSERT INTO users (name, age) VALUES ('John', 25);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>UPDATE table SET col = val WHERE condition;</code></td>
+                            <td>更新数据</td>
+                            <td><code>UPDATE users SET age = 26 WHERE name = 'John';</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE FROM table WHERE condition;</code></td>
+                            <td>删除数据</td>
+                            <td><code>DELETE FROM users WHERE age > 30;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>SELECT col1, col2 FROM table WHERE condition;</code></td>
+                            <td>查询数据</td>
+                            <td><code>SELECT name, age FROM users WHERE age > 25;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 管理命令 -->
+            <div class="command-section" id="pgsql-admin">
+                <div class="command-card">
+                    <h3><i class="fas fa-cogs"></i> 用户与权限管理</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE USER username WITH PASSWORD 'password';</code></td>
+                            <td>创建用户</td>
+                            <td><code>CREATE USER john WITH PASSWORD 'secret';</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER USER username WITH PASSWORD 'newpassword';</code></td>
+                            <td>修改用户密码</td>
+                            <td><code>ALTER USER john WITH PASSWORD 'newsecret';</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>GRANT privilege ON table TO username;</code></td>
+                            <td>授予权限</td>
+                            <td><code>GRANT SELECT ON users TO john;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>REVOKE privilege ON table FROM username;</code></td>
+                            <td>撤销权限</td>
+                            <td><code>REVOKE SELECT ON users FROM john;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 高级功能 -->
+            <div class="command-section" id="pgsql-advanced">
+                <div class="command-card">
+                    <h3><i class="fas fa-rocket"></i> 高级功能</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE INDEX index_name ON table (column);</code></td>
+                            <td>创建索引</td>
+                            <td><code>CREATE INDEX idx_users_name ON users (name);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>EXPLAIN ANALYZE query;</code></td>
+                            <td>分析查询性能</td>
+                            <td><code>EXPLAIN ANALYZE SELECT * FROM users;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>VACUUM FULL table;</code></td>
+                            <td>清理和优化表空间</td>
+                            <td><code>VACUUM FULL users;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>BEGIN; ... COMMIT;</code></td>
+                            <td>事务处理</td>
+                            <td><code>BEGIN; UPDATE accounts SET balance = balance - 100; COMMIT;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- MySQL 内容 -->
+        <div id="mysql-content" class="database-content" style="display:none;">
+            <div class="database-header">
+                <h2 class="database-title"><i class="fas fa-database"></i> MySQL 命令参考</h2>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索MySQL命令..." id="mysql-search">
+                </div>
+            </div>
+
+            <!-- 命令分类选项卡 -->
+            <div class="category-tabs">
+                <div class="category-tab active" data-category="mysql-basic">基础命令</div>
+                <div class="category-tab" data-category="mysql-ddl">DDL操作</div>
+                <div class="category-tab" data-category="mysql-dml">DML操作</div>
+                <div class="category-tab" data-category="mysql-admin">管理命令</div>
+                <div class="category-tab" data-category="mysql-advanced">高级功能</div>
+            </div>
+
+            <!-- 基础命令 -->
+            <div class="command-section active" id="mysql-basic">
+                <div class="command-card">
+                    <h3><i class="fas fa-terminal"></i> 连接与退出</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>mysql -h host -P port -u user -p</code></td>
+                            <td>连接MySQL服务器</td>
+                            <td><code>mysql -h 127.0.0.1 -P 3306 -u root -p</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>exit</code> 或 <code>quit</code></td>
+                            <td>退出MySQL命令行</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>use db_name</code></td>
+                            <td>选择数据库</td>
+                            <td><code>use my_database</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>status</code></td>
+                            <td>显示当前连接状态</td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="command-card">
+                    <h3><i class="fas fa-info-circle"></i> 信息查询</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="70%">说明</th>
+                        </tr>
+                        <tr>
+                            <td><code>SHOW DATABASES;</code></td>
+                            <td>显示所有数据库</td>
+                        </tr>
+                        <tr>
+                            <td><code>SHOW TABLES;</code></td>
+                            <td>显示当前数据库中的所有表</td>
+                        </tr>
+                        <tr>
+                            <td><code>DESCRIBE table_name;</code></td>
+                            <td>显示表结构</td>
+                        </tr>
+                        <tr>
+                            <td><code>SHOW CREATE TABLE table_name;</code></td>
+                            <td>显示创建表的SQL语句</td>
+                        </tr>
+                        <tr>
+                            <td><code>SHOW INDEX FROM table_name;</code></td>
+                            <td>显示表索引信息</td>
+                        </tr>
+                        <tr>
+                            <td><code>SHOW PROCESSLIST;</code></td>
+                            <td>显示当前正在执行的线程</td>
+                        </tr>
+                        <tr>
+                            <td><code>SHOW VARIABLES;</code></td>
+                            <td>显示系统变量</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DDL操作 -->
+            <div class="command-section" id="mysql-ddl">
+                <div class="command-card">
+                    <h3><i class="fas fa-table"></i> 数据库操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE DATABASE dbname;</code></td>
+                            <td>创建数据库</td>
+                            <td><code>CREATE DATABASE mydb;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DROP DATABASE dbname;</code></td>
+                            <td>删除数据库</td>
+                            <td><code>DROP DATABASE olddb;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER DATABASE dbname CHARACTER SET charset;</code></td>
+                            <td>修改数据库字符集</td>
+                            <td><code>ALTER DATABASE mydb CHARACTER SET utf8mb4;</code></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="command-card">
+                    <h3><i class="fas fa-columns"></i> 表操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE TABLE table_name (column1 datatype, ...);</code></td>
+                            <td>创建表</td>
+                            <td><code>CREATE TABLE users (id INT AUTO_INCREMENT, name VARCHAR(50));</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DROP TABLE table_name;</code></td>
+                            <td>删除表</td>
+                            <td><code>DROP TABLE users;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER TABLE table_name ADD COLUMN column_name datatype;</code></td>
+                            <td>添加列</td>
+                            <td><code>ALTER TABLE users ADD COLUMN email VARCHAR(100);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER TABLE table_name DROP COLUMN column_name;</code></td>
+                            <td>删除列</td>
+                            <td><code>ALTER TABLE users DROP COLUMN email;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DML操作 -->
+            <div class="command-section" id="mysql-dml">
+                <div class="command-card">
+                    <h3><i class="fas fa-edit"></i> 数据操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>INSERT INTO table (col1, col2) VALUES (val1, val2);</code></td>
+                            <td>插入数据</td>
+                            <td><code>INSERT INTO users (name, age) VALUES ('John', 25);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>UPDATE table SET col = val WHERE condition;</code></td>
+                            <td>更新数据</td>
+                            <td><code>UPDATE users SET age = 26 WHERE name = 'John';</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE FROM table WHERE condition;</code></td>
+                            <td>删除数据</td>
+                            <td><code>DELETE FROM users WHERE age > 30;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>SELECT col1, col2 FROM table WHERE condition;</code></td>
+                            <td>查询数据</td>
+                            <td><code>SELECT name, age FROM users WHERE age > 25;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 管理命令 -->
+            <div class="command-section" id="mysql-admin">
+                <div class="command-card">
+                    <h3><i class="fas fa-cogs"></i> 用户与权限管理</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE USER 'username'@'host' IDENTIFIED BY 'password';</code></td>
+                            <td>创建用户</td>
+                            <td><code>CREATE USER 'john'@'localhost' IDENTIFIED BY 'secret';</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>GRANT privilege ON db.table TO 'username'@'host';</code></td>
+                            <td>授予权限</td>
+                            <td><code>GRANT SELECT ON mydb.* TO 'john'@'localhost';</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>REVOKE privilege ON db.table FROM 'username'@'host';</code></td>
+                            <td>撤销权限</td>
+                            <td><code>REVOKE SELECT ON mydb.* FROM 'john'@'localhost';</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>FLUSH PRIVILEGES;</code></td>
+                            <td>刷新权限</td>
+                            <td><code>FLUSH PRIVILEGES;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 高级功能 -->
+            <div class="command-section" id="mysql-advanced">
+                <div class="command-card">
+                    <h3><i class="fas fa-rocket"></i> 高级功能</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE INDEX index_name ON table (column);</code></td>
+                            <td>创建索引</td>
+                            <td><code>CREATE INDEX idx_name ON users (name);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>EXPLAIN query;</code></td>
+                            <td>分析查询执行计划</td>
+                            <td><code>EXPLAIN SELECT * FROM users;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>OPTIMIZE TABLE table_name;</code></td>
+                            <td>优化表</td>
+                            <td><code>OPTIMIZE TABLE users;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>START TRANSACTION; ... COMMIT;</code></td>
+                            <td>事务处理</td>
+                            <td><code>START TRANSACTION; UPDATE accounts SET balance = balance - 100; COMMIT;</code>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Redis 内容 -->
+        <div id="redis-content" class="database-content" style="display:none;">
+            <div class="database-header">
+                <h2 class="database-title"><i class="fas fa-bolt"></i> Redis 命令参考</h2>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索Redis命令..." id="redis-search">
+                </div>
+            </div>
+
+            <!-- 命令分类选项卡 -->
+            <div class="category-tabs">
+                <div class="category-tab active" data-category="redis-basic">基础命令</div>
+                <div class="category-tab" data-category="redis-strings">字符串</div>
+                <div class="category-tab" data-category="redis-hashes">哈希</div>
+                <div class="category-tab" data-category="redis-lists">列表</div>
+                <div class="category-tab" data-category="redis-sets">集合</div>
+                <div class="category-tab" data-category="redis-admin">管理命令</div>
+            </div>
+
+            <!-- 基础命令 -->
+            <div class="command-section active" id="redis-basic">
+                <div class="command-card">
+                    <h3><i class="fas fa-terminal"></i> 连接与服务器</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>redis-cli -h host -p port</code></td>
+                            <td>连接Redis服务器</td>
+                            <td><code>redis-cli -h 127.0.0.1 -p 6379</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>PING</code></td>
+                            <td>测试服务器是否运行</td>
+                            <td><code>PING</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>SELECT index</code></td>
+                            <td>选择数据库(0-15)</td>
+                            <td><code>SELECT 1</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>QUIT</code></td>
+                            <td>关闭连接</td>
+                            <td><code>QUIT</code></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="command-card">
+                    <h3><i class="fas fa-key"></i> 键操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>KEYS pattern</code></td>
+                            <td>查找所有匹配的键</td>
+                            <td><code>KEYS user:*</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DEL key</code></td>
+                            <td>删除键</td>
+                            <td><code>DEL user:123</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>EXISTS key</code></td>
+                            <td>检查键是否存在</td>
+                            <td><code>EXISTS user:123</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>EXPIRE key seconds</code></td>
+                            <td>设置键的过期时间(秒)</td>
+                            <td><code>EXPIRE user:123 3600</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 字符串命令 -->
+            <div class="command-section" id="redis-strings">
+                <div class="command-card">
+                    <h3><i class="fas fa-font"></i> 字符串操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>SET key value</code></td>
+                            <td>设置键的值</td>
+                            <td><code>SET username "john"</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>GET key</code></td>
+                            <td>获取键的值</td>
+                            <td><code>GET username</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>INCR key</code></td>
+                            <td>将键的值增加1</td>
+                            <td><code>INCR counter</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>APPEND key value</code></td>
+                            <td>追加值到键</td>
+                            <td><code>APPEND username "doe"</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 哈希命令 -->
+            <div class="command-section" id="redis-hashes">
+                <div class="command-card">
+                    <h3><i class="fas fa-layer-group"></i> 哈希操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>HSET key field value</code></td>
+                            <td>设置哈希字段的值</td>
+                            <td><code>HSET user:123 name "John"</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>HGET key field</code></td>
+                            <td>获取哈希字段的值</td>
+                            <td><code>HGET user:123 name</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>HGETALL key</code></td>
+                            <td>获取哈希的所有字段和值</td>
+                            <td><code>HGETALL user:123</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>HDEL key field</code></td>
+                            <td>删除哈希字段</td>
+                            <td><code>HDEL user:123 name</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 列表命令 -->
+            <div class="command-section" id="redis-lists">
+                <div class="command-card">
+                    <h3><i class="fas fa-list"></i> 列表操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>LPUSH key value</code></td>
+                            <td>从左侧插入值到列表</td>
+                            <td><code>LPUSH tasks "task1"</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>RPUSH key value</code></td>
+                            <td>从右侧插入值到列表</td>
+                            <td><code>RPUSH tasks "task2"</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>LPOP key</code></td>
+                            <td>从左侧弹出列表值</td>
+                            <td><code>LPOP tasks</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>LRANGE key start stop</code></td>
+                            <td>获取列表范围内的元素</td>
+                            <td><code>LRANGE tasks 0 -1</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 集合命令 -->
+            <div class="command-section" id="redis-sets">
+                <div class="command-card">
+                    <h3><i class="fas fa-object-group"></i> 集合操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>SADD key member</code></td>
+                            <td>向集合添加成员</td>
+                            <td><code>SADD tags "redis" "database"</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>SMEMBERS key</code></td>
+                            <td>获取集合所有成员</td>
+                            <td><code>SMEMBERS tags</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>SISMEMBER key member</code></td>
+                            <td>检查成员是否在集合中</td>
+                            <td><code>SISMEMBER tags "redis"</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>SREM key member</code></td>
+                            <td>从集合移除成员</td>
+                            <td><code>SREM tags "database"</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 管理命令 -->
+            <div class="command-section" id="redis-admin">
+                <div class="command-card">
+                    <h3><i class="fas fa-cogs"></i> 服务器管理</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>INFO</code></td>
+                            <td>获取服务器信息</td>
+                            <td><code>INFO</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>CLIENT LIST</code></td>
+                            <td>列出客户端连接</td>
+                            <td><code>CLIENT LIST</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>CONFIG GET parameter</code></td>
+                            <td>获取配置参数</td>
+                            <td><code>CONFIG GET maxmemory</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>FLUSHALL</code></td>
+                            <td>删除所有数据库的所有键</td>
+                            <td><code>FLUSHALL</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- MongoDB 内容 -->
+        <div id="mongodb-content" class="database-content" style="display:none;">
+            <div class="database-header">
+                <h2 class="database-title"><i class="fas fa-leaf"></i> MongoDB 命令参考</h2>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索MongoDB命令..." id="mongodb-search">
+                </div>
+            </div>
+
+            <!-- 命令分类选项卡 -->
+            <div class="category-tabs">
+                <div class="category-tab active" data-category="mongodb-basic">基础命令</div>
+                <div class="category-tab" data-category="mongodb-crud">CRUD操作</div>
+                <div class="category-tab" data-category="mongodb-index">索引操作</div>
+                <div class="category-tab" data-category="mongodb-aggregation">聚合操作</div>
+                <div class="category-tab" data-category="mongodb-admin">管理命令</div>
+            </div>
+
+            <!-- 基础命令 -->
+            <div class="command-section active" id="mongodb-basic">
+                <div class="command-card">
+                    <h3><i class="fas fa-terminal"></i> 连接与数据库操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>mongo --host host --port port</code></td>
+                            <td>连接MongoDB服务器</td>
+                            <td><code>mongo --host 127.0.0.1 --port 27017</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>use database_name</code></td>
+                            <td>切换/创建数据库</td>
+                            <td><code>use mydb</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>show dbs</code></td>
+                            <td>显示所有数据库</td>
+                            <td><code>show dbs</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>show collections</code></td>
+                            <td>显示当前数据库的所有集合</td>
+                            <td><code>show collections</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>db.dropDatabase()</code></td>
+                            <td>删除当前数据库</td>
+                            <td><code>db.dropDatabase()</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CRUD操作 -->
+            <div class="command-section" id="mongodb-crud">
+                <div class="command-card">
+                    <h3><i class="fas fa-edit"></i> 文档操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>db.collection.insertOne()</code></td>
+                            <td>插入单个文档</td>
+                            <td><code>db.users.insertOne({name: "John", age: 25})</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>db.collection.insertMany()</code></td>
+                            <td>插入多个文档</td>
+                            <td><code>db.users.insertMany([{name: "John"}, {name: "Jane"}])</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>db.collection.find()</code></td>
+                            <td>查询文档</td>
+                            <td><code>db.users.find({age: {$gt: 18}})</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>db.collection.updateOne()</code></td>
+                            <td>更新单个文档</td>
+                            <td><code>db.users.updateOne({name: "John"}, {$set: {age: 26}})</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>db.collection.deleteOne()</code></td>
+                            <td>删除单个文档</td>
+                            <td><code>db.users.deleteOne({name: "John"})</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 索引操作 -->
+            <div class="command-section" id="mongodb-index">
+                <div class="command-card">
+                    <h3><i class="fas fa-search"></i> 索引管理</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>db.collection.createIndex()</code></td>
+                            <td>创建索引</td>
+                            <td><code>db.users.createIndex({name: 1})</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>db.collection.getIndexes()</code></td>
+                            <td>获取集合索引信息</td>
+                            <td><code>db.users.getIndexes()</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>db.collection.dropIndex()</code></td>
+                            <td>删除索引</td>
+                            <td><code>db.users.dropIndex("name_1")</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>db.collection.explain()</code></td>
+                            <td>查看查询执行计划</td>
+                            <td><code>db.users.find({name: "John"}).explain()</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 聚合操作 -->
+            <div class="command-section" id="mongodb-aggregation">
+                <div class="command-card">
+                    <h3><i class="fas fa-project-diagram"></i> 聚合管道</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>db.collection.aggregate()</code></td>
+                            <td>执行聚合操作</td>
+                            <td><code>db.orders.aggregate([{$group: {_id: "$product", total: {$sum: "$amount"}}}])</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>$match</code></td>
+                            <td>过滤文档</td>
+                            <td><code>{$match: {status: "A"}}</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>$group</code></td>
+                            <td>分组文档</td>
+                            <td><code>{$group: {_id: "$city", total: {$sum: 1}}}</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>$sort</code></td>
+                            <td>排序文档</td>
+                            <td><code>{$sort: {age: -1}}</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 管理命令 -->
+            <div class="command-section" id="mongodb-admin">
+                <div class="command-card">
+                    <h3><i class="fas fa-cogs"></i> 服务器管理</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>db.serverStatus()</code></td>
+                            <td>查看服务器状态</td>
+                            <td><code>db.serverStatus()</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>db.currentOp()</code></td>
+                            <td>查看当前操作</td>
+                            <td><code>db.currentOp()</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>db.shutdownServer()</code></td>
+                            <td>关闭服务器</td>
+                            <td><code>db.shutdownServer()</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>db.createUser()</code></td>
+                            <td>创建用户</td>
+                            <td><code>db.createUser({user: "admin", pwd: "password", roles: ["root"]})</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SQLite 内容 -->
+        <div id="sqlite-content" class="database-content" style="display:none;">
+            <div class="database-header">
+                <h2 class="database-title"><i class="fas fa-database"></i> SQLite 命令参考</h2>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索SQLite命令..." id="sqlite-search">
+                </div>
+            </div>
+
+            <!-- 命令分类选项卡 -->
+            <div class="category-tabs">
+                <div class="category-tab active" data-category="sqlite-basic">基础命令</div>
+                <div class="category-tab" data-category="sqlite-ddl">DDL操作</div>
+                <div class="category-tab" data-category="sqlite-dml">DML操作</div>
+                <div class="category-tab" data-category="sqlite-advanced">高级功能</div>
+            </div>
+
+            <!-- 基础命令 -->
+            <div class="command-section active" id="sqlite-basic">
+                <div class="command-card">
+                    <h3><i class="fas fa-terminal"></i> 连接与操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>sqlite3 database.db</code></td>
+                            <td>打开/创建SQLite数据库</td>
+                            <td><code>sqlite3 mydb.db</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>.exit</code> 或 <code>.quit</code></td>
+                            <td>退出SQLite命令行</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>.help</code></td>
+                            <td>显示帮助信息</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>.databases</code></td>
+                            <td>显示所有附加数据库</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>.tables</code></td>
+                            <td>显示所有表</td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="command-card">
+                    <h3><i class="fas fa-info-circle"></i> 信息查询</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="70%">说明</th>
+                        </tr>
+                        <tr>
+                            <td><code>.schema table_name</code></td>
+                            <td>显示表结构</td>
+                        </tr>
+                        <tr>
+                            <td><code>.indexes table_name</code></td>
+                            <td>显示表索引</td>
+                        </tr>
+                        <tr>
+                            <td><code>.dump table_name</code></td>
+                            <td>导出表数据为SQL</td>
+                        </tr>
+                        <tr>
+                            <td><code>.mode mode_name</code></td>
+                            <td>设置输出模式(csv, column, html等)</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DDL操作 -->
+            <div class="command-section" id="sqlite-ddl">
+                <div class="command-card">
+                    <h3><i class="fas fa-table"></i> 表操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE TABLE table_name (column1 datatype, ...);</code></td>
+                            <td>创建表</td>
+                            <td><code>CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DROP TABLE table_name;</code></td>
+                            <td>删除表</td>
+                            <td><code>DROP TABLE users;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER TABLE table_name ADD COLUMN column_name datatype;</code></td>
+                            <td>添加列</td>
+                            <td><code>ALTER TABLE users ADD COLUMN email TEXT;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER TABLE table_name RENAME TO new_name;</code></td>
+                            <td>重命名表</td>
+                            <td><code>ALTER TABLE users RENAME TO customers;</code></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="command-card">
+                    <h3><i class="fas fa-database"></i> 索引与视图</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE INDEX index_name ON table_name (column);</code></td>
+                            <td>创建索引</td>
+                            <td><code>CREATE INDEX idx_name ON users (name);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DROP INDEX index_name;</code></td>
+                            <td>删除索引</td>
+                            <td><code>DROP INDEX idx_name;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE VIEW view_name AS SELECT ...;</code></td>
+                            <td>创建视图</td>
+                            <td><code>CREATE VIEW active_users AS SELECT * FROM users WHERE active=1;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DROP VIEW view_name;</code></td>
+                            <td>删除视图</td>
+                            <td><code>DROP VIEW active_users;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DML操作 -->
+            <div class="command-section" id="sqlite-dml">
+                <div class="command-card">
+                    <h3><i class="fas fa-edit"></i> 数据操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>INSERT INTO table (col1, col2) VALUES (val1, val2);</code></td>
+                            <td>插入数据</td>
+                            <td><code>INSERT INTO users (name, age) VALUES ('John', 25);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>UPDATE table SET col = val WHERE condition;</code></td>
+                            <td>更新数据</td>
+                            <td><code>UPDATE users SET age = 26 WHERE name = 'John';</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE FROM table WHERE condition;</code></td>
+                            <td>删除数据</td>
+                            <td><code>DELETE FROM users WHERE age > 30;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>SELECT col1, col2 FROM table WHERE condition;</code></td>
+                            <td>查询数据</td>
+                            <td><code>SELECT name, age FROM users WHERE age > 25;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 高级功能 -->
+            <div class="command-section" id="sqlite-advanced">
+                <div class="command-card">
+                    <h3><i class="fas fa-rocket"></i> 高级功能</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>BEGIN TRANSACTION; ... COMMIT;</code></td>
+                            <td>事务处理</td>
+                            <td><code>BEGIN; UPDATE accounts SET balance = balance - 100; COMMIT;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ATTACH DATABASE 'file.db' AS alias;</code></td>
+                            <td>附加数据库</td>
+                            <td><code>ATTACH DATABASE 'backup.db' AS backup;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DETACH DATABASE alias;</code></td>
+                            <td>分离数据库</td>
+                            <td><code>DETACH DATABASE backup;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>VACUUM;</code></td>
+                            <td>重建数据库文件，优化空间</td>
+                            <td><code>VACUUM;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Oracle 内容 -->
+        <div id="oracle-content" class="database-content" style="display:none;">
+            <div class="database-header">
+                <h2 class="database-title"><i class="fas fa-database"></i> Oracle 命令参考</h2>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索Oracle命令..." id="oracle-search">
+                </div>
+            </div>
+
+            <!-- 命令分类选项卡 -->
+            <div class="category-tabs">
+                <div class="category-tab active" data-category="oracle-basic">基础命令</div>
+                <div class="category-tab" data-category="oracle-ddl">DDL操作</div>
+                <div class="category-tab" data-category="oracle-dml">DML操作</div>
+                <div class="category-tab" data-category="oracle-admin">管理命令</div>
+                <div class="category-tab" data-category="oracle-advanced">高级功能</div>
+            </div>
+
+            <!-- 基础命令 -->
+            <div class="command-section active" id="oracle-basic">
+                <div class="command-card">
+                    <h3><i class="fas fa-terminal"></i> 连接与操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>sqlplus username/password@database</code></td>
+                            <td>连接Oracle数据库</td>
+                            <td><code>sqlplus scott/tiger@orcl</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>exit</code></td>
+                            <td>退出SQL*Plus</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>CONNECT username/password@database</code></td>
+                            <td>切换连接</td>
+                            <td><code>CONNECT system/manager@orcl</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>SHOW USER</code></td>
+                            <td>显示当前用户</td>
+                            <td></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="command-card">
+                    <h3><i class="fas fa-info-circle"></i> 信息查询</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="70%">说明</th>
+                        </tr>
+                        <tr>
+                            <td><code>SELECT * FROM tab;</code></td>
+                            <td>显示当前用户的所有表</td>
+                        </tr>
+                        <tr>
+                            <td><code>DESC table_name</code></td>
+                            <td>显示表结构</td>
+                        </tr>
+                        <tr>
+                            <td><code>SHOW PARAMETERS parameter_name</code></td>
+                            <td>显示参数值</td>
+                        </tr>
+                        <tr>
+                            <td><code>SELECT table_name FROM user_tables;</code></td>
+                            <td>查询用户拥有的所有表</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DDL操作 -->
+            <div class="command-section" id="oracle-ddl">
+                <div class="command-card">
+                    <h3><i class="fas fa-table"></i> 表空间与用户</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE TABLESPACE tspace_name DATAFILE 'file.dbf' SIZE 100M;</code></td>
+                            <td>创建表空间</td>
+                            <td><code>CREATE TABLESPACE my_tspace DATAFILE 'my_tspace.dbf' SIZE 100M;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE USER username IDENTIFIED BY password DEFAULT TABLESPACE tspace;</code></td>
+                            <td>创建用户</td>
+                            <td><code>CREATE USER john IDENTIFIED BY secret DEFAULT TABLESPACE users;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER USER username IDENTIFIED BY new_password;</code></td>
+                            <td>修改用户密码</td>
+                            <td><code>ALTER USER john IDENTIFIED BY newsecret;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DROP USER username CASCADE;</code></td>
+                            <td>删除用户及其所有对象</td>
+                            <td><code>DROP USER john CASCADE;</code></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="command-card">
+                    <h3><i class="fas fa-columns"></i> 表操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE TABLE table_name (column1 datatype, ...);</code></td>
+                            <td>创建表</td>
+                            <td><code>CREATE TABLE users (id NUMBER, name VARCHAR2(50));</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DROP TABLE table_name;</code></td>
+                            <td>删除表</td>
+                            <td><code>DROP TABLE users;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER TABLE table_name ADD (column_name datatype);</code></td>
+                            <td>添加列</td>
+                            <td><code>ALTER TABLE users ADD (email VARCHAR2(100));</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER TABLE table_name DROP COLUMN column_name;</code></td>
+                            <td>删除列</td>
+                            <td><code>ALTER TABLE users DROP COLUMN email;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DML操作 -->
+            <div class="command-section" id="oracle-dml">
+                <div class="command-card">
+                    <h3><i class="fas fa-edit"></i> 数据操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>INSERT INTO table (col1, col2) VALUES (val1, val2);</code></td>
+                            <td>插入数据</td>
+                            <td><code>INSERT INTO users (name, age) VALUES ('John', 25);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>UPDATE table SET col = val WHERE condition;</code></td>
+                            <td>更新数据</td>
+                            <td><code>UPDATE users SET age = 26 WHERE name = 'John';</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE FROM table WHERE condition;</code></td>
+                            <td>删除数据</td>
+                            <td><code>DELETE FROM users WHERE age > 30;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>SELECT col1, col2 FROM table WHERE condition;</code></td>
+                            <td>查询数据</td>
+                            <td><code>SELECT name, age FROM users WHERE age > 25;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 管理命令 -->
+            <div class="command-section" id="oracle-admin">
+                <div class="command-card">
+                    <h3><i class="fas fa-cogs"></i> 权限管理</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>GRANT privilege TO username;</code></td>
+                            <td>授予权限</td>
+                            <td><code>GRANT CREATE SESSION TO john;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>GRANT privilege ON table TO username;</code></td>
+                            <td>授予表权限</td>
+                            <td><code>GRANT SELECT ON users TO john;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>REVOKE privilege FROM username;</code></td>
+                            <td>撤销权限</td>
+                            <td><code>REVOKE CREATE SESSION FROM john;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE ROLE role_name;</code></td>
+                            <td>创建角色</td>
+                            <td><code>CREATE ROLE clerk;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 高级功能 -->
+            <div class="command-section" id="oracle-advanced">
+                <div class="command-card">
+                    <h3><i class="fas fa-rocket"></i> 高级功能</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE INDEX index_name ON table (column);</code></td>
+                            <td>创建索引</td>
+                            <td><code>CREATE INDEX idx_users_name ON users (name);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE SEQUENCE seq_name START WITH 1 INCREMENT BY 1;</code></td>
+                            <td>创建序列</td>
+                            <td><code>CREATE SEQUENCE user_seq START WITH 1 INCREMENT BY 1;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>EXPLAIN PLAN FOR query;</code></td>
+                            <td>分析查询执行计划</td>
+                            <td><code>EXPLAIN PLAN FOR SELECT * FROM users;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</code></td>
+                            <td>显示执行计划</td>
+                            <td><code>SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SQL Server 内容 -->
+        <div id="sqlserver-content" class="database-content" style="display:none;">
+            <div class="database-header">
+                <h2 class="database-title"><i class="fas fa-server"></i> SQL Server 命令参考</h2>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索SQL Server命令..." id="sqlserver-search">
+                </div>
+            </div>
+
+            <!-- 命令分类选项卡 -->
+            <div class="category-tabs">
+                <div class="category-tab active" data-category="sqlserver-basic">基础命令</div>
+                <div class="category-tab" data-category="sqlserver-ddl">DDL操作</div>
+                <div class="category-tab" data-category="sqlserver-dml">DML操作</div>
+                <div class="category-tab" data-category="sqlserver-admin">管理命令</div>
+                <div class="category-tab" data-category="sqlserver-advanced">高级功能</div>
+            </div>
+
+            <!-- 基础命令 -->
+            <div class="command-section active" id="sqlserver-basic">
+                <div class="command-card">
+                    <h3><i class="fas fa-terminal"></i> 连接与操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>sqlcmd -S server -U user -P password</code></td>
+                            <td>连接SQL Server</td>
+                            <td><code>sqlcmd -S localhost -U sa -P password</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>EXIT</code></td>
+                            <td>退出sqlcmd</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><code>:r file.sql</code></td>
+                            <td>执行SQL脚本文件</td>
+                            <td><code>:r C:\script.sql</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>USE database_name;</code></td>
+                            <td>选择数据库</td>
+                            <td><code>USE master;</code></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="command-card">
+                    <h3><i class="fas fa-info-circle"></i> 信息查询</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="70%">说明</th>
+                        </tr>
+                        <tr>
+                            <td><code>SELECT name FROM sys.databases;</code></td>
+                            <td>显示所有数据库</td>
+                        </tr>
+                        <tr>
+                            <td><code>EXEC sp_tables;</code></td>
+                            <td>显示当前数据库中的表</td>
+                        </tr>
+                        <tr>
+                            <td><code>EXEC sp_help 'table_name';</code></td>
+                            <td>显示表结构</td>
+                        </tr>
+                        <tr>
+                            <td><code>EXEC sp_helpindex 'table_name';</code></td>
+                            <td>显示表索引</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DDL操作 -->
+            <div class="command-section" id="sqlserver-ddl">
+                <div class="command-card">
+                    <h3><i class="fas fa-table"></i> 数据库操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE DATABASE dbname;</code></td>
+                            <td>创建数据库</td>
+                            <td><code>CREATE DATABASE mydb;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DROP DATABASE dbname;</code></td>
+                            <td>删除数据库</td>
+                            <td><code>DROP DATABASE olddb;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER DATABASE dbname MODIFY NAME = newname;</code></td>
+                            <td>重命名数据库</td>
+                            <td><code>ALTER DATABASE mydb MODIFY NAME = newdb;</code></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="command-card">
+                    <h3><i class="fas fa-columns"></i> 表操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE TABLE table_name (column1 datatype, ...);</code></td>
+                            <td>创建表</td>
+                            <td><code>CREATE TABLE users (id INT IDENTITY, name VARCHAR(50));</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DROP TABLE table_name;</code></td>
+                            <td>删除表</td>
+                            <td><code>DROP TABLE users;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER TABLE table_name ADD column_name datatype;</code></td>
+                            <td>添加列</td>
+                            <td><code>ALTER TABLE users ADD email VARCHAR(100);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>ALTER TABLE table_name DROP COLUMN column_name;</code></td>
+                            <td>删除列</td>
+                            <td><code>ALTER TABLE users DROP COLUMN email;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DML操作 -->
+            <div class="command-section" id="sqlserver-dml">
+                <div class="command-card">
+                    <h3><i class="fas fa-edit"></i> 数据操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>INSERT INTO table (col1, col2) VALUES (val1, val2);</code></td>
+                            <td>插入数据</td>
+                            <td><code>INSERT INTO users (name, age) VALUES ('John', 25);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>UPDATE table SET col = val WHERE condition;</code></td>
+                            <td>更新数据</td>
+                            <td><code>UPDATE users SET age = 26 WHERE name = 'John';</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE FROM table WHERE condition;</code></td>
+                            <td>删除数据</td>
+                            <td><code>DELETE FROM users WHERE age > 30;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>SELECT col1, col2 FROM table WHERE condition;</code></td>
+                            <td>查询数据</td>
+                            <td><code>SELECT name, age FROM users WHERE age > 25;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 管理命令 -->
+            <div class="command-section" id="sqlserver-admin">
+                <div class="command-card">
+                    <h3><i class="fas fa-cogs"></i> 用户与权限管理</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE LOGIN login_name WITH PASSWORD = 'password';</code></td>
+                            <td>创建登录账户</td>
+                            <td><code>CREATE LOGIN john WITH PASSWORD = 'secret';</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE USER user_name FOR LOGIN login_name;</code></td>
+                            <td>创建数据库用户</td>
+                            <td><code>CREATE USER john FOR LOGIN john;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>GRANT permission ON object TO user_name;</code></td>
+                            <td>授予权限</td>
+                            <td><code>GRANT SELECT ON users TO john;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>REVOKE permission ON object FROM user_name;</code></td>
+                            <td>撤销权限</td>
+                            <td><code>REVOKE SELECT ON users FROM john;</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 高级功能 -->
+            <div class="command-section" id="sqlserver-advanced">
+                <div class="command-card">
+                    <h3><i class="fas fa-rocket"></i> 高级功能</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>CREATE INDEX index_name ON table (column);</code></td>
+                            <td>创建索引</td>
+                            <td><code>CREATE INDEX idx_users_name ON users (name);</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>EXEC sp_helpindex 'table_name';</code></td>
+                            <td>查看索引信息</td>
+                            <td><code>EXEC sp_helpindex 'users';</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>BEGIN TRANSACTION; ... COMMIT;</code></td>
+                            <td>事务处理</td>
+                            <td><code>BEGIN TRANSACTION; UPDATE accounts SET balance = balance - 100; COMMIT;</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>BACKUP DATABASE dbname TO disk = 'path';</code></td>
+                            <td>备份数据库</td>
+                            <td><code>BACKUP DATABASE mydb TO disk = 'C:\backup.bak';</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Elasticsearch 内容 -->
+        <div id="elasticsearch-content" class="database-content" style="display:none;">
+            <div class="database-header">
+                <h2 class="database-title"><i class="fas fa-search-plus"></i> Elasticsearch 命令参考</h2>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索Elasticsearch命令..." id="elasticsearch-search">
+                </div>
+            </div>
+
+            <!-- 命令分类选项卡 -->
+            <div class="category-tabs">
+                <div class="category-tab active" data-category="elasticsearch-basic">基础命令</div>
+                <div class="category-tab" data-category="elasticsearch-index">索引操作</div>
+                <div class="category-tab" data-category="elasticsearch-document">文档操作</div>
+                <div class="category-tab" data-category="elasticsearch-search">搜索操作</div>
+                <div class="category-tab" data-category="elasticsearch-admin">管理命令</div>
+            </div>
+
+            <!-- 基础命令 -->
+            <div class="command-section active" id="elasticsearch-basic">
+                <div class="command-card">
+                    <h3><i class="fas fa-terminal"></i> 集群与节点信息</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>GET /</code></td>
+                            <td>查看集群基本信息</td>
+                            <td><code>curl -XGET 'http://localhost:9200/'</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /_cat/health?v</code></td>
+                            <td>查看集群健康状态</td>
+                            <td><code>curl -XGET 'http://localhost:9200/_cat/health?v'</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /_cat/nodes?v</code></td>
+                            <td>查看节点信息</td>
+                            <td><code>curl -XGET 'http://localhost:9200/_cat/nodes?v'</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /_cat/indices?v</code></td>
+                            <td>查看所有索引</td>
+                            <td><code>curl -XGET 'http://localhost:9200/_cat/indices?v'</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 索引操作 -->
+            <div class="command-section" id="elasticsearch-index">
+                <div class="command-card">
+                    <h3><i class="fas fa-database"></i> 索引管理</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>PUT /index_name</code></td>
+                            <td>创建索引</td>
+                            <td><code>curl -XPUT 'http://localhost:9200/my_index'</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE /index_name</code></td>
+                            <td>删除索引</td>
+                            <td><code>curl -XDELETE 'http://localhost:9200/my_index'</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /index_name</code></td>
+                            <td>查看索引信息</td>
+                            <td><code>curl -XGET 'http://localhost:9200/my_index'</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>PUT /index_name/_mapping</code></td>
+                            <td>设置映射</td>
+                            <td><code>curl -XPUT 'http://localhost:9200/my_index/_mapping' -d '{"properties":{"field":{"type":"text"}}}'</code>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 文档操作 -->
+            <div class="command-section" id="elasticsearch-document">
+                <div class="command-card">
+                    <h3><i class="fas fa-file-alt"></i> 文档操作</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>PUT /index_name/_doc/id</code></td>
+                            <td>创建/更新文档</td>
+                            <td><code>curl -XPUT 'http://localhost:9200/my_index/_doc/1' -d '{"name":"John"}'</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /index_name/_doc/id</code></td>
+                            <td>获取文档</td>
+                            <td><code>curl -XGET 'http://localhost:9200/my_index/_doc/1'</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE /index_name/_doc/id</code></td>
+                            <td>删除文档</td>
+                            <td><code>curl -XDELETE 'http://localhost:9200/my_index/_doc/1'</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>POST /index_name/_update/id</code></td>
+                            <td>更新文档</td>
+                            <td><code>curl -XPOST 'http://localhost:9200/my_index/_update/1' -d '{"doc":{"name":"John Doe"}}'</code>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 搜索操作 -->
+            <div class="command-section" id="elasticsearch-search">
+                <div class="command-card">
+                    <h3><i class="fas fa-search"></i> 搜索查询</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>GET /index_name/_search</code></td>
+                            <td>搜索所有文档</td>
+                            <td><code>curl -XGET 'http://localhost:9200/my_index/_search'</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /index_name/_search?q=field:value</code></td>
+                            <td>简单查询</td>
+                            <td><code>curl -XGET 'http://localhost:9200/my_index/_search?q=name:John'</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /index_name/_search -d '{"query":{"match":{"field":"value"}}}'</code></td>
+                            <td>DSL查询</td>
+                            <td><code>curl -XGET 'http://localhost:9200/my_index/_search' -d '{"query":{"match":{"name":"John"}}}'</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /index_name/_count</code></td>
+                            <td>统计文档数量</td>
+                            <td><code>curl -XGET 'http://localhost:9200/my_index/_count'</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 管理命令 -->
+            <div class="command-section" id="elasticsearch-admin">
+                <div class="command-card">
+                    <h3><i class="fas fa-cogs"></i> 集群管理</h3>
+                    <table class="command-table">
+                        <tr>
+                            <th width="30%">命令</th>
+                            <th width="40%">说明</th>
+                            <th width="30%">示例</th>
+                        </tr>
+                        <tr>
+                            <td><code>GET /_cluster/health</code></td>
+                            <td>查看集群健康详情</td>
+                            <td><code>curl -XGET 'http://localhost:9200/_cluster/health'</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>GET /_cluster/settings</code></td>
+                            <td>查看集群设置</td>
+                            <td><code>curl -XGET 'http://localhost:9200/_cluster/settings'</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>POST /_cluster/reroute</code></td>
+                            <td>手动分片重分配</td>
+                            <td><code>curl -XPOST 'http://localhost:9200/_cluster/reroute' -d '{"commands":[{"move":{"index":"my_index","shard":0,"from_node":"node1","to_node":"node2"}}]}'</code>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><code>POST /_flush</code></td>
+                            <td>刷新索引</td>
+                            <td><code>curl -XPOST 'http://localhost:9200/_flush'</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>数据库命令参考手册 &copy; 2023 | 持续更新中</p>
+        </div>
+    </div>
+
+    <script src="js/sql_query.js"></script>
+</body>
+
+</html>

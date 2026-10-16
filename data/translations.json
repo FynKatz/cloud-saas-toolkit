@@ -1,0 +1,22 @@
+{
+  "zh": {
+    "pageTitle": "开发者工具箱",
+    "pageSubtitle": "一站式技术文档与实用工具集合",
+    "tabAll": "全部",
+    "tabDocker": "Docker & K8S",
+    "tabRedis": "Redis",
+    "tabMarkdown": "Markdown",
+    "tabTools": "实用工具",
+    "footerText": "&copy; 2024 开发者工具箱. 让技术更简单."
+  },
+  "en": {
+    "pageTitle": "Developer Toolbox",
+    "pageSubtitle": "All-in-one Technical Documentation & Utilities",
+    "tabAll": "All",
+    "tabDocker": "Docker & K8S",
+    "tabRedis": "Redis",
+    "tabMarkdown": "Markdown",
+    "tabTools": "Utilities",
+    "footerText": "&copy; 2024 Developer Toolbox. Making technology simpler."
+  }
+}

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=266dd97a-5e4f-48fc-b798-675a60c67943
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Typora Mac 快捷键速查表（最全版）</title>
+
+  <!-- 使用Font Awesome图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* GitHub/Notion 风格基础样式 */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      color: #24292e;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background-color: #f6f8fa;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: #24292e;
+    }
+
+    .shortcut-group {
+      background: white;
+      border-radius: 6px;
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    code {
+      padding: 0.2em 0.4em;
+      font-size: 0.9em;
+      background-color: #f0f0f0;
+      border-radius: 3px;
+      font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    }
+
+    .copy-btn {
+      cursor: pointer;
+      padding: 0.3em 0.6em;
+      font-size: 0.8em;
+      background-color: #24292e;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      background-color: #444;
+    }
+
+    @media (max-width: 600px) {
+      li {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .copy-btn {
+        margin-top: 0.5rem;
+        width: 100%;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="css/auth-styles.css">
+  <script src="js/auth-config.js"></script>
+  <script src="js/auth-check.js"></script>
+</head>
+
+<body>
+  <div class="header-actions">
+      <div class="header-left">
+          <button onclick="goToHome()" class="home-btn">
+              <i class="fas fa-home"></i>
+              首页
+          </button>
+      </div>
+      <div class="header-right">
+          <button onclick="logout()" class="logout-btn">
+              <i class="fas fa-sign-out-alt"></i>
+              退出
+          </button>
+      </div>
+  </div>
+
+  <h1>Typora Mac 快捷键速查表（最全版）</h1>
+
+  <!-- 文件操作 -->
+  <div class="shortcut-group">
+    <h3>文件操作</h3>
+    <ul>
+      <li><span><code>⌘ + N</code> 新建文件</span><button class="copy-btn" onclick="copyText('⌘ + N')">复制</button></li>
+      <li><span><code>⌘ + O</code> 打开文件</span><button class="copy-btn" onclick="copyText('⌘ + O')">复制</button></li>
+      <li><span><code>⌘ + S</code> 保存文件</span><button class="copy-btn" onclick="copyText('⌘ + S')">复制</button></li>
+      <li><span><code>⌘ + Shift + S</code> 另存为</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + S')">复制</button></li>
+      <li><span><code>⌘ + W</code> 关闭当前文件</span><button class="copy-btn" onclick="copyText('⌘ + W')">复制</button></li>
+      <li><span><code>⌘ + Q</code> 退出 Typora</span><button class="copy-btn" onclick="copyText('⌘ + Q')">复制</button></li>
+    </ul>
+  </div>
+
+  <!-- 编辑操作 -->
+  <div class="shortcut-group">
+    <h3>编辑操作</h3>
+    <ul>
+      <li><span><code>⌘ + C</code> 复制</span><button class="copy-btn" onclick="copyText('⌘ + C')">复制</button></li>
+      <li><span><code>⌘ + V</code> 粘贴</span><button class="copy-btn" onclick="copyText('⌘ + V')">复制</button></li>
+      <li><span><code>⌘ + X</code> 剪切</span><button class="copy-btn" onclick="copyText('⌘ + X')">复制</button></li>
+      <li><span><code>⌘ + Z</code> 撤销</span><button class="copy-btn" onclick="copyText('⌘ + Z')">复制</button></li>
+      <li><span><code>⌘ + Shift + Z</code> 重做</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + Z')">复制</button></li>
+      <li><span><code>⌘ + A</code> 全选</span><button class="copy-btn" onclick="copyText('⌘ + A')">复制</button></li>
+    </ul>
+  </div>
+
+  <!-- 格式化 -->
+  <div class="shortcut-group">
+    <h3>格式化</h3>
+    <ul>
+      <li><span><code>⌘ + B</code> 加粗</span><button class="copy-btn" onclick="copyText('⌘ + B')">复制</button></li>
+      <li><span><code>⌘ + I</code> 斜体</span><button class="copy-btn" onclick="copyText('⌘ + I')">复制</button></li>
+      <li><span><code>⌘ + U</code> 下划线</span><button class="copy-btn" onclick="copyText('⌘ + U')">复制</button></li>
+      <li><span><code>⌘ + Shift + 5</code> 删除线</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + 5')">复制</button></li>
+      <li><span><code>⌘ + K</code> 插入超链接</span><button class="copy-btn" onclick="copyText('⌘ + K')">复制</button></li>
+      <li><span><code>⌘ + H</code> 高亮文本（需自定义配置）</span><button class="copy-btn" onclick="copyText('⌘ + H')">复制</button>
+      </li>
+      <li><span><code>⌘ + `</code> 插入代码块</span><button class="copy-btn" onclick="copyText('⌘ + `')">复制</button></li>
+      <li><span><code>⌘ + Shift + `</code> 插入行内代码</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + `')">复制</button></li>
+    </ul>
+  </div>
+
+  <!-- 段落与标题 -->
+  <div class="shortcut-group">
+    <h3>段落与标题</h3>
+    <ul>
+      <li><span><code>⌘ + 1~6</code> 一级到六级标题</span><button class="copy-btn" onclick="copyText('⌘ + 1~6')">复制</button>
+      </li>
+      <li><span><code>⌘ + 0</code> 正文格式</span><button class="copy-btn" onclick="copyText('⌘ + 0')">复制</button></li>
+      <li><span><code>⌘ + T</code> 插入表格</span><button class="copy-btn" onclick="copyText('⌘ + T')">复制</button></li>
+      <li><span><code>⌘ + Shift + L</code> 插入列表</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + L')">复制</button></li>
+      <li><span><code>⌘ + Shift + Q</code> 插入引用</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + Q')">复制</button></li>
+      <li><span><code>⌘ + Shift + G</code> 折叠/展开段落</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + G')">复制</button></li>
+      <li><span><code>⌘ + Shift + C</code> 插入代码块（支持语言）</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + C')">复制</button></li>
+    </ul>
+  </div>
+
+  <!-- 视图与导航 -->
+  <div class="shortcut-group">
+    <h3>视图与导航</h3>
+    <ul>
+      <li><span><code>⌘ + /</code> 打开命令面板</span><button class="copy-btn" onclick="copyText('⌘ + /')">复制</button></li>
+      <li><span><code>⌘ + Shift + L</code> 切换侧边栏</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + L')">复制</button></li>
+      <li><span><code>⌘ + Shift + F</code> 全屏模式</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + F')">复制</button></li>
+      <li><span><code>⌘ + Shift + M</code> 预览模式</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + M')">复制</button></li>
+      <li><span><code>⌘ + Shift + P</code> 打印文档</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + P')">复制</button></li>
+    </ul>
+  </div>
+
+  <!-- 表格 -->
+  <div class="shortcut-group">
+    <h3>表格操作</h3>
+    <ul>
+      <li><span><code>Tab</code> 跳转到下一个单元格</span><button class="copy-btn" onclick="copyText('Tab')">复制</button></li>
+      <li><span><code>Shift + Tab</code> 跳转到上一个单元格</span><button class="copy-btn"
+          onclick="copyText('Shift + Tab')">复制</button></li>
+      <li><span><code>Enter</code> 在当前行下方插入新行</span><button class="copy-btn" onclick="copyText('Enter')">复制</button>
+      </li>
+      <li><span><code>⌘ + Shift + Enter</code> 在当前行上方插入新行</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + Enter')">复制</button></li>
+    </ul>
+  </div>
+
+  <!-- 图像 -->
+  <div class="shortcut-group">
+    <h3>图像操作</h3>
+    <ul>
+      <li><span><code>⌘ + Shift + I</code> 插入图片</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + I')">复制</button></li>
+      <li><span><code>⌘ + Alt + I</code> 插入图片链接</span><button class="copy-btn"
+          onclick="copyText('⌘ + Alt + I')">复制</button></li>
+    </ul>
+  </div>
+
+  <!-- 数学公式 -->
+  <div class="shortcut-group">
+    <h3>数学公式</h3>
+    <ul>
+      <li><span><code>⌘ + Shift + E</code> 插入行内公式</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + E')">复制</button></li>
+      <li><span><code>⌘ + Shift + M</code> 插入块级公式</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + M')">复制</button></li>
+    </ul>
+  </div>
+
+  <!-- 脚注 -->
+  <div class="shortcut-group">
+    <h3>脚注</h3>
+    <ul>
+      <li><span><code>⌘ + Shift + F</code> 插入脚注</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + F')">复制</button></li>
+    </ul>
+  </div>
+
+  <!-- 高级功能 -->
+  <div class="shortcut-group">
+    <h3>高级功能</h3>
+    <ul>
+      <li><span><code>⌘ + Shift + O</code> 导出为 PDF</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + O')">复制</button></li>
+      <li><span><code>⌘ + F</code> 查找</span><button class="copy-btn" onclick="copyText('⌘ + F')">复制</button></li>
+      <li><span><code>⌘ + G</code> 查找下一个</span><button class="copy-btn" onclick="copyText('⌘ + G')">复制</button></li>
+      <li><span><code>⌘ + Shift + G</code> 查找上一个</span><button class="copy-btn"
+          onclick="copyText('⌘ + Shift + G')">复制</button></li>
+    </ul>
+  </div>
+
+  <!-- JavaScript 实现复制功能 -->
+  <script>
+    function copyText(text) {
+      navigator.clipboard.writeText(text)
+        .then(() => alert(`已复制：${text}`))
+        .catch(err => console.error('复制失败:', err));
+    }
+  </script>
+</body>
+
+</html>

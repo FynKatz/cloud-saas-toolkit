@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=266dd97a-5e4f-48fc-b798-675a60c67943
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo应用</title>
+
+    <!-- 使用Font Awesome图标库 -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- 引入本地样式 -->
+    <link rel="stylesheet" href="css/todo.css" />
+
+    <!-- 引入配置文件 -->
+    <script src="js/supabase-config.js"></script>
+    <script src="js/auth-config.js"></script>
+    <script src="js/auth-check.js"></script>
+  </head>
+
+  <body>
+    <div class="app-container">
+      <!-- 顶部导航栏 -->
+      <div class="top-navbar">
+        <div class="nav-left">
+          <h1 class="app-title">
+            <i class="fas fa-tasks"></i>
+            Todo任务管理
+          </h1>
+        </div>
+        <div class="nav-right">
+          <button onclick="goToHome()" class="nav-btn">
+            <i class="fas fa-home"></i>
+            <span class="btn-text">首页</span>
+          </button>
+          <button onclick="logout()" class="nav-btn">
+            <i class="fas fa-sign-out-alt"></i>
+            <span class="btn-text">退出</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 用户管理区域 - 长条形设计 -->
+      <div class="container" id="user-section" style="display: none">
+        <div class="user-management-bar">
+          <div id="login-section" class="login-form-inline">
+            <input
+              type="email"
+              id="email"
+              class="form-control form-control-sm"
+              placeholder="邮箱地址"
+            />
+            <input
+              type="password"
+              id="password"
+              class="form-control form-control-sm"
+              placeholder="密码"
+            />
+            <div class="btn-group-inline">
+              <button class="btn btn-sm btn-primary" onclick="loginUser()">
+                登录
+              </button>
+              <button class="btn btn-sm" onclick="registerUser()">注册</button>
+            </div>
+            <div
+              id="login-error"
+              class="error-message"
+              style="display: none"
+            ></div>
+          </div>
+          <div
+            id="current-user"
+            style="display: none"
+            class="current-user-info"
+          >
+            <span class="user-welcome">当前用户:</span>
+            <span id="user-email" class="user-badge"></span>
+            <button class="btn btn-sm" onclick="logoutUser()">切换用户</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 主内容区域 -->
+      <div class="main-content">
+        <!-- 任务管理区域 (初始隐藏) -->
+        <div id="task-section" style="display: none">
+          <div class="data-container">
+            <!-- 表格操作栏 -->
+            <div class="table-header">
+              <!-- 筛选区域 - 修改为一行布局 -->
+              <div class="filter-row single-row">
+                <!-- 状态筛选按钮组 -->
+                <div class="status-filter-group">
+                  <span class="filter-label"
+                    ><i class="fas fa-filter"></i
+                    ><strong> 完成状态</strong></span
+                  >
+                  <div class="btn-group">
+                    <button
+                      class="btn btn-sm btn-status active"
+                      data-status="all"
+                      onclick="changeStatusFilter('all')"
+                    >
+                      全部
+                    </button>
+                    <button
+                      class="btn btn-sm btn-status"
+                      data-status="进行中"
+                      onclick="changeStatusFilter('进行中')"
+                    >
+                      进行中
+                    </button>
+                    <button
+                      class="btn btn-sm btn-status"
+                      data-status="已完成"
+                      onclick="changeStatusFilter('已完成')"
+                    >
+                      已完成
+                    </button>
+                  </div>
+                </div>
+
+                <!-- 日期筛选 -->
+                <div class="date-filter-container">
+                  <span class="filter-label"
+                    ><i class="far fa-clock"></i
+                    ><strong> 截止时间</strong></span
+                  >
+                  <input
+                    type="date"
+                    id="date-filter"
+                    class="form-control form-control-sm date-filter"
+                    onchange="filterTasks()"
+                  />
+                </div>
+
+                <!-- 搜索区域和重置按钮组 -->
+                <div class="search-reset-group">
+                  <!-- 搜索区域 -->
+                  <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input
+                      type="text"
+                      id="search-input"
+                      class="search-input"
+                      placeholder="搜索任务内容..."
+                      oninput="filterTasks()"
+                    />
+                  </div>
+
+                  <!-- 重置按钮 -->
+                  <button
+                    class="btn btn-sm btn-outline reset-btn"
+                    onclick="resetFilters()"
+                    title="重置所有筛选条件"
+                  >
+                    <i class="fas fa-redo"></i>
+                    重置
+                  </button>
+                </div>
+
+                <!-- 添加任务按钮 -->
+                <button
+                  class="btn btn-primary btn-add"
+                  onclick="openAddTaskModal()"
+                >
+                  <i class="fas fa-plus-circle"></i>
+                  <span>添加任务</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 任务表格 -->
+            <div id="task-container" class="table-container">
+              <table class="task-table styled-table">
+                <thead>
+                  <tr>
+                    <th>任务内容</th>
+                    <th>截止时间</th>
+                    <th>状态</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="task-table-body">
+                  <!-- 数据将通过JavaScript动态填充 -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 加载状态 -->
+      <div id="loading" class="loading-overlay">
+        <div class="loading-content">
+          <span class="spinner"></span>
+          <p>正在加载...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 添加/编辑任务模态框 -->
+    <div id="task-modal" class="modal">
+      <div class="modal-content compact-form">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modal-title">添加新任务</h3>
+          <span class="modal-close" onclick="closeTaskModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="edit-id" />
+
+          <div class="form-group compact">
+            <label class="form-label">任务内容</label>
+            <textarea
+              id="task-content"
+              class="form-control"
+              placeholder="请输入任务内容..."
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group compact">
+              <label class="form-label">截止时间</label>
+              <input
+                type="datetime-local"
+                id="task-due-time"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group compact">
+              <label class="form-label">状态</label>
+              <select id="task-status" class="form-control">
+                <option value="进行中">进行中</option>
+                <option value="已完成">已完成</option>
+              </select>
+            </div>
+          </div>
+
+          <div
+            id="task-error"
+            class="error-message"
+            style="display: none"
+          ></div>
+          <div class="modal-actions">
+            <button class="btn btn-outline" onclick="closeTaskModal()">
+              取消
+            </button>
+            <button class="btn btn-primary" onclick="saveTask()">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Supabase客户端库 - 使用稳定版本 -->
+    <script src="js/supabase-js.js"></script>
+
+    <!-- 引入主JavaScript文件 -->
+    <script src="js/todo.js"></script>
+  </body>
+</html>

@@ -1,0 +1,264 @@
+{
+  "tools": [
+    {
+      "id": "docker",
+      "href": "Docker & K8S 速查.html",
+      "category": "docker",
+      "icon": "fa-ship",
+      "translations": {
+        "zh": {
+          "category": "容器",
+          "title": "Docker & K8S 命令",
+          "description": "常用 Docker 和 Kubernetes 命令速查表",
+          "linkText": "查看文档"
+        },
+        "en": {
+          "category": "Container",
+          "title": "Docker & K8S Commands",
+          "description": "Quick reference for common Docker and Kubernetes commands",
+          "linkText": "View Document"
+        }
+      }
+    },
+    {
+      "id": "redis",
+      "href": "Redis 速查.html",
+      "category": "redis",
+      "icon": "fa-database",
+      "translations": {
+        "zh": {
+          "category": "数据库",
+          "title": "Redis 命令",
+          "description": "Redis 数据库常用命令参考手册",
+          "linkText": "查看文档"
+        },
+        "en": {
+          "category": "Database",
+          "title": "Redis Commands",
+          "description": "Common Redis database commands reference manual",
+          "linkText": "View Document"
+        }
+      }
+    },
+    {
+      "id": "typora",
+      "href": "Typora 速查.html",
+      "category": "markdown",
+      "icon": "fa-file-alt",
+      "translations": {
+        "zh": {
+          "category": "Markdown",
+          "title": "Typora 快捷键",
+          "description": "Typora 编辑器高效操作快捷键大全",
+          "linkText": "查看文档"
+        },
+        "en": {
+          "category": "Markdown",
+          "title": "Typora Shortcuts",
+          "description": "Efficient shortcut keys for Typora editor",
+          "linkText": "View Document"
+        }
+      }
+    },
+    {
+      "id": "todo",
+      "href": "todo.html",
+      "category": "tools",
+      "icon": "fa-tasks",
+      "translations": {
+        "zh": {
+          "category": "工具",
+          "title": "待办事项",
+          "description": "个人任务管理与待办清单工具",
+          "linkText": "使用工具"
+        },
+        "en": {
+          "category": "Tools",
+          "title": "Todo List",
+          "description": "Personal task management and to-do list tool",
+          "linkText": "Use Tool"
+        }
+      }
+    },
+    {
+      "id": "parking",
+      "href": "parking.html",
+      "category": "tools",
+      "icon": "fa-car",
+      "translations": {
+        "zh": {
+          "category": "工具",
+          "title": "停车收费指南",
+          "description": "各地停车收费标准查询工具",
+          "linkText": "使用工具"
+        },
+        "en": {
+          "category": "Tools",
+          "title": "Parking Fee Guide",
+          "description": "Tool for checking parking fee standards in various locations",
+          "linkText": "Use Tool"
+        }
+      }
+    },
+    {
+      "id": "movie",
+      "href": "movie.html",
+      "category": "tools",
+      "icon": "fa-movie",
+      "translations": {
+        "zh": {
+          "category": "工具",
+          "title": "家庭电影手册",
+          "description": "家庭电影手册",
+          "linkText": "使用工具"
+        },
+        "en": {
+          "category": "Tools",
+          "title": "family movie book",
+          "description": "Tool for family movie book collections.",
+          "linkText": "Use Tool"
+        }
+      }
+    },
+    {
+      "id": "image",
+      "href": "Image Collage.html",
+      "category": "tools",
+      "icon": "fa-images",
+      "translations": {
+        "zh": {
+          "category": "工具",
+          "title": "图片拼接",
+          "description": "在线图片拼接工具，支持多种布局",
+          "linkText": "使用工具"
+        },
+        "en": {
+          "category": "Tools",
+          "title": "Image Collage",
+          "description": "Online image collage tool with multiple layouts",
+          "linkText": "Use Tool"
+        }
+      }
+    },
+    {
+      "id": "text",
+      "href": "Text Statistics.html",
+      "category": "tools",
+      "icon": "fa-font",
+      "translations": {
+        "zh": {
+          "category": "工具",
+          "title": "字数统计",
+          "description": "文本字数、字符数统计分析工具",
+          "linkText": "使用工具"
+        },
+        "en": {
+          "category": "Tools",
+          "title": "Text Statistics",
+          "description": "Text word and character count analysis tool",
+          "linkText": "Use Tool"
+        }
+      }
+    },
+    {
+      "id": "markdown1",
+      "href": "Markdown Heading Hierarchy Tool.html",
+      "category": "markdown",
+      "icon": "fa-heading",
+      "translations": {
+        "zh": {
+          "category": "Markdown",
+          "title": "Markdown 标题层级调整器",
+          "description": "批量调整 Markdown 文档标题层级",
+          "linkText": "使用工具"
+        },
+        "en": {
+          "category": "Markdown",
+          "title": "Markdown Heading Hierarchy Tool",
+          "description": "Batch adjust Markdown document heading levels",
+          "linkText": "Use Tool"
+        }
+      }
+    },
+    {
+      "id": "pixabay",
+      "href": "Pixabay downloader.html",
+      "category": "tools",
+      "icon": "fa-download",
+      "translations": {
+        "zh": {
+          "category": "工具",
+          "title": "Pixabay图片下载",
+          "description": "Pixabay 免费图片批量下载工具",
+          "linkText": "使用工具"
+        },
+        "en": {
+          "category": "Tools",
+          "title": "Pixabay Image Downloader",
+          "description": "Batch download free images from Pixabay",
+          "linkText": "Use Tool"
+        }
+      }
+    },
+    {
+      "id": "flight",
+      "href": "hn_air_flight.html",
+      "category": "tools",
+      "icon": "fa-plane",
+      "translations": {
+        "zh": {
+          "category": "工具",
+          "title": "海南航空",
+          "description": "海南航空航班信息查询工具",
+          "linkText": "使用工具"
+        },
+        "en": {
+          "category": "Tools",
+          "title": "Hainan Airlines",
+          "description": "Hainan Airlines flight information tool",
+          "linkText": "Use Tool"
+        }
+      }
+    },
+    {
+      "id": "sql-book",
+      "href": "SQL速查.html",
+      "category": "tools",
+      "icon": "fa-database",
+      "translations": {
+        "zh": {
+          "category": "工具",
+          "title": "SQL速查表",
+          "description": "常用SQL语句速查表",
+          "linkText": "使用工具"
+        },
+        "en": {
+          "category": "Tools",
+          "title": "SQL Cheat Sheet",
+          "description": "Quick reference for common SQL statements",
+          "linkText": "Use Tool"
+        }
+      }
+    },
+    {
+      "id": "chrome-backpack",
+      "href": "Chrome扩展打包指南.html",
+      "category": "tools",
+      "icon": "fa-chrome",
+      "translations": {
+        "zh": {
+          "category": "工具",
+          "title": "Chrome扩展打包指南",
+          "description": "Chrome扩展打包指南",
+          "linkText": "使用工具"
+        },
+        "en": {
+          "category": "Tools",
+          "title": "Chrome pack tools",
+          "description": "Chrome pack tools",
+          "linkText": "Use Tool"
+        }
+      }
+    }
+  ]
+}

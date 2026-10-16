@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8" />
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=266dd97a-5e4f-48fc-b798-675a60c67943
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>停车收费指南</title>
+
+        <!-- 使用Font Awesome图标库 -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+        <!-- 引入本地样式 -->
+        <link rel="stylesheet" href="css/parking-mgt.css" />
+
+        <!-- 引入配置文件 -->
+        <script src="js/supabase-config.js"></script>
+        <script src="js/auth-config.js"></script>
+        <script src="js/auth-check.js"></script>
+    </head>
+
+    <body>
+        <div class="app-container">
+            <!-- 顶部导航栏 -->
+            <div class="top-navbar">
+                <div class="nav-left">
+                    <h1 class="app-title">
+                        <i class="fas fa-parking"></i>
+                        停车收费指南
+                    </h1>
+                </div>
+                <div class="nav-right">
+                    <button onclick="goToHome()" class="nav-btn">
+                        <i class="fas fa-home"></i>
+                        <span class="btn-text">首页</span>
+                    </button>
+                    <button onclick="logout()" class="nav-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="btn-text">退出</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 用户管理区域 - 改为长条形设计 -->
+            <div class="container" id="user-section" style="display: none">
+                <div class="user-management-bar">
+                    <div id="login-section" class="login-form-inline">
+                        <input type="email" id="email" class="form-control form-control-sm" placeholder="邮箱地址" />
+                        <input type="password" id="password" class="form-control form-control-sm" placeholder="密码" />
+                        <div class="btn-group-inline">
+                            <button class="btn btn-sm btn-primary" onclick="loginUser()">登录</button>
+                            <button class="btn btn-sm" onclick="registerUser()">注册</button>
+                        </div>
+                        <div id="login-error" class="error-message" style="display: none"></div>
+                    </div>
+                    <div id="current-user" style="display: none" class="current-user-info">
+                        <span class="user-welcome">当前用户:</span>
+                        <span id="user-email" class="user-badge"></span>
+                        <button class="btn btn-sm" onclick="logoutUser()">切换用户</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主内容区域 -->
+            <div class="main-content">
+                <!-- 停车信息管理区域 (初始隐藏) -->
+                <div id="parking-section" style="display: none">
+                    <div class="data-container">
+                        <!-- 表格操作栏 -->
+                        <div class="table-header">
+                            <!-- 筛选区域 - 四个筛选框在一行 -->
+                            <div class="filter-row filter-row-no-wrap">
+                                <select id="province-filter" class="select-control select-sm" onchange="filterParking()">
+                                    <option value="">所有省份</option>
+                                </select>
+                                <select id="city-filter" class="select-control select-sm" onchange="filterParking()">
+                                    <option value="">所有城市</option>
+                                </select>
+                                <select id="district-filter" class="select-control select-sm" onchange="filterParking()">
+                                    <option value="">所有行政区</option>
+                                </select>
+                                <select id="mall-filter" class="select-control select-sm" onchange="filterParking()">
+                                    <option value="">所有商场</option>
+                                </select>
+                            </div>
+
+                            <!-- 第二行：搜索框和添加按钮 -->
+                            <div class="filter-row second-row">
+                                <!-- 搜索区域 -->
+                                <div class="search-box">
+                                    <i class="fas fa-search search-icon"></i>
+                                    <input type="text" id="search-input" class="search-input" placeholder="搜索任何字段..." oninput="filterParking()" />
+                                    <button class="btn btn-sm btn-outline reset-btn" onclick="resetFilters()" title="重置所有筛选条件">
+                                        <i class="fas fa-redo"></i>
+                                        重置
+                                    </button>
+                                </div>
+
+                                <!-- 添加记录按钮 - 移到右上角 -->
+                                <button class="btn btn-primary btn-add" onclick="openUploadModal()" id="upload-btn">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span>添加记录</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 停车信息表格 -->
+                        <div id="parking-container" class="table-container">
+                            <table class="parking-table styled-table">
+                                <thead>
+                                    <tr>
+                                        <th>省份</th>
+                                        <th>城市</th>
+                                        <th>行政区</th>
+                                        <th>商场名称</th>
+                                        <th>地址</th>
+                                        <th>位置信息</th>
+                                        <th>免费时长</th>
+                                        <th>日间收费</th>
+                                        <th>夜间收费</th>
+                                        <th>重新计费时长</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="parking-table-body">
+                                    <!-- 数据将通过JavaScript动态填充 -->
+                                </tbody>
+                            </table>
+                            <div id="debug-info" style="display: none; position: fixed; bottom: 10px; right: 10px; background: white; border: 1px solid #ccc; padding: 10px; max-width: 300px; max-height: 200px; overflow: auto; z-index: 1000"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 加载状态 -->
+            <div id="loading" class="loading-overlay">
+                <div class="loading-content">
+                    <span class="spinner"></span>
+                    <p>正在加载...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 上传/编辑模态框 -->
+        <div id="upload-modal" class="modal">
+            <div class="modal-content compact-form">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="modal-title">添加停车收费信息</h3>
+                    <span class="modal-close" onclick="closeUploadModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit-id" />
+
+                    <!-- 第一行：省份和城市 -->
+                    <div class="form-grid">
+                        <div class="form-group compact">
+                            <label class="form-label">省份</label>
+                            <input type="text" id="upload-province" class="form-control" placeholder="例如: 上海市" />
+                        </div>
+                        <div class="form-group compact">
+                            <label class="form-label">城市</label>
+                            <input type="text" id="upload-city" class="form-control" placeholder="例如: 上海市" />
+                        </div>
+                    </div>
+
+                    <!-- 第二行：行政区和商场 -->
+                    <div class="form-grid">
+                        <div class="form-group compact">
+                            <label class="form-label">行政区</label>
+                            <input type="text" id="upload-district" class="form-control" placeholder="例如: 浦东新区" />
+                        </div>
+                        <div class="form-group compact">
+                            <label class="form-label">商场名称</label>
+                            <input type="text" id="upload-mall" class="form-control" placeholder="例如: 陆家嘴中心" />
+                        </div>
+                    </div>
+
+                    <!-- 第三行：详细地址和选择位置按钮 -->
+                    <div class="form-group compact address-row">
+                        <label class="form-label">详细地址</label>
+                        <div class="address-with-map">
+                            <input type="text" id="upload-address" class="form-control" placeholder="例如: 浦东新区浦东南路899号" />
+                            <button class="btn btn-outline location-btn" onclick="openMapPicker()">
+                                <i class="fas fa-map-marker-alt"></i>
+                                选择位置
+                            </button>
+                        </div>
+                        <div id="map-container" class="map-container-small"></div>
+                        <input type="hidden" id="upload-location" />
+                    </div>
+
+                    <!-- 第四行：日间和夜间收费标准 -->
+                    <div class="form-grid">
+                        <div class="form-group compact">
+                            <label class="form-label">日间收费标准</label>
+                            <div class="price-unit-group">
+                                <input type="number" id="upload-day-price" class="form-control price-input" value="8" step="0.01" />
+                                <select id="upload-day-unit" class="form-control unit-select">
+                                    <option value="元/小时">元/小时</option>
+                                    <option value="元/分钟">元/分钟</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group compact">
+                            <label class="form-label">夜间收费标准</label>
+                            <div class="price-unit-group">
+                                <input type="number" id="upload-night-price" class="form-control price-input" value="1" step="0.01" />
+                                <select id="upload-night-unit" class="form-control unit-select">
+                                    <option value="元/小时">元/小时</option>
+                                    <option value="元/分钟">元/分钟</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 第五行：免费时长和重新计费时长 -->
+                    <div class="form-grid">
+                        <div class="form-group compact">
+                            <label class="form-label">免费停车时长</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="upload-free-duration" class="form-control" value="15" />
+                                <span class="unit-label">分钟</span>
+                            </div>
+                        </div>
+                        <div class="form-group compact">
+                            <label class="form-label">重新计费时长</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="upload-charge-interval" class="form-control" value="30" />
+                                <span class="unit-label">分钟</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group compact">
+                        <label class="form-label">备注信息</label>
+                        <textarea id="upload-notes" class="form-control" placeholder="其他需要注意的信息" rows="2"></textarea>
+                    </div>
+
+                    <div class="form-group compact">
+                        <label class="form-label">上传图片</label>
+                        <div class="file-upload compact">
+                            <input type="file" id="upload-images" class="file-input" multiple accept="image/*" style="display: none" />
+                            <label for="upload-images" class="file-label upload-image-btn">
+                                <i class="fas fa-upload"></i>
+                                选择图片
+                            </label>
+                            <div class="upload-preview" id="image-preview">
+                                <!-- 图片预览区域 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="upload-error" class="error-message" style="display: none"></div>
+                    <div class="modal-actions">
+                        <button class="btn btn-outline" onclick="closeUploadModal()">取消</button>
+                        <button class="btn btn-primary" onclick="saveParkingInfo()">提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 地图选择模态框 -->
+        <div id="map-modal" class="modal">
+            <div class="modal-content" style="width: 90%; max-width: 800px">
+                <div class="modal-header">
+                    <h3 class="modal-title">选择位置</h3>
+                    <span class="modal-close" onclick="closeMapModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <!-- 地图工具栏 - 放在地图上方 -->
+                    <div class="map-toolbar" style="margin-bottom: 10px">
+                        <div class="search-container">
+                            <div class="search-input-container">
+                                <input type="text" id="map-search-input" class="form-control" placeholder="搜索地点..." />
+                                <div id="search-results" class="search-results"></div>
+                            </div>
+                            <button id="map-search-btn" class="btn btn-primary">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <button class="map-tool-btn" title="定位到当前位置" onclick="locateOnMap()">
+                            <i class="fas fa-location-arrow"></i>
+                        </button>
+                    </div>
+
+                    <div id="map-picker" style="height: 400px; position: relative"></div>
+                    <div class="modal-actions">
+                        <button class="btn btn-outline" onclick="closeMapModal()">取消</button>
+                        <button class="btn btn-primary" onclick="confirmLocation()">确认位置</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Supabase客户端库 - 使用稳定版本 -->
+        <script src="js/supabase-js.js"></script>
+
+        <!-- 引入百度地图API -->
+        <script type="text/javascript">
+            // 百度地图API密钥
+            window.BAIDU_MAP_AK = 'uVk3wkB98nQV3AT2InbUyvOpXg4Oupqe';
+            window.BAIDU_WEB_KEY = 'qwS5Rec2WOCZmpWb4JhNyswxelBg2znA';
+
+            // 百度地图加载回调
+            window.baiduMapInit = function () {
+                console.log('百度地图API加载完成');
+                window.BaiduMapLoaded = true;
+
+                // 如果有等待初始化的地图，立即初始化
+                if (window.pendingMapInit && window.pendingMapInit.length > 0) {
+                    window.pendingMapInit.forEach(initFunc => initFunc());
+                    window.pendingMapInit = [];
+                }
+            };
+
+            // 动态加载百度地图API
+            (function () {
+                var script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = 'https://api.map.baidu.com/api?v=3.0&ak=' + window.BAIDU_MAP_AK + '&callback=baiduMapInit';
+                script.async = true;
+                script.onerror = function () {
+                    console.error('百度地图API加载失败');
+                    alert('百度地图加载失败，请检查网络连接或API密钥配置');
+                };
+                document.head.appendChild(script);
+            })();
+        </script>
+
+        <!-- 引入主JavaScript文件 -->
+        <script src="js/parking-mgt.js"></script>
+    </body>
+</html>
