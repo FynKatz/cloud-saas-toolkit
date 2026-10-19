@@ -1,68 +1,51 @@
-# Cloud SaaS Toolkit Roadmap
+# Cloud SaaS Toolkit — 路线图
 
-## Goal
-
-Migrate the static tool pages into a unified frontend hosted on Cloudflare Pages,
-with Supabase as the backend and Cloudflare Pages Functions as the API gateway.
+> 需求以 [PRD](./docs/PRD.md) 为唯一事实来源。
 
 ## Current State
 
-- Source restored into this repository from the original Netlify site.
-- Git remotes:
-  - `origin`: https://gitee.com/FynKatz/cloud-saas-toolkit.git
-  - `github`: https://github.com/FynKatz/cloud-saas-toolkit.git
-- Branch flow: `feature/2610 -> dev -> int -> stg -> prod`
-- Supabase credentials are currently hardcoded in `js/supabase-config.js`.
-- Protected page passwords are currently hardcoded in `js/auth-config.js`.
+- 静态工具页面已从原 Netlify 站点恢复到本仓库。
+- Git 远端：`origin` (GitHub) / `gitee` (Gitee 镜像)。
+- 分支策略：`feature/2610 → dev → int → stg → prod`。
+- `prod` 分支通过 Netlify 自动部署到 https://cloud-saas-toolkit.netlify.app。
+- Supabase 密钥存于 `frontend/.env`（已 gitignore），`.env.example` 供参考。
+- 密钥按 A/B/C 三级管理（见 [PRD §8.1](docs/PRD.md)）：`.env.secrets`（git 跟踪）为单一事实源，`frontend/.env`（gitignore）存公开 `VITE_` 变量，C 级机密不进入前端产物。
 
 ## Target Architecture
 
-```text
-Browser
-  |-> Cloudflare Pages: static Vue/Vite frontend
-  |-> Cloudflare Pages Functions: /api/*
-          |-> Supabase Auth / Database API
 ```
-
-This removes direct browser access to Supabase, keeps secrets in Cloudflare
-environment variables, and lets the application work behind restrictive
-corporate proxies that only allow Cloudflare traffic.
+Browser
+  |-> Netlify: Vue 3 + Vite 前端
+  |-> Supabase Edge Functions (service role 操作)
+         |-> Supabase Auth / Database / RLS
+```
 
 ## Phases
 
-### Phase 1: Cloudflare Pages Foundation
+### Phase 1: 数据层
 
-- Register a global Cloudflare account at https://www.cloudflare.com
-- Connect the GitHub repository `FynKatz/cloud-saas-toolkit`
-- Set the production branch to `prod`
-- Deploy the current static files and verify pages load
-- Keep the current Supabase direct connection for this initial milestone
+- Supabase 建表、RLS、触发器、安全函数。
+- 种子数据：admin 角色、初始 admin 用户、tools 表。
 
-### Phase 2: Frontend and API Migration
+### Phase 2: 认证与权限
 
-- Rebuild the frontend as a unified Vue + Vite application
-- Standardize navigation, layout, components, and visual design
-- Add Cloudflare Pages Functions under `/api/*`
-- Proxy Supabase requests through Cloudflare instead of the browser
-- Store Supabase keys in Cloudflare environment variables
+- Supabase Auth 接入（用户名/密码 → 虚拟邮箱）。
+- 注册、登录、审批、密码修改/重置、路由守卫。
+- RBAC 管理界面（用户、角色、权限勾选）。
 
-### Phase 3: Authentication and Security
+### Phase 3: 前端重构
 
-- Replace hardcoded passwords in `auth-config.js`
-- Use Supabase Auth for login and session management
-- Protect pages with route guards and Supabase sessions
-- Apply Supabase Row Level Security policies for all protected data
+- 首页 + 侧边栏按锁定的 UI 方案重写。
+- 白天/暗夜主题、可折叠抽屉、搜索 + 最近使用 + Bento。
 
-### Phase 4: Tool Migration and Polish
+### Phase 4: 工具迁移
 
-- Migrate each existing tool page into the Vue app
-- Standardize UI/UX across all tools
-- Add automated tests and branch-based preview deployments
-- Validate on desktop and mobile viewports
+- 12 个工具逐个迁移进 Vue 应用。
+- 私有工具 RLS 隔离、共享工具对所有已授权用户可见。
+- 审计日志、收藏、最近使用收尾。
 
 ## Repository Rules
 
-- `prod` is the only production deployment branch.
-- Merge changes through:
-  `feature/2610 -> dev -> int -> stg -> prod`
-- Do not commit local secret files; rely on Cloudflare environment variables.
+- `prod` 是唯一的部署分支。
+- 合并流水线：`feature/2610 → dev → int → stg → prod`。
+- 密钥管理：`.env.secrets`（git 跟踪）为唯一事实源，按三级分发（§8.1）；前端产物仅含 `VITE_` 前缀的公开变量。
