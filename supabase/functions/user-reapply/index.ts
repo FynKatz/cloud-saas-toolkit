@@ -29,18 +29,19 @@ Deno.serve(async (req) => {
     })
   }
 
-  const serviceClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-
   const token = authHeader.replace('Bearer ', '')
-  const { data: { user }, error: authError } = await serviceClient.auth.getUser(token)
+  const anonClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  const { data: { user }, error: authError } = await anonClient.auth.getUser(token)
   if (authError || !user) {
     return new Response(JSON.stringify({ error: '未登录' }), {
       status: 401,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
+
+  const serviceClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
 
   const { data: profile } = await serviceClient
     .from('profiles')
@@ -82,3 +83,4 @@ Deno.serve(async (req) => {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 })
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
