@@ -5,11 +5,11 @@ const title = (route.meta.title as string) || '工具'
 </script>
 
 <template>
-  <div class="flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white p-10">
-    <div class="grid h-14 w-14 place-items-center rounded-full bg-slate-100">
-      <span class="text-2xl text-slate-400">⚙️</span>
+  <div class="flex min-h-[400px] flex-col items-center justify-center rounded-lg border border-dashed border-[var(--surface-border)] bg-[var(--surface)] p-10">
+    <div class="grid h-14 w-14 place-items-center rounded-full bg-[var(--bg)]">
+      <span class="text-2xl text-[var(--text-secondary)]">⚙️</span>
     </div>
-    <div class="mt-4 text-lg font-semibold tracking-normal text-slate-700">{{ title }}</div>
-    <div class="mt-2 text-sm text-slate-500">该工具正在迁移至新平台，敬请期待</div>
+    <div class="mt-4 text-lg font-semibold tracking-normal text-[var(--text)]">{{ title }}</div>
+    <div class="mt-2 text-sm text-[var(--text-secondary)]">该工具正在迁移至新平台，敬请期待</div>
   </div>
 </template>
