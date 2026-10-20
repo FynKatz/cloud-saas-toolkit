@@ -9,6 +9,7 @@ const admin = useAdminStore()
 const notice = ref('')
 const error = ref('')
 const busy = ref(false)
+const pendingPermission = ref<Set<string>>(new Set())
 const selectedId = ref<string>('')
 const editing = ref(false)
 const form = reactive({ name: '', description: '' })
@@ -91,12 +92,23 @@ function permissionOf(toolId: string): 'view' | 'edit' | '' {
 
 async function setPermission(toolId: string, level: 'view' | 'edit' | null) {
   if (!selected.value) return
+  // Ignore repeat clicks for the same tool while its request is in flight:
+  // otherwise a second click computes `next` from stale state and can land on
+  // an unintended access level.
+  if (pendingPermission.value.has(toolId)) return
+  pendingPermission.value.add(toolId)
+  pendingPermission.value = new Set(pendingPermission.value)
   error.value = ''
-  const current = permissionOf(toolId)
-  const next = current === level ? null : level
-  const res = await admin.setRolePermission(selected.value.id, toolId, next)
-  if (res.error) return (error.value = res.error)
-  await admin.loadRoles()
+  try {
+    const current = permissionOf(toolId)
+    const next = current === level ? null : level
+    const res = await admin.setRolePermission(selected.value.id, toolId, next)
+    if (res.error) return (error.value = res.error)
+    await admin.loadRoles()
+  } finally {
+    pendingPermission.value.delete(toolId)
+    pendingPermission.value = new Set(pendingPermission.value)
+  }
 }
 
 function toolGroups() {

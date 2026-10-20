@@ -239,9 +239,11 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, username, status)
-  values (new.id, split_part(new.email, '@', 1), 'pending')
-  on conflict (id) do nothing;
+  -- last_registration_attempt feeds the 60s username rate limit enforced by
+  -- the check_username Edge Function (PRD 5.2).
+  insert into public.profiles (id, username, status, last_registration_attempt)
+  values (new.id, split_part(new.email, '@', 1), 'pending', now())
+  on conflict (id) do update set last_registration_attempt = now();
   return new;
 end;
 $$;

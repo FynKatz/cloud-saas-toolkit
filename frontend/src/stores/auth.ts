@@ -42,6 +42,29 @@ export const useAuthStore = defineStore('auth', () => {
     profile.value = (data as Profile | null) ?? null
   }
 
+  /**
+   * Loads the profile and reports whether it succeeded. Callers that must not
+   * strand the user on a blank screen (login, registration) use this instead of
+   * refreshProfile() so a transient failure surfaces as an error message.
+   */
+  async function loadProfileChecked(): Promise<{ error?: string }> {
+    if (!user.value) {
+      profile.value = null
+      return { error: '登录状态无效，请重新登录' }
+    }
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.value.id)
+      .single()
+    if (error || !data) {
+      profile.value = null
+      return { error: '无法加载账号信息，请检查网络后重试' }
+    }
+    profile.value = data as Profile
+    return {}
+  }
+
   async function init(): Promise<void> {
     try {
       const { data } = await supabase.auth.getSession()
@@ -81,7 +104,8 @@ export const useAuthStore = defineStore('auth', () => {
     if (data.session) {
       session.value = data.session
       user.value = data.session.user
-      await refreshProfile()
+      const profileResult = await loadProfileChecked()
+      if (profileResult.error) return profileResult
       await refreshAdminFlag()
     }
     return {}
@@ -99,7 +123,8 @@ export const useAuthStore = defineStore('auth', () => {
     if (error) return { error: '用户名或密码错误' }
     session.value = data.session
     user.value = data.session.user
-    await refreshProfile()
+    const profileResult = await loadProfileChecked()
+    if (profileResult.error) return profileResult
     await refreshAdminFlag()
     return {}
   }
@@ -128,6 +153,7 @@ export const useAuthStore = defineStore('auth', () => {
     signIn,
     signOut,
     refreshProfile,
+    loadProfileChecked,
     refreshAdminFlag,
   }
 })
