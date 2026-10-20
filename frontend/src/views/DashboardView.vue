@@ -5,17 +5,23 @@ import {
   Clock,
   Grid3X3,
   Search,
+  Star,
   X,
 } from 'lucide-vue-next'
+import { useAuthStore } from '../stores/auth'
 import { useToolsStore } from '../stores/tools'
 import { useRecent } from '../composables/useRecent'
+import { useFavorites } from '../composables/useFavorites'
 import { getToolIcon } from '../lib/toolIcons'
 import { toolPath } from '../types/tools'
 import type { Tool } from '../types/tools'
 import { DASHBOARD_SEARCH_KEY } from '../lib/keys'
 
+const auth = useAuthStore()
 const toolsStore = useToolsStore()
 const { recentTools } = useRecent()
+const userId = computed(() => auth.user?.id)
+const favorites = useFavorites(userId)
 
 const localSearch = ref('')
 const injectedSearch = inject(DASHBOARD_SEARCH_KEY, ref(''))
@@ -36,6 +42,10 @@ const filteredTools = computed<Tool[]>(() => {
 })
 
 const recent = computed<Tool[]>(() => recentTools(toolsStore.allowedTools))
+
+const favoriteTools = computed<Tool[]>(() =>
+  toolsStore.allowedTools.filter((tool) => favorites.isFavorited(tool.id)),
+)
 
 const stats = computed(() => ({
   total: toolsStore.allowedTools.length,
@@ -62,6 +72,7 @@ function clearSearch() {
 
 onMounted(() => {
   if (!toolsStore.initialized) toolsStore.load()
+  favorites.load()
 })
 </script>
 
@@ -128,6 +139,30 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- Favorite Tools -->
+    <div v-if="favoriteTools.length > 0" class="rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] p-5">
+      <h2 class="text-sm font-semibold tracking-normal text-[var(--text)] mb-4">
+        <Star class="inline h-4 w-4 mr-1.5 -mt-0.5 text-amber-400" /> 收藏
+      </h2>
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <RouterLink
+          v-for="tool in favoriteTools"
+          :key="tool.id"
+          :to="toolPath(tool)"
+          class="group flex items-center gap-3 rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2.5 transition hover:border-[var(--accent)] hover:shadow-[var(--shadow-hover)]"
+        >
+          <div class="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-[var(--accent-soft)] text-[var(--accent)]">
+            <component :is="getToolIcon(tool.icon)" class="h-[16px] w-[16px]" />
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="truncate text-xs font-medium text-[var(--text)]">{{ tool.name }}</div>
+            <div class="truncate text-[11px] text-[var(--text-secondary)]">{{ tool.category }}</div>
+          </div>
+          <ArrowUpRight class="h-3.5 w-3.5 shrink-0 text-[var(--text-secondary)] opacity-0 transition group-hover:opacity-100" />
+        </RouterLink>
+      </div>
+    </div>
+
     <!-- Recent Tools -->
     <div v-if="recent.length > 0" class="rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] p-5">
       <h2 class="text-sm font-semibold tracking-normal text-[var(--text)] mb-4">
@@ -187,6 +222,16 @@ onMounted(() => {
               <div class="truncate text-sm font-medium text-[var(--text)]">{{ tool.name }}</div>
               <div class="truncate text-[11px] text-[var(--text-secondary)]">{{ tool.category }}</div>
             </div>
+            <button
+              class="grid h-7 w-7 shrink-0 place-items-center rounded text-[var(--text-secondary)] transition hover:bg-[var(--nav-hover)] hover:text-amber-400"
+              :title="favorites.isFavorited(tool.id) ? '取消收藏' : '收藏'"
+              @click.stop.prevent="favorites.toggle(tool.id)"
+            >
+              <Star
+                class="h-4 w-4"
+                :class="favorites.isFavorited(tool.id) ? 'fill-current text-amber-400' : ''"
+              />
+            </button>
             <ArrowUpRight class="h-4 w-4 shrink-0 text-[var(--text-secondary)] opacity-0 transition group-hover:opacity-100" />
           </div>
           <p class="mt-3 line-clamp-2 text-xs leading-relaxed text-[var(--text-secondary)]">
