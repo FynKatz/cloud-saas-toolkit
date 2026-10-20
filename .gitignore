@@ -10,3 +10,5 @@ build/
 .supabase/
 *.log
 gh_token.txt
+supabase_token.txt
+.wrangler/
