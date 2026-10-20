@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, provide, ref } from 'vue'
+import { computed, nextTick, onMounted, provide, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import {
   Box,
   Car,
@@ -12,6 +13,7 @@ import {
   Heading,
   Image,
   Keyboard,
+  LogOut,
   LayoutDashboard,
   ListTodo,
   Moon,
@@ -45,6 +47,7 @@ const route = useRoute()
 const auth = useAuthStore()
 const toolsStore = useToolsStore()
 const theme = useTheme()
+const router = useRouter()
 const { addRecent } = useRecent()
 
 const ICON_MAP: Record<string, Icon> = {
@@ -94,6 +97,35 @@ function toggleSidebar() {
 
 function onTabClick(toolId: string) {
   addRecent(toolId)
+}
+
+const openUserMenu = ref(false)
+const userMenuRef = ref<HTMLElement | null>(null)
+
+function toggleUserMenu() {
+  openUserMenu.value = !openUserMenu.value
+}
+
+async function handleLogout() {
+  openUserMenu.value = false
+  await auth.signOut()
+  router.replace({ name: 'login' })
+}
+
+watch(openUserMenu, (val) => {
+  if (val) {
+    nextTick(() => {
+      document.addEventListener('click', onOutsideClick)
+    })
+  } else {
+    document.removeEventListener('click', onOutsideClick)
+  }
+})
+
+function onOutsideClick(e: MouseEvent) {
+  if (userMenuRef.value && !userMenuRef.value.contains(e.target as Node)) {
+    openUserMenu.value = false
+  }
 }
 
 onMounted(() => {
@@ -193,9 +225,36 @@ provide(DASHBOARD_SEARCH_KEY, searchQuery)
             <Sun v-if="theme.isDark.value" class="h-4 w-4" />
             <Moon v-else class="h-4 w-4" />
           </button>
-          <button class="grid h-9 w-9 place-items-center rounded-md border border-[var(--surface-border)] text-[var(--text-secondary)] transition hover:bg-[var(--nav-hover)]">
+          <div ref="userMenuRef" class="relative">
+            <button
+              class="grid h-9 w-9 place-items-center rounded-md border border-[var(--surface-border)] text-[var(--text-secondary)] transition hover:bg-[var(--nav-hover)]"
+              @click="toggleUserMenu"
+            >
             <CircleUser class="h-5 w-5" />
-          </button>
+            </button>
+            <Transition name="fade">
+              <div
+                v-if="openUserMenu"
+                class="absolute right-0 top-full z-40 mt-1.5 w-56 rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] shadow-lg"
+              >
+                <div class="border-b border-[var(--surface-border)] px-4 py-3">
+                  <div class="text-sm font-semibold text-[var(--text)]">
+                    {{ auth.profile?.display_name || auth.profile?.username }}
+                  </div>
+                  <div class="mt-0.5 text-[11px] text-[var(--text-secondary)]">
+                    系统管理员
+                  </div>
+                </div>
+                <button
+                  class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-[var(--text-secondary)] transition hover:bg-[var(--nav-hover)] hover:text-[var(--text)]"
+                  @click="handleLogout"
+                >
+                  <LogOut class="h-4 w-4" />
+                  退出登录
+                </button>
+              </div>
+            </Transition>
+          </div>
         </div>
       </header>
 
@@ -205,3 +264,14 @@ provide(DASHBOARD_SEARCH_KEY, searchQuery)
     </div>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
