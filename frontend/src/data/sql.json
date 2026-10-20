@@ -1,0 +1,312 @@
+[
+  {
+    "db": "PostgreSQL",
+    "items": [
+      {
+        "cmd": "psql -h host -p port -U user -d db",
+        "desc": "使用参数连接数据库",
+        "example": "psql -h 127.0.0.1 -p 5432 -U myuser -d mydb"
+      },
+      {
+        "cmd": "\\q 或 quit",
+        "desc": "退出 psql 命令行工具",
+        "example": ""
+      },
+      {
+        "cmd": "\\c dbname",
+        "desc": "切换数据库",
+        "example": "\\c my_new_database"
+      },
+      {
+        "cmd": "\\conninfo",
+        "desc": "显示当前连接信息",
+        "example": ""
+      },
+      {
+        "cmd": "\\?",
+        "desc": "查看所有 psql 元命令的帮助",
+        "example": ""
+      },
+      {
+        "cmd": "\\h command",
+        "desc": "查看 SQL 命令的帮助",
+        "example": ""
+      },
+      {
+        "cmd": "\\l 或 \\list",
+        "desc": "列出所有数据库",
+        "example": ""
+      },
+      {
+        "cmd": "\\dt",
+        "desc": "列出当前数据库中的所有表",
+        "example": ""
+      },
+      {
+        "cmd": "\\d table_name",
+        "desc": "查看表的结构",
+        "example": ""
+      },
+      {
+        "cmd": "\\du 或 \\dg",
+        "desc": "列出所有角色/用户",
+        "example": ""
+      },
+      {
+        "cmd": "\\x",
+        "desc": "切换扩展显示模式（宽结果集）",
+        "example": ""
+      },
+      {
+        "cmd": "CREATE DATABASE dbname;",
+        "desc": "创建数据库",
+        "example": "CREATE DATABASE mydb;"
+      },
+      {
+        "cmd": "DROP DATABASE dbname;",
+        "desc": "删除数据库",
+        "example": "DROP DATABASE olddb;"
+      },
+      {
+        "cmd": "ALTER DATABASE dbname RENAME TO newname;",
+        "desc": "重命名数据库",
+        "example": "ALTER DATABASE mydb RENAME TO newdb;"
+      },
+      {
+        "cmd": "CREATE TABLE table_name (column1 datatype, ...);",
+        "desc": "创建表",
+        "example": "CREATE TABLE users (id SERIAL, name VARCHAR(50));"
+      },
+      {
+        "cmd": "DROP TABLE table_name;",
+        "desc": "删除表",
+        "example": "DROP TABLE users;"
+      },
+      {
+        "cmd": "ALTER TABLE table_name ADD COLUMN column_name datatype;",
+        "desc": "添加列",
+        "example": "ALTER TABLE users ADD COLUMN email VARCHAR(100);"
+      },
+      {
+        "cmd": "ALTER TABLE table_name DROP COLUMN column_name;",
+        "desc": "删除列",
+        "example": "ALTER TABLE users DROP COLUMN email;"
+      },
+      {
+        "cmd": "INSERT INTO table (col1, col2) VALUES (val1, val2);",
+        "desc": "插入数据",
+        "example": "INSERT INTO users (name, age) VALUES ('John', 25);"
+      },
+      {
+        "cmd": "UPDATE table SET col = val WHERE condition;",
+        "desc": "更新数据",
+        "example": "UPDATE users SET age = 26 WHERE name = 'John';"
+      },
+      {
+        "cmd": "DELETE FROM table WHERE condition;",
+        "desc": "删除数据",
+        "example": "DELETE FROM users WHERE age > 30;"
+      },
+      {
+        "cmd": "SELECT col1, col2 FROM table WHERE condition;",
+        "desc": "查询数据",
+        "example": "SELECT name, age FROM users WHERE age > 25;"
+      },
+      {
+        "cmd": "CREATE USER username WITH PASSWORD 'password';",
+        "desc": "创建用户",
+        "example": "CREATE USER john WITH PASSWORD 'secret';"
+      },
+      {
+        "cmd": "ALTER USER username WITH PASSWORD 'newpassword';",
+        "desc": "修改用户密码",
+        "example": "ALTER USER john WITH PASSWORD 'newsecret';"
+      },
+      {
+        "cmd": "GRANT privilege ON table TO username;",
+        "desc": "授予权限",
+        "example": "GRANT SELECT ON users TO john;"
+      },
+      {
+        "cmd": "REVOKE privilege ON table FROM username;",
+        "desc": "撤销权限",
+        "example": "REVOKE SELECT ON users FROM john;"
+      },
+      {
+        "cmd": "CREATE INDEX index_name ON table (column);",
+        "desc": "创建索引",
+        "example": "CREATE INDEX idx_users_name ON users (name);"
+      },
+      {
+        "cmd": "EXPLAIN ANALYZE query;",
+        "desc": "分析查询性能",
+        "example": "EXPLAIN ANALYZE SELECT * FROM users;"
+      },
+      {
+        "cmd": "VACUUM FULL table;",
+        "desc": "清理和优化表空间",
+        "example": "VACUUM FULL users;"
+      },
+      {
+        "cmd": "BEGIN; ... COMMIT;",
+        "desc": "事务处理",
+        "example": "BEGIN; UPDATE accounts SET balance = balance - 100; COMMIT;"
+      }
+    ]
+  },
+  {
+    "db": "MySQL",
+    "items": [
+      {
+        "cmd": "mysql -h host -P port -u user -p",
+        "desc": "连接MySQL服务器",
+        "example": "mysql -h 127.0.0.1 -P 3306 -u root -p"
+      },
+      {
+        "cmd": "exit 或 quit",
+        "desc": "退出MySQL命令行",
+        "example": ""
+      },
+      {
+        "cmd": "use db_name",
+        "desc": "选择数据库",
+        "example": "use my_database"
+      },
+      {
+        "cmd": "status",
+        "desc": "显示当前连接状态",
+        "example": ""
+      },
+      {
+        "cmd": "SHOW DATABASES;",
+        "desc": "显示所有数据库",
+        "example": ""
+      },
+      {
+        "cmd": "SHOW TABLES;",
+        "desc": "显示当前数据库中的所有表",
+        "example": ""
+      },
+      {
+        "cmd": "DESCRIBE table_name;",
+        "desc": "显示表结构",
+        "example": ""
+      },
+      {
+        "cmd": "SHOW CREATE TABLE table_name;",
+        "desc": "显示创建表的SQL语句",
+        "example": ""
+      },
+      {
+        "cmd": "SHOW INDEX FROM table_name;",
+        "desc": "显示表索引信息",
+        "example": ""
+      },
+      {
+        "cmd": "SHOW PROCESSLIST;",
+        "desc": "显示当前正在执行的线程",
+        "example": ""
+      },
+      {
+        "cmd": "SHOW VARIABLES;",
+        "desc": "显示系统变量",
+        "example": ""
+      },
+      {
+        "cmd": "CREATE DATABASE dbname;",
+        "desc": "创建数据库",
+        "example": "CREATE DATABASE mydb;"
+      },
+      {
+        "cmd": "DROP DATABASE dbname;",
+        "desc": "删除数据库",
+        "example": "DROP DATABASE olddb;"
+      },
+      {
+        "cmd": "ALTER DATABASE dbname CHARACTER SET charset;",
+        "desc": "修改数据库字符集",
+        "example": "ALTER DATABASE mydb CHARACTER SET utf8mb4;"
+      },
+      {
+        "cmd": "CREATE TABLE table_name (column1 datatype, ...);",
+        "desc": "创建表",
+        "example": "CREATE TABLE users (id INT AUTO_INCREMENT, name VARCHAR(50));"
+      },
+      {
+        "cmd": "DROP TABLE table_name;",
+        "desc": "删除表",
+        "example": "DROP TABLE users;"
+      },
+      {
+        "cmd": "ALTER TABLE table_name ADD COLUMN column_name datatype;",
+        "desc": "添加列",
+        "example": "ALTER TABLE users ADD COLUMN email VARCHAR(100);"
+      },
+      {
+        "cmd": "ALTER TABLE table_name DROP COLUMN column_name;",
+        "desc": "删除列",
+        "example": "ALTER TABLE users DROP COLUMN email;"
+      },
+      {
+        "cmd": "INSERT INTO table (col1, col2) VALUES (val1, val2);",
+        "desc": "插入数据",
+        "example": "INSERT INTO users (name, age) VALUES ('John', 25);"
+      },
+      {
+        "cmd": "UPDATE table SET col = val WHERE condition;",
+        "desc": "更新数据",
+        "example": "UPDATE users SET age = 26 WHERE name = 'John';"
+      },
+      {
+        "cmd": "DELETE FROM table WHERE condition;",
+        "desc": "删除数据",
+        "example": "DELETE FROM users WHERE age > 30;"
+      },
+      {
+        "cmd": "SELECT col1, col2 FROM table WHERE condition;",
+        "desc": "查询数据",
+        "example": "SELECT name, age FROM users WHERE age > 25;"
+      },
+      {
+        "cmd": "CREATE USER 'username'@'host' IDENTIFIED BY 'password';",
+        "desc": "创建用户",
+        "example": "CREATE USER 'john'@'localhost' IDENTIFIED BY 'secret';"
+      },
+      {
+        "cmd": "GRANT privilege ON db.table TO 'username'@'host';",
+        "desc": "授予权限",
+        "example": "GRANT SELECT ON mydb.* TO 'john'@'localhost';"
+      },
+      {
+        "cmd": "REVOKE privilege ON db.table FROM 'username'@'host';",
+        "desc": "撤销权限",
+        "example": "REVOKE SELECT ON mydb.* FROM 'john'@'localhost';"
+      },
+      {
+        "cmd": "FLUSH PRIVILEGES;",
+        "desc": "刷新权限",
+        "example": "FLUSH PRIVILEGES;"
+      },
+      {
+        "cmd": "CREATE INDEX index_name ON table (column);",
+        "desc": "创建索引",
+        "example": "CREATE INDEX idx_name ON users (name);"
+      },
+      {
+        "cmd": "EXPLAIN query;",
+        "desc": "分析查询执行计划",
+        "example": "EXPLAIN SELECT * FROM users;"
+      },
+      {
+        "cmd": "OPTIMIZE TABLE table_name;",
+        "desc": "优化表",
+        "example": "OPTIMIZE TABLE users;"
+      },
+      {
+        "cmd": "START TRANSACTION; ... COMMIT;",
+        "desc": "事务处理",
+        "example": "START TRANSACTION; UPDATE accounts SET balance = balance - 100; COMMIT;"
+      }
+    ]
+  }
+]

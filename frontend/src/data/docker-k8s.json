@@ -1,0 +1,212 @@
+[
+  {
+    "db": "Docker",
+    "sections": [
+      {
+        "title": "1️⃣ 容器生命周期管理",
+        "items": [
+          {
+            "cmd": "docker run -d --name ${CONTAINER_NAME} ${IMAGE_NAME}",
+            "desc": "docker run — 创建并启动容器",
+            "example": "docker run -d --name nginx -p 80:80 nginx:latest"
+          },
+          {
+            "cmd": "docker start ${CONTAINER_NAME}",
+            "desc": "docker start — 启动已停止的容器",
+            "example": "docker start nginx"
+          },
+          {
+            "cmd": "docker stop ${CONTAINER_NAME}",
+            "desc": "docker stop — 停止运行中的容器",
+            "example": "docker stop nginx"
+          },
+          {
+            "cmd": "docker restart ${CONTAINER_NAME}",
+            "desc": "docker restart — 重启容器",
+            "example": "docker restart nginx"
+          },
+          {
+            "cmd": "docker rm ${CONTAINER_NAME}",
+            "desc": "docker rm — 删除容器（需先停止）",
+            "example": "docker stop nginx && docker rm nginx"
+          },
+          {
+            "cmd": "docker logs ${CONTAINER_NAME}",
+            "desc": "docker logs — 查看容器日志",
+            "example": "docker logs nginx"
+          },
+          {
+            "cmd": "docker exec -it ${CONTAINER_NAME} ${COMMAND}",
+            "desc": "docker exec — 进入容器执行命令",
+            "example": "docker exec -it nginx bash"
+          }
+        ]
+      },
+      {
+        "title": "2️⃣ 镜像管理",
+        "items": [
+          {
+            "cmd": "docker pull ${IMAGE_NAME}:${TAG}",
+            "desc": "docker pull — 拉取镜像",
+            "example": "docker pull nginx:latest"
+          },
+          {
+            "cmd": "docker images",
+            "desc": "docker images — 列出本地镜像",
+            "example": "docker rmi nginx:latest"
+          },
+          {
+            "cmd": "docker build -t ${IMAGE_NAME}:${TAG} .",
+            "desc": "docker build — 构建镜像",
+            "example": "docker build -t my-app:1.0 ."
+          },
+          {
+            "cmd": "docker tag ${SOURCE_IMAGE} ${TARGET_IMAGE}",
+            "desc": "docker tag — 为镜像打标签",
+            "example": "docker tag my-app:1.0 my-app:latest"
+          }
+        ]
+      },
+      {
+        "title": "3️⃣ 卷与网络",
+        "items": [
+          {
+            "cmd": "docker volume create ${VOLUME_NAME}",
+            "desc": "docker volume create — 创建数据卷",
+            "example": "docker volume create nginx_data"
+          },
+          {
+            "cmd": "docker network create ${NETWORK_NAME}",
+            "desc": "docker network create — 创建自定义网络",
+            "example": "docker network create app_network"
+          },
+          {
+            "cmd": "docker network inspect ${NETWORK_NAME}",
+            "desc": "docker network inspect — 查看网络详情",
+            "example": "docker network inspect app_network"
+          }
+        ]
+      },
+      {
+        "title": "4️⃣ 系统管理",
+        "items": [
+          {
+            "cmd": "docker ps",
+            "desc": "docker ps — 列出运行中的容器",
+            "example": ""
+          },
+          {
+            "cmd": "docker ps -a",
+            "desc": "docker ps -a — 列出所有容器（包括已停止）",
+            "example": ""
+          },
+          {
+            "cmd": "docker system prune -a",
+            "desc": "docker system prune — 清理无用数据（镜像、容器、卷、网络）",
+            "example": ""
+          }
+        ]
+      },
+      {
+        "title": "5️⃣ Docker Compose",
+        "items": [
+          {
+            "cmd": "docker-compose up -d",
+            "desc": "docker-compose up — 启动服务",
+            "example": "docker-compose up -d"
+          },
+          {
+            "cmd": "docker-compose down",
+            "desc": "docker-compose down — 停止并删除容器",
+            "example": "docker-compose down"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "db": "Kubernetes",
+    "sections": [
+      {
+        "title": "1️⃣ 资源管理",
+        "items": [
+          {
+            "cmd": "kubectl get ${RESOURCE_TYPE}",
+            "desc": "kubectl get — 获取资源列表",
+            "example": "kubectl get pods"
+          },
+          {
+            "cmd": "kubectl describe ${RESOURCE_TYPE} ${NAME}",
+            "desc": "kubectl describe — 查看资源详细信息",
+            "example": "kubectl describe pod nginx-pod"
+          },
+          {
+            "cmd": "kubectl apply -f ${FILE_NAME}",
+            "desc": "kubectl apply — 应用资源配置文件",
+            "example": "kubectl apply -f deployment.yaml"
+          },
+          {
+            "cmd": "kubectl delete ${RESOURCE_TYPE} ${NAME}",
+            "desc": "kubectl delete — 删除资源",
+            "example": "kubectl delete pod nginx-pod"
+          }
+        ]
+      },
+      {
+        "title": "2️⃣ Pod 操作",
+        "items": [
+          {
+            "cmd": "kubectl logs ${POD_NAME}",
+            "desc": "kubectl logs — 查看 Pod 日志",
+            "example": "kubectl logs nginx-pod"
+          },
+          {
+            "cmd": "kubectl exec -it ${POD_NAME} -- ${COMMAND}",
+            "desc": "kubectl exec — 进入 Pod 执行命令",
+            "example": "kubectl exec -it nginx-pod -- bash"
+          }
+        ]
+      },
+      {
+        "title": "3️⃣ 服务与网络",
+        "items": [
+          {
+            "cmd": "kubectl expose ${RESOURCE_TYPE} ${NAME} --type=${SERVICE_TYPE} --port=${PORT}",
+            "desc": "kubectl expose — 创建服务",
+            "example": "kubectl expose deployment nginx --type=NodePort --port=80"
+          },
+          {
+            "cmd": "kubectl get services",
+            "desc": "kubectl get services — 列出服务",
+            "example": ""
+          }
+        ]
+      },
+      {
+        "title": "4️⃣ 集群管理",
+        "items": [
+          {
+            "cmd": "kops create cluster --name=${CLUSTER_NAME} --zones=${ZONE}",
+            "desc": "kops create cluster — 创建Kubernetes集群",
+            "example": "kops create cluster --name=my-cluster.example.com --zones=us-east-1a"
+          }
+        ]
+      },
+      {
+        "title": "5️⃣ Helm 包管理",
+        "items": [
+          {
+            "cmd": "helm install ${RELEASE_NAME} ${CHART_NAME}",
+            "desc": "helm install — 安装 Helm Chart",
+            "example": "helm install my-release stable/nginx"
+          },
+          {
+            "cmd": "helm list",
+            "desc": "helm list — 列出已安装的 Helm 发布",
+            "example": ""
+          }
+        ]
+      }
+    ]
+  }
+]

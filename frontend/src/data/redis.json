@@ -1,0 +1,920 @@
+[
+  {
+    "title": "一、连接管理",
+    "items": [
+      {
+        "cmd": "AUTH password",
+        "desc": "认证密码"
+      },
+      {
+        "cmd": "ECHO message",
+        "desc": "打印消息"
+      },
+      {
+        "cmd": "PING",
+        "desc": "测试连接是否存活"
+      },
+      {
+        "cmd": "QUIT",
+        "desc": "关闭连接"
+      },
+      {
+        "cmd": "SELECT index",
+        "desc": "切换数据库（默认 0-15）"
+      }
+    ]
+  },
+  {
+    "title": "二、键（Key）操作",
+    "items": [
+      {
+        "cmd": "DEL key [key ...]",
+        "desc": "删除一个或多个键"
+      },
+      {
+        "cmd": "DUMP key",
+        "desc": "序列化键值"
+      },
+      {
+        "cmd": "EXISTS key",
+        "desc": "检查键是否存在"
+      },
+      {
+        "cmd": "EXPIRE key seconds",
+        "desc": "设置键的过期时间（秒）"
+      },
+      {
+        "cmd": "EXPIREAT key timestamp",
+        "desc": "设置键的过期时间（时间戳）"
+      },
+      {
+        "cmd": "KEYS pattern",
+        "desc": "查找匹配模式的键（慎用，生产环境可能阻塞）"
+      },
+      {
+        "cmd": "MOVE key db",
+        "desc": "将键移动到另一个数据库"
+      },
+      {
+        "cmd": "PERSIST key",
+        "desc": "移除键的过期时间"
+      },
+      {
+        "cmd": "PEXPIRE key milliseconds",
+        "desc": "设置过期时间（毫秒）"
+      },
+      {
+        "cmd": "PEXPIREAT key milliseconds-timestamp",
+        "desc": "设置过期时间（毫秒时间戳）"
+      },
+      {
+        "cmd": "PTTL key",
+        "desc": "获取键的剩余生存时间（毫秒）"
+      },
+      {
+        "cmd": "RANDOMKEY",
+        "desc": "返回一个随机键"
+      },
+      {
+        "cmd": "RENAME key newkey",
+        "desc": "重命名键"
+      },
+      {
+        "cmd": "RENAMENX key newkey",
+        "desc": "仅当新键不存在时重命名"
+      },
+      {
+        "cmd": "SCAN cursor [MATCH pattern] [COUNT count]",
+        "desc": "迭代键集合（替代 KEYS）"
+      },
+      {
+        "cmd": "TTL key",
+        "desc": "获取键的剩余生存时间（秒）"
+      },
+      {
+        "cmd": "TYPE key",
+        "desc": "返回键的类型"
+      }
+    ]
+  },
+  {
+    "title": "三、字符串（String）",
+    "items": [
+      {
+        "cmd": "APPEND key value",
+        "desc": "追加字符串"
+      },
+      {
+        "cmd": "BITCOUNT key [start end]",
+        "desc": "计算位数为 1 的数量"
+      },
+      {
+        "cmd": "BITOP operation destkey key [key ...]",
+        "desc": "对字符串执行位操作"
+      },
+      {
+        "cmd": "DECR key",
+        "desc": "减 1"
+      },
+      {
+        "cmd": "DECRBY key decrement",
+        "desc": "减指定数值"
+      },
+      {
+        "cmd": "GET key",
+        "desc": "获取值"
+      },
+      {
+        "cmd": "GETBIT key offset",
+        "desc": "获取指定位的值（0 或 1）"
+      },
+      {
+        "cmd": "GETRANGE key start end",
+        "desc": "获取子字符串"
+      },
+      {
+        "cmd": "GETSET key value",
+        "desc": "设置新值并返回旧值"
+      },
+      {
+        "cmd": "INCR key",
+        "desc": "加 1"
+      },
+      {
+        "cmd": "INCRBY key increment",
+        "desc": "加指定数值"
+      },
+      {
+        "cmd": "INCRBYFLOAT key increment",
+        "desc": "加浮点数"
+      },
+      {
+        "cmd": "MGET key [key ...]",
+        "desc": "获取多个键的值"
+      },
+      {
+        "cmd": "MSET key value [key value ...]",
+        "desc": "设置多个键值对"
+      },
+      {
+        "cmd": "MSETNX key value [key value ...]",
+        "desc": "仅当所有键不存在时设置"
+      },
+      {
+        "cmd": "PSETEX key milliseconds value",
+        "desc": "设置值并指定过期时间（毫秒）"
+      },
+      {
+        "cmd": "SET key value [EX seconds] [PX milliseconds] [NX|XX]",
+        "desc": "设置值（可带过期时间和条件）"
+      },
+      {
+        "cmd": "SETBIT key offset value",
+        "desc": "设置指定位的值（0 或 1）"
+      },
+      {
+        "cmd": "SETEX key seconds value",
+        "desc": "设置值并指定过期时间（秒）"
+      },
+      {
+        "cmd": "SETNX key value",
+        "desc": "仅当键不存在时设置"
+      },
+      {
+        "cmd": "SETRANGE key offset value",
+        "desc": "替换子字符串"
+      },
+      {
+        "cmd": "STRLEN key",
+        "desc": "获取字符串长度"
+      }
+    ]
+  },
+  {
+    "title": "四、哈希（Hash）",
+    "items": [
+      {
+        "cmd": "HDEL key field [field ...]",
+        "desc": "删除一个或多个字段"
+      },
+      {
+        "cmd": "HEXISTS key field",
+        "desc": "检查字段是否存在"
+      },
+      {
+        "cmd": "HGET key field",
+        "desc": "获取字段的值"
+      },
+      {
+        "cmd": "HGETALL key",
+        "desc": "获取所有字段和值"
+      },
+      {
+        "cmd": "HINCRBY key field increment",
+        "desc": "字段值增加整数"
+      },
+      {
+        "cmd": "HINCRBYFLOAT key field increment",
+        "desc": "字段值增加浮点数"
+      },
+      {
+        "cmd": "HKEYS key",
+        "desc": "获取所有字段"
+      },
+      {
+        "cmd": "HLEN key",
+        "desc": "获取字段数量"
+      },
+      {
+        "cmd": "HMGET key field [field ...]",
+        "desc": "获取多个字段的值"
+      },
+      {
+        "cmd": "HMSET key field value [field value ...]",
+        "desc": "设置多个字段值"
+      },
+      {
+        "cmd": "HSCAN key cursor [MATCH pattern] [COUNT count]",
+        "desc": "迭代哈希字段"
+      },
+      {
+        "cmd": "HSET key field value",
+        "desc": "设置字段值"
+      },
+      {
+        "cmd": "HSETNX key field value",
+        "desc": "仅当字段不存在时设置"
+      },
+      {
+        "cmd": "HVALS key",
+        "desc": "获取所有值"
+      }
+    ]
+  },
+  {
+    "title": "五、列表（List）",
+    "items": [
+      {
+        "cmd": "BLPOP key [key ...] timeout",
+        "desc": "阻塞式左弹出"
+      },
+      {
+        "cmd": "BRPOP key [key ...] timeout",
+        "desc": "阻塞式右弹出"
+      },
+      {
+        "cmd": "BRPOPLPUSH source destination timeout",
+        "desc": "阻塞式右弹出并左压入"
+      },
+      {
+        "cmd": "LINDEX key index",
+        "desc": "获取指定索引的元素"
+      },
+      {
+        "cmd": "LINSERT key BEFORE|AFTER pivot value",
+        "desc": "在某个元素前后插入"
+      },
+      {
+        "cmd": "LLEN key",
+        "desc": "获取列表长度"
+      },
+      {
+        "cmd": "LPOP key",
+        "desc": "左弹出元素"
+      },
+      {
+        "cmd": "LPUSH key value [value ...]",
+        "desc": "左压入元素"
+      },
+      {
+        "cmd": "LPUSHX key value",
+        "desc": "仅当键存在时左压入"
+      },
+      {
+        "cmd": "LRANGE key start stop",
+        "desc": "获取范围元素"
+      },
+      {
+        "cmd": "LREM key count value",
+        "desc": "移除指定值的元素"
+      },
+      {
+        "cmd": "LSET key index value",
+        "desc": "修改指定索引的元素"
+      },
+      {
+        "cmd": "LTRIM key start stop",
+        "desc": "修剪列表到指定范围"
+      },
+      {
+        "cmd": "RPOP key",
+        "desc": "右弹出元素"
+      },
+      {
+        "cmd": "RPOPLPUSH source destination",
+        "desc": "右弹出并左压入"
+      },
+      {
+        "cmd": "RPUSH key value [value ...]",
+        "desc": "右压入元素"
+      },
+      {
+        "cmd": "RPUSHX key value",
+        "desc": "仅当键存在时右压入"
+      }
+    ]
+  },
+  {
+    "title": "六、集合（Set）",
+    "items": [
+      {
+        "cmd": "SADD key member [member ...]",
+        "desc": "添加成员"
+      },
+      {
+        "cmd": "SCARD key",
+        "desc": "获取集合成员数"
+      },
+      {
+        "cmd": "SDIFF key [key ...]",
+        "desc": "差集"
+      },
+      {
+        "cmd": "SDIFFSTORE destination key [key ...]",
+        "desc": "差集并存储"
+      },
+      {
+        "cmd": "SINTER key [key ...]",
+        "desc": "交集"
+      },
+      {
+        "cmd": "SINTERSTORE destination key [key ...]",
+        "desc": "交集并存储"
+      },
+      {
+        "cmd": "SISMEMBER key member",
+        "desc": "检查成员是否存在"
+      },
+      {
+        "cmd": "SMEMBERS key",
+        "desc": "获取所有成员"
+      },
+      {
+        "cmd": "SMOVE source destination member",
+        "desc": "移动成员到另一个集合"
+      },
+      {
+        "cmd": "SPOP key [count]",
+        "desc": "随机弹出成员"
+      },
+      {
+        "cmd": "SRANDMEMBER key [count]",
+        "desc": "随机获取成员"
+      },
+      {
+        "cmd": "SREM key member [member ...]",
+        "desc": "移除成员"
+      },
+      {
+        "cmd": "SSCAN key cursor [MATCH pattern] [COUNT count]",
+        "desc": "迭代集合成员"
+      },
+      {
+        "cmd": "SUNION key [key ...]",
+        "desc": "并集"
+      },
+      {
+        "cmd": "SUNIONSTORE destination key [key ...]",
+        "desc": "并集并存储"
+      }
+    ]
+  },
+  {
+    "title": "七、有序集合（Sorted Set）",
+    "items": [
+      {
+        "cmd": "ZADD key [NX|XX] [CH] [INCR] score member",
+        "desc": "添加或更新成员"
+      },
+      {
+        "cmd": "ZCARD key",
+        "desc": "获取成员数"
+      },
+      {
+        "cmd": "ZCOUNT key min max",
+        "desc": "统计分数范围内的成员数"
+      },
+      {
+        "cmd": "ZINCRBY key increment member",
+        "desc": "增加成员分数"
+      },
+      {
+        "cmd": "ZINTERSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM|MIN|MAX]",
+        "desc": "交集并存储"
+      },
+      {
+        "cmd": "ZRANGE key start stop [WITHSCORES]",
+        "desc": "按索引范围获取成员"
+      },
+      {
+        "cmd": "ZRANGEBYSCORE key min max [WITHSCORES] [LIMIT offset count]",
+        "desc": "按分数范围获取成员"
+      },
+      {
+        "cmd": "ZRANK key member",
+        "desc": "获取成员的排名（按分数升序）"
+      },
+      {
+        "cmd": "ZREM key member [member ...]",
+        "desc": "移除成员"
+      },
+      {
+        "cmd": "ZREMRANGEBYRANK key start stop",
+        "desc": "按排名范围移除"
+      },
+      {
+        "cmd": "ZREMRANGEBYSCORE key min max",
+        "desc": "按分数范围移除"
+      },
+      {
+        "cmd": "ZREVRANGE key start stop [WITHSCORES]",
+        "desc": "反向按索引获取"
+      },
+      {
+        "cmd": "ZREVRANGEBYSCORE key max min [WITHSCORES] [LIMIT offset count]",
+        "desc": "反向按分数获取"
+      },
+      {
+        "cmd": "ZREVRANK key member",
+        "desc": "反向排名（降序）"
+      },
+      {
+        "cmd": "ZSCORE key member",
+        "desc": "获取成员分数"
+      },
+      {
+        "cmd": "ZUNIONSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM|MIN|MAX]",
+        "desc": "并集并存储"
+      },
+      {
+        "cmd": "ZSCAN key cursor [MATCH pattern] [COUNT count]",
+        "desc": "迭代有序集合成员"
+      }
+    ]
+  },
+  {
+    "title": "八、HyperLogLog",
+    "items": [
+      {
+        "cmd": "PFADD key element [element ...]",
+        "desc": "添加元素"
+      },
+      {
+        "cmd": "PFCOUNT key [key ...]",
+        "desc": "估算基数"
+      },
+      {
+        "cmd": "PFMERGE destkey sourcekey [sourcekey ...]",
+        "desc": "合并多个 HyperLogLog"
+      }
+    ]
+  },
+  {
+    "title": "九、地理空间（Geospatial）",
+    "items": [
+      {
+        "cmd": "GEOADD key longitude latitude member",
+        "desc": "添加地理坐标"
+      },
+      {
+        "cmd": "GEODIST key member1 member2 [unit]",
+        "desc": "计算两点距离（m, km, mi, ft）"
+      },
+      {
+        "cmd": "GEOHASH key member [member ...]",
+        "desc": "获取 Geohash"
+      },
+      {
+        "cmd": "GEOPOS key member [member ...]",
+        "desc": "获取坐标"
+      },
+      {
+        "cmd": "GEORADIUS key longitude latitude radius m|km|mi|ft [WITHCOORD] [WITHDIST] [WITHHASH] [COUNT count]",
+        "desc": "查询半径内元素"
+      },
+      {
+        "cmd": "GEORADIUSBYMEMBER key member radius m|km|mi|ft [WITHCOORD] [WITHDIST] [WITHHASH] [COUNT count]",
+        "desc": "以成员为中心查询"
+      }
+    ]
+  },
+  {
+    "title": "十、流（Stream）",
+    "items": [
+      {
+        "cmd": "XADD key ID field value [field value ...]",
+        "desc": "添加流记录"
+      },
+      {
+        "cmd": "XTRIM key MAXLEN [~] count",
+        "desc": "修剪流长度"
+      },
+      {
+        "cmd": "XDEL key ID [ID ...]",
+        "desc": "删除记录"
+      },
+      {
+        "cmd": "XLEN key",
+        "desc": "获取流长度"
+      },
+      {
+        "cmd": "XRANGE key start end [COUNT count]",
+        "desc": "获取范围记录"
+      },
+      {
+        "cmd": "XREVRANGE key end start [COUNT count]",
+        "desc": "反向获取范围记录"
+      },
+      {
+        "cmd": "XREAD [COUNT count] [BLOCK milliseconds] STREAMS key [key ...] ID [ID ...]",
+        "desc": "读取流记录"
+      },
+      {
+        "cmd": "XGROUP CREATE key groupname ID [$|-]",
+        "desc": "创建消费者组"
+      },
+      {
+        "cmd": "XREADGROUP GROUP group consumer [COUNT count] [BLOCK milliseconds] [NOACK] STREAMS key [key ...] ID [ID ...]",
+        "desc": "读取并分配给消费者组"
+      },
+      {
+        "cmd": "XACK key group ID [ID ...]",
+        "desc": "确认处理完成"
+      },
+      {
+        "cmd": "XCLAIM key group consumer min-idle-time ID [ID ...]",
+        "desc": "转移未确认消息"
+      },
+      {
+        "cmd": "XINFO [STREAM key] [GROUPS key] [CONSUMERS key group]",
+        "desc": "获取流/组/消费者信息"
+      }
+    ]
+  },
+  {
+    "title": "十一、发布订阅（Pub/Sub）",
+    "items": [
+      {
+        "cmd": "PUBLISH channel message",
+        "desc": "发布消息"
+      },
+      {
+        "cmd": "SUBSCRIBE channel [channel ...]",
+        "desc": "订阅频道"
+      },
+      {
+        "cmd": "UNSUBSCRIBE [channel [channel ...]]",
+        "desc": "取消订阅"
+      },
+      {
+        "cmd": "PSUBSCRIBE pattern [pattern ...]",
+        "desc": "订阅模式"
+      },
+      {
+        "cmd": "PUNSUBSCRIBE [pattern [pattern ...]]",
+        "desc": "取消订阅模式"
+      }
+    ]
+  },
+  {
+    "title": "十二、事务",
+    "items": [
+      {
+        "cmd": "MULTI",
+        "desc": "开始事务"
+      },
+      {
+        "cmd": "EXEC",
+        "desc": "执行事务"
+      },
+      {
+        "cmd": "DISCARD",
+        "desc": "取消事务"
+      },
+      {
+        "cmd": "WATCH key [key ...]",
+        "desc": "监视键"
+      },
+      {
+        "cmd": "UNWATCH",
+        "desc": "取消监视"
+      }
+    ]
+  },
+  {
+    "title": "十三、脚本（Lua）",
+    "items": [
+      {
+        "cmd": "EVAL script numkeys key [key ...] arg [arg ...]",
+        "desc": "执行 Lua 脚本"
+      },
+      {
+        "cmd": "EVALSHA sha1 numkeys key [key ...] arg [arg ...]",
+        "desc": "执行已缓存的脚本"
+      },
+      {
+        "cmd": "SCRIPT LOAD script",
+        "desc": "缓存脚本"
+      },
+      {
+        "cmd": "SCRIPT EXISTS sha1 [sha1 ...]",
+        "desc": "检查脚本是否存在"
+      },
+      {
+        "cmd": "SCRIPT FLUSH",
+        "desc": "清空脚本缓存"
+      },
+      {
+        "cmd": "SCRIPT KILL",
+        "desc": "终止正在运行的脚本"
+      }
+    ]
+  },
+  {
+    "title": "十四、服务器管理",
+    "items": [
+      {
+        "cmd": "BGREWRITEAOF",
+        "desc": "异步重写 AOF 文件"
+      },
+      {
+        "cmd": "BGSAVE",
+        "desc": "异步保存 RDB 快照"
+      },
+      {
+        "cmd": "CLIENT GETNAME",
+        "desc": "获取客户端名称"
+      },
+      {
+        "cmd": "CLIENT KILL ip:port",
+        "desc": "终止客户端连接"
+      },
+      {
+        "cmd": "CLIENT LIST",
+        "desc": "列出客户端连接"
+      },
+      {
+        "cmd": "CLIENT PAUSE timeout",
+        "desc": "暂停客户端请求"
+      },
+      {
+        "cmd": "CLIENT REPLY ON|OFF|SKIP",
+        "desc": "控制服务器响应"
+      },
+      {
+        "cmd": "CLIENT SETNAME connection-name",
+        "desc": "设置客户端名称"
+      },
+      {
+        "cmd": "CLUSTER ...",
+        "desc": "集群管理命令（如 CLUSTER NODES, CLUSTER MEET 等）"
+      },
+      {
+        "cmd": "CONFIG GET parameter",
+        "desc": "获取配置参数"
+      },
+      {
+        "cmd": "CONFIG SET parameter value",
+        "desc": "设置配置参数"
+      },
+      {
+        "cmd": "CONFIG RESETSTAT",
+        "desc": "重置统计信息"
+      },
+      {
+        "cmd": "DBSIZE",
+        "desc": "获取当前数据库键数量"
+      },
+      {
+        "cmd": "DEBUG OBJECT key",
+        "desc": "获取键的调试信息"
+      },
+      {
+        "cmd": "DEBUG SEGFAULT",
+        "desc": "触发段错误（测试用）"
+      },
+      {
+        "cmd": "FLUSHALL [ASYNC]",
+        "desc": "清空所有数据库"
+      },
+      {
+        "cmd": "FLUSHDB [ASYNC]",
+        "desc": "清空当前数据库"
+      },
+      {
+        "cmd": "INFO [section]",
+        "desc": "获取服务器信息"
+      },
+      {
+        "cmd": "LASTSAVE",
+        "desc": "获取上次保存 RDB 的时间"
+      },
+      {
+        "cmd": "MONITOR",
+        "desc": "实时监控请求（慎用，性能影响大）"
+      },
+      {
+        "cmd": "ROLE",
+        "desc": "获取实例角色（主/从）"
+      },
+      {
+        "cmd": "SAVE",
+        "desc": "同步保存 RDB 快照"
+      },
+      {
+        "cmd": "SHUTDOWN [NOSAVE|SAVE]",
+        "desc": "关闭服务器"
+      },
+      {
+        "cmd": "SLAVEOF host port",
+        "desc": "设置主从关系（Redis 5.0+ 改为 REPLICAOF）"
+      },
+      {
+        "cmd": "SLOWLOG subcommand",
+        "desc": "管理慢查询日志"
+      },
+      {
+        "cmd": "SYNC",
+        "desc": "主从同步（内部使用）"
+      },
+      {
+        "cmd": "TIME",
+        "desc": "获取服务器时间"
+      }
+    ]
+  },
+  {
+    "title": "十五、集群命令（Cluster）",
+    "items": [
+      {
+        "cmd": "CLUSTER ADDSLOTS slot [slot ...]",
+        "desc": "分配槽位"
+      },
+      {
+        "cmd": "CLUSTER BUMPEPOCH",
+        "desc": "强制增加集群纪元"
+      },
+      {
+        "cmd": "CLUSTER DELSLOTS slot [slot ...]",
+        "desc": "移除槽位"
+      },
+      {
+        "cmd": "CLUSTER FAILOVER [FORCE|TAKEOVER]",
+        "desc": "手动故障转移"
+      },
+      {
+        "cmd": "CLUSTER FORGET node-id",
+        "desc": "忘记节点"
+      },
+      {
+        "cmd": "CLUSTER GETKEYSINSLOT slot count",
+        "desc": "获取槽位中的键"
+      },
+      {
+        "cmd": "CLUSTER INFO",
+        "desc": "获取集群信息"
+      },
+      {
+        "cmd": "CLUSTER KEYSLOT key",
+        "desc": "计算键的槽位"
+      },
+      {
+        "cmd": "CLUSTER MEET ip port",
+        "desc": "连接节点到集群"
+      },
+      {
+        "cmd": "CLUSTER NODES",
+        "desc": "列出集群节点"
+      },
+      {
+        "cmd": "CLUSTER REPLICATE node-id",
+        "desc": "设置从节点复制主节点"
+      },
+      {
+        "cmd": "CLUSTER RESET [HARD|SOFT]",
+        "desc": "重置集群状态"
+      },
+      {
+        "cmd": "CLUSTER SAVECONFIG",
+        "desc": "保存集群配置"
+      },
+      {
+        "cmd": "CLUSTER SET-CONFIG-EPOCH epoch",
+        "desc": "设置配置纪元"
+      },
+      {
+        "cmd": "CLUSTER SETSLOT slot MIGRATING|IMPORTING|STABLE|NODE node-id",
+        "desc": "设置槽位状态"
+      },
+      {
+        "cmd": "CLUSTER SLAVES node-id",
+        "desc": "列出从节点"
+      },
+      {
+        "cmd": "CLUSTER SLOTS",
+        "desc": "获取槽位分布信息"
+      }
+    ]
+  },
+  {
+    "title": "十六、Sentinel（哨兵）",
+    "items": [
+      {
+        "cmd": "SENTINEL CKQUORUM master-name",
+        "desc": "检查仲裁数量"
+      },
+      {
+        "cmd": "SENTINEL FAILOVER master-name",
+        "desc": "强制故障转移"
+      },
+      {
+        "cmd": "SENTINEL FLUSHCONFIG",
+        "desc": "强制写入配置"
+      },
+      {
+        "cmd": "SENTINEL GET-MASTER-ADDR-BY-NAME master-name",
+        "desc": "获取主节点地址"
+      },
+      {
+        "cmd": "SENTINEL MASTER master-name",
+        "desc": "获取主节点信息"
+      },
+      {
+        "cmd": "SENTINEL MASTERS",
+        "desc": "列出所有主节点"
+      },
+      {
+        "cmd": "SENTINEL MONITOR master-name ip port quorum",
+        "desc": "监控主节点"
+      },
+      {
+        "cmd": "SENTINEL REMOVE master-name",
+        "desc": "移除主节点"
+      },
+      {
+        "cmd": "SENTINEL RESET master-name",
+        "desc": "重置主节点"
+      },
+      {
+        "cmd": "SENTINEL SLAVES master-name",
+        "desc": "获取从节点列表"
+      }
+    ]
+  },
+  {
+    "title": "十七、模块命令（Module）",
+    "items": [
+      {
+        "cmd": "MODULE LIST",
+        "desc": "列出加载的模块"
+      },
+      {
+        "cmd": "MODULE LOAD path",
+        "desc": "加载模块"
+      },
+      {
+        "cmd": "MODULE UNLOAD name",
+        "desc": "卸载模块"
+      }
+    ]
+  },
+  {
+    "title": "十八、其他高级命令",
+    "items": [
+      {
+        "cmd": "MEMORY DOCTOR",
+        "desc": "内存使用分析"
+      },
+      {
+        "cmd": "MEMORY HELP",
+        "desc": "内存命令帮助"
+      },
+      {
+        "cmd": "MEMORY MALLOC-STATS",
+        "desc": "内存分配器统计"
+      },
+      {
+        "cmd": "MEMORY PURGE",
+        "desc": "清理内存（适用于 jemalloc）"
+      },
+      {
+        "cmd": "MEMORY STATS",
+        "desc": "内存统计"
+      },
+      {
+        "cmd": "MEMORY USAGE key",
+        "desc": "估算键的内存使用"
+      }
+    ]
+  }
+]
