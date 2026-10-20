@@ -147,7 +147,11 @@ function onOutsideClick(e: MouseEvent) {
 }
 
 onMounted(() => {
-  if (!toolsStore.initialized) toolsStore.load()
+  // Force a refresh on every mount. AppShell mounts when the user enters the
+  // workspace (login or page reload), which is the point where a permission
+  // change made by an admin should become visible. In-app child navigation does
+  // not remount AppShell, so this stays a single request per session entry.
+  toolsStore.load(true)
   loadPendingCount()
 })
 

@@ -8,7 +8,7 @@ create extension if not exists pgcrypto with schema extensions;
 -- 1. Core tables
 -- ============================================================
 
-create table public.profiles (
+create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   username text not null unique,
   display_name text,
@@ -36,7 +36,7 @@ create table public.profiles (
   )
 );
 
-create table public.roles (
+create table if not exists public.roles (
   id uuid primary key default extensions.gen_random_uuid(),
   name text not null unique,
   description text,
@@ -44,7 +44,7 @@ create table public.roles (
   created_at timestamptz not null default now()
 );
 
-create table public.tools (
+create table if not exists public.tools (
   id text primary key,
   name text not null,
   category text not null,
@@ -58,7 +58,7 @@ create table public.tools (
   created_at timestamptz not null default now()
 );
 
-create table public.role_permissions (
+create table if not exists public.role_permissions (
   role_id uuid not null references public.roles(id) on delete cascade,
   tool_id text not null references public.tools(id) on delete cascade,
   access_level text not null check (access_level in ('view','edit')),
@@ -67,7 +67,7 @@ create table public.role_permissions (
   primary key (role_id, tool_id)
 );
 
-create table public.user_roles (
+create table if not exists public.user_roles (
   user_id uuid not null references public.profiles(id) on delete cascade,
   role_id uuid not null references public.roles(id) on delete cascade,
   granted_by uuid references auth.users(id),
@@ -75,21 +75,21 @@ create table public.user_roles (
   primary key (user_id, role_id)
 );
 
-create table public.user_favorites (
+create table if not exists public.user_favorites (
   user_id uuid not null references public.profiles(id) on delete cascade,
   tool_id text not null references public.tools(id) on delete cascade,
   created_at timestamptz not null default now(),
   primary key (user_id, tool_id)
 );
 
-create table public.user_recent_tools (
+create table if not exists public.user_recent_tools (
   user_id uuid not null references public.profiles(id) on delete cascade,
   tool_id text not null references public.tools(id) on delete cascade,
   last_used_at timestamptz not null default now(),
   primary key (user_id, tool_id)
 );
 
-create table public.audit_logs (
+create table if not exists public.audit_logs (
   id uuid primary key default extensions.gen_random_uuid(),
   actor_id uuid references auth.users(id),
   action text not null,
@@ -101,7 +101,7 @@ create table public.audit_logs (
 );
 
 -- Business tables: shared/private data scope.
-create table public.parking_info (
+create table if not exists public.parking_info (
   id uuid primary key default extensions.gen_random_uuid(),
   user_id uuid not null references auth.users(id),
   province text,
@@ -122,7 +122,7 @@ create table public.parking_info (
   updated_at timestamptz not null default now()
 );
 
-create table public.movies_library (
+create table if not exists public.movies_library (
   id uuid primary key default extensions.gen_random_uuid(),
   user_id uuid not null references auth.users(id),
   tmdb_id int,
@@ -140,7 +140,7 @@ create table public.movies_library (
   updated_at timestamptz not null default now()
 );
 
-create table public.tasks (
+create table if not exists public.tasks (
   id uuid primary key default extensions.gen_random_uuid(),
   user_id uuid not null references auth.users(id),
   content text not null,
@@ -246,6 +246,7 @@ begin
 end;
 $$;
 
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
@@ -260,14 +261,19 @@ begin
 end;
 $$;
 
+drop trigger if exists profiles_set_updated_at on public.profiles;
 create trigger profiles_set_updated_at before update on public.profiles
   for each row execute function public.set_updated_at();
+drop trigger if exists role_permissions_set_updated_at on public.role_permissions;
 create trigger role_permissions_set_updated_at before update on public.role_permissions
   for each row execute function public.set_updated_at();
+drop trigger if exists parking_info_set_updated_at on public.parking_info;
 create trigger parking_info_set_updated_at before update on public.parking_info
   for each row execute function public.set_updated_at();
+drop trigger if exists movies_library_set_updated_at on public.movies_library;
 create trigger movies_library_set_updated_at before update on public.movies_library
   for each row execute function public.set_updated_at();
+drop trigger if exists tasks_set_updated_at on public.tasks;
 create trigger tasks_set_updated_at before update on public.tasks
   for each row execute function public.set_updated_at();
 
@@ -303,6 +309,7 @@ begin
 end;
 $$;
 
+drop trigger if exists prevent_profile_sensitive_update_trigger on public.profiles;
 create trigger prevent_profile_sensitive_update_trigger
   before update on public.profiles
   for each row execute function public.prevent_profile_sensitive_update();
@@ -324,133 +331,162 @@ alter table public.movies_library enable row level security;
 alter table public.tasks enable row level security;
 
 -- profiles
+drop policy if exists profiles_select_own on public.profiles;
 create policy profiles_select_own on public.profiles
   for select to authenticated
   using (id = auth.uid());
 
+drop policy if exists profiles_select_admin on public.profiles;
 create policy profiles_select_admin on public.profiles
   for select to authenticated
   using (public.is_admin());
 
+drop policy if exists profiles_update_own on public.profiles;
 create policy profiles_update_own on public.profiles
   for update to authenticated
   using (id = auth.uid())
   with check (id = auth.uid());
 
 -- roles
+drop policy if exists roles_select_admin on public.roles;
 create policy roles_select_admin on public.roles
   for select to authenticated
   using (public.is_admin());
 
 -- role_permissions
+drop policy if exists role_permissions_select_admin on public.role_permissions;
 create policy role_permissions_select_admin on public.role_permissions
   for select to authenticated
   using (public.is_admin());
 
 -- user_roles
+drop policy if exists user_roles_select_admin on public.user_roles;
 create policy user_roles_select_admin on public.user_roles
   for select to authenticated
   using (public.is_admin());
 
 -- tools
+drop policy if exists tools_select on public.tools;
 create policy tools_select on public.tools
   for select to authenticated
   using (public.is_admin() or (status = 'active' and public.has_tool_permission(id, 'view')));
 
 -- user_favorites
+drop policy if exists user_favorites_select_own on public.user_favorites;
 create policy user_favorites_select_own on public.user_favorites
   for select to authenticated
   using (user_id = auth.uid() and public.has_tool_permission(tool_id, 'view'));
 
+drop policy if exists user_favorites_select_admin on public.user_favorites;
 create policy user_favorites_select_admin on public.user_favorites
   for select to authenticated
   using (public.is_admin());
 
+drop policy if exists user_favorites_insert_own on public.user_favorites;
 create policy user_favorites_insert_own on public.user_favorites
   for insert to authenticated
   with check (user_id = auth.uid() and public.has_tool_permission(tool_id, 'view'));
 
+drop policy if exists user_favorites_delete_own on public.user_favorites;
 create policy user_favorites_delete_own on public.user_favorites
   for delete to authenticated
   using (user_id = auth.uid());
 
 -- user_recent_tools
+drop policy if exists user_recent_tools_select_own on public.user_recent_tools;
 create policy user_recent_tools_select_own on public.user_recent_tools
   for select to authenticated
   using (user_id = auth.uid() and public.has_tool_permission(tool_id, 'view'));
 
+drop policy if exists user_recent_tools_select_admin on public.user_recent_tools;
 create policy user_recent_tools_select_admin on public.user_recent_tools
   for select to authenticated
   using (public.is_admin());
 
+drop policy if exists user_recent_tools_insert_own on public.user_recent_tools;
 create policy user_recent_tools_insert_own on public.user_recent_tools
   for insert to authenticated
   with check (user_id = auth.uid() and public.has_tool_permission(tool_id, 'view'));
 
+drop policy if exists user_recent_tools_update_own on public.user_recent_tools;
 create policy user_recent_tools_update_own on public.user_recent_tools
   for update to authenticated
   using (user_id = auth.uid())
   with check (user_id = auth.uid());
 
+drop policy if exists user_recent_tools_delete_own on public.user_recent_tools;
 create policy user_recent_tools_delete_own on public.user_recent_tools
   for delete to authenticated
   using (user_id = auth.uid());
 
 -- audit_logs (append-only: no client insert/update/delete)
+drop policy if exists audit_logs_select_admin on public.audit_logs;
 create policy audit_logs_select_admin on public.audit_logs
   for select to authenticated
   using (public.is_admin());
 
 -- parking_info (shared)
+drop policy if exists parking_select on public.parking_info;
 create policy parking_select on public.parking_info
   for select to authenticated
   using (public.has_tool_permission('parking', 'view'));
 
+drop policy if exists parking_insert on public.parking_info;
 create policy parking_insert on public.parking_info
   for insert to authenticated
   with check (public.has_tool_permission('parking', 'edit'));
 
+drop policy if exists parking_update on public.parking_info;
 create policy parking_update on public.parking_info
   for update to authenticated
   using (public.has_tool_permission('parking', 'edit'))
   with check (public.has_tool_permission('parking', 'edit'));
 
+drop policy if exists parking_delete on public.parking_info;
 create policy parking_delete on public.parking_info
   for delete to authenticated
   using (public.has_tool_permission('parking', 'edit'));
 
 -- movies_library (shared)
+drop policy if exists movies_select on public.movies_library;
 create policy movies_select on public.movies_library
   for select to authenticated
   using (public.has_tool_permission('movie', 'view'));
 
+drop policy if exists movies_insert on public.movies_library;
 create policy movies_insert on public.movies_library
   for insert to authenticated
   with check (public.has_tool_permission('movie', 'edit'));
 
+drop policy if exists movies_update on public.movies_library;
 create policy movies_update on public.movies_library
   for update to authenticated
   using (public.has_tool_permission('movie', 'edit'))
   with check (public.has_tool_permission('movie', 'edit'));
 
+drop policy if exists movies_delete on public.movies_library;
 create policy movies_delete on public.movies_library
   for delete to authenticated
   using (public.has_tool_permission('movie', 'edit'));
 
 -- tasks (private)
+drop policy if exists tasks_select_own on public.tasks;
 create policy tasks_select_own on public.tasks
   for select to authenticated
   using (user_id = auth.uid() and public.has_tool_permission('todo', 'view'));
 
+drop policy if exists tasks_insert_own on public.tasks;
 create policy tasks_insert_own on public.tasks
   for insert to authenticated
   with check (user_id = auth.uid() and public.has_tool_permission('todo', 'edit'));
 
+drop policy if exists tasks_update_own on public.tasks;
 create policy tasks_update_own on public.tasks
   for update to authenticated
   using (user_id = auth.uid() and public.has_tool_permission('todo', 'edit'))
   with check (user_id = auth.uid() and public.has_tool_permission('todo', 'edit'));
 
+drop policy if exists tasks_delete_own on public.tasks;
 create policy tasks_delete_own on public.tasks
   for delete to authenticated
   using (user_id = auth.uid() and public.has_tool_permission('todo', 'edit'));
