@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import {
   Car,
   Clock,
@@ -42,7 +42,12 @@ const provinceFilter = ref('')
 const cityFilter = ref('')
 const districtFilter = ref('')
 const mallFilter = ref('')
-const imageUrls = ref('')
+const existingImages = ref<string[]>([])
+const uploadFiles = ref<File[]>([])
+const uploadPreviews = ref<string[]>([])
+const uploadingImage = ref(false)
+const saveError = ref('')
+const fileInput = ref<HTMLInputElement | null>(null)
 
 const toolsStore = useToolsStore()
 const canEdit = computed(() => toolsStore.canEdit('parking'))
@@ -121,6 +126,12 @@ async function loadRecords() {
   records.value = (data as ParkingRecord[]) ?? []
 }
 
+function revokePreviews() {
+  uploadPreviews.value.forEach((url) => URL.revokeObjectURL(url))
+  uploadPreviews.value = []
+  uploadFiles.value = []
+}
+
 function openCreate() {
   editingId.value = null
   resetForm()
@@ -141,7 +152,8 @@ function openEdit(record: ParkingRecord) {
   form.day_unit = record.day_unit ?? '元/小时'
   form.night_unit = record.night_unit ?? '元/小时'
   form.notes = record.notes ?? ''
-  imageUrls.value = (record.images ?? []).join(', ')
+  existingImages.value = record.images ?? []
+  saveError.value = ''
   showForm.value = true
 }
 
@@ -158,11 +170,86 @@ function resetForm() {
   form.day_unit = '元/小时'
   form.night_unit = '元/小时'
   form.notes = ''
-  imageUrls.value = ''
+  existingImages.value = []
+  saveError.value = ''
+  revokePreviews()
+}
+
+function handleFileSelect(event: Event) {
+  const input = event.target as HTMLInputElement
+  const files = input.files ? Array.from(input.files) : []
+  if (files.length === 0) return
+  uploadFiles.value.push(...files)
+  uploadPreviews.value.push(...files.map((file) => URL.createObjectURL(file)))
+  input.value = ''
+}
+
+function removeNewPreview(index: number) {
+  const preview = uploadPreviews.value[index]
+  if (preview) URL.revokeObjectURL(preview)
+  uploadPreviews.value.splice(index, 1)
+  uploadFiles.value.splice(index, 1)
+}
+
+async function uploadImages(): Promise<string[]> {
+  if (uploadFiles.value.length === 0) return existingImages.value
+  uploadingImage.value = true
+  try {
+    const urls: string[] = []
+    for (const file of uploadFiles.value) {
+      const ext = file.name.includes('.')
+        ? file.name.split('.').pop()?.toLowerCase() || 'jpg'
+        : 'jpg'
+      const path = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`
+      const { data, error } = await supabase.storage
+        .from('parking-images')
+        .upload(path, file, { cacheControl: '3600' })
+      if (error) throw new Error(error.message)
+      const { data: publicUrl } = supabase.storage
+        .from('parking-images')
+        .getPublicUrl(data.path)
+      urls.push(publicUrl.publicUrl)
+    }
+    return [...existingImages.value, ...urls]
+  } finally {
+    uploadingImage.value = false
+  }
+}
+
+async function removeImage(url: string) {
+  const marker = '/parking-images/'
+  const markerIndex = url.indexOf(marker)
+  let path = markerIndex === -1 ? '' : url.slice(markerIndex + marker.length)
+  path = path.split('?')[0]
+  if (path) {
+    try {
+      path = decodeURIComponent(path)
+    } catch {
+      // keep the raw path when it is not percent encoded
+    }
+    const { error } = await supabase.storage.from('parking-images').remove([path])
+    if (error) {
+      saveError.value = `删除图片失败：${error.message}`
+      return
+    }
+  }
+  existingImages.value = existingImages.value.filter((item) => item !== url)
 }
 
 async function saveRecord() {
   if (!canEdit.value) return
+  saving.value = true
+  saveError.value = ''
+
+  let images: string[]
+  try {
+    images = await uploadImages()
+  } catch (error) {
+    saving.value = false
+    saveError.value = error instanceof Error ? error.message : '图片上传失败'
+    return
+  }
+
   const payload = {
     province: form.province.trim() || null,
     city: form.city.trim() || null,
@@ -176,13 +263,9 @@ async function saveRecord() {
     day_unit: form.day_unit,
     night_unit: form.night_unit,
     notes: form.notes.trim() || null,
-    images: imageUrls.value
-      .split(',')
-      .map((url) => url.trim())
-      .filter(Boolean),
+    images,
   }
 
-  saving.value = true
   if (editingId.value) {
     const { error } = await supabase
       .from('parking_info')
@@ -191,6 +274,10 @@ async function saveRecord() {
     if (!error) {
       const index = records.value.findIndex((record) => record.id === editingId.value)
       if (index !== -1) records.value[index] = { ...records.value[index], ...payload }
+    } else {
+      saving.value = false
+      saveError.value = error.message
+      return
     }
   } else {
     const { data, error } = await supabase
@@ -199,9 +286,15 @@ async function saveRecord() {
       .select()
       .single()
     if (!error && data) records.value.unshift(data as ParkingRecord)
+    else {
+      saving.value = false
+      saveError.value = error?.message ?? '保存失败'
+      return
+    }
   }
   saving.value = false
   showForm.value = false
+  resetForm()
 }
 
 async function deleteRecord(record: ParkingRecord) {
@@ -216,6 +309,7 @@ function priceText(price: number | null, unit: string | null) {
 }
 
 onMounted(loadRecords)
+onBeforeUnmount(revokePreviews)
 </script>
 
 <template>
@@ -426,13 +520,65 @@ onMounted(loadRecords)
               <textarea v-model="form.notes" rows="2" class="w-full resize-none rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="备注信息" />
             </div>
             <div class="sm:col-span-2">
-              <input v-model="imageUrls" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="图片 URL，多个用逗号分隔" />
+              <div class="mb-2 flex items-center justify-between">
+                <span class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                  <Image class="h-4 w-4" />
+                  图片
+                </span>
+                <button
+                  v-if="canEdit"
+                  type="button"
+                  class="flex items-center gap-1 rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-1.5 text-xs text-[var(--text-secondary)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                  :disabled="uploadingImage"
+                  @click="fileInput?.click()"
+                >
+                  <Plus class="h-3.5 w-3.5" />
+                  选择图片
+                </button>
+              </div>
+              <input
+                ref="fileInput"
+                type="file"
+                multiple
+                accept="image/png,image/jpeg,image/webp"
+                class="hidden"
+                @change="handleFileSelect"
+              />
+              <div v-if="existingImages.length || uploadPreviews.length" class="grid grid-cols-3 gap-2 sm:grid-cols-5">
+                <div v-for="url in existingImages" :key="url" class="group relative aspect-square overflow-hidden rounded-md border border-[var(--surface-border)] bg-[var(--bg)]">
+                  <img :src="url" alt="停车图片" class="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    class="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded bg-black/60 text-white/80 opacity-0 transition hover:bg-red-500 group-hover:opacity-100"
+                    title="删除"
+                    @click="removeImage(url)"
+                  >
+                    <Trash2 class="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <div v-for="(url, index) in uploadPreviews" :key="url" class="group relative aspect-square overflow-hidden rounded-md border border-[var(--surface-border)] bg-[var(--bg)]">
+                  <img :src="url" alt="待上传图片" class="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    class="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded bg-black/60 text-white/80 opacity-0 transition hover:bg-red-500 group-hover:opacity-100"
+                    title="移除"
+                    @click="removeNewPreview(index)"
+                  >
+                    <X class="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+              <p v-else class="text-xs text-[var(--text-secondary)]">尚未选择图片，支持 PNG、JPG、WebP，单张不超过 5MB。</p>
             </div>
+          </div>
+
+          <div v-if="saveError" class="mt-3 rounded-md bg-red-500/10 px-3 py-2 text-xs text-red-400">
+            {{ saveError }}
           </div>
 
           <div class="mt-4 flex justify-end gap-2">
             <button class="rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text)]" @click="showForm = false">取消</button>
-            <button class="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-85" :disabled="saving" @click="saveRecord">
+            <button class="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-85" :disabled="saving || uploadingImage" @click="saveRecord">
               {{ saving ? '保存中...' : '保存' }}
             </button>
           </div>

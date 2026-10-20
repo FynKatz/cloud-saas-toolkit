@@ -3,8 +3,12 @@ import { ref } from 'vue'
 import { Download, Info } from 'lucide-vue-next'
 import JSZip from 'jszip'
 import { saveAs } from 'file-saver'
+import { supabase } from '../lib/supabase'
 
-const PIXABAY_API_KEY = '9067334-64bc150336c9d15dd6ceaab3b'
+interface PixabayHit {
+  largeImageURL: string
+}
+
 const keyword = ref('山水')
 const picNum = ref(5)
 const status = ref('')
@@ -15,19 +19,23 @@ async function downloadPixabay() {
   statusType.value = 'loading'
 
   try {
-    const apiUrl = `https://pixabay.com/api/?key=${PIXABAY_API_KEY}&q=${encodeURIComponent(keyword.value)}&per_page=${picNum.value}`
-    const response = await fetch(apiUrl)
-    const data = await response.json()
+    const { data, error } = await supabase.functions.invoke('pixabay-proxy', {
+      method: 'POST',
+      body: { keyword: keyword.value, per_page: picNum.value },
+    })
 
-    if (data.hits.length === 0) {
+    if (error) throw new Error(error.message)
+
+    const hits = (data?.hits ?? []) as PixabayHit[]
+    if (hits.length === 0) {
       throw new Error('未找到相关图片，请尝试其他关键词')
     }
 
-    status.value = `找到 ${data.hits.length} 张图片，开始下载...`
+    status.value = `找到 ${hits.length} 张图片，开始下载...`
     const zip = new JSZip()
 
     await Promise.all(
-      data.hits.slice(0, picNum.value).map(async (img: { largeImageURL: string }) => {
+      hits.slice(0, picNum.value).map(async (img: PixabayHit) => {
         const res = await fetch(img.largeImageURL)
         const blob = await res.blob()
         const ts = Date.now()
@@ -39,7 +47,7 @@ async function downloadPixabay() {
     status.value = '正在生成压缩文件...'
     const content = await zip.generateAsync({ type: 'blob' })
     saveAs(content, `${keyword.value}_图片包.zip`)
-    status.value = `下载完成！共下载 ${data.hits.length} 张图片`
+    status.value = `下载完成！共下载 ${hits.length} 张图片`
     statusType.value = 'success'
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : '下载失败'

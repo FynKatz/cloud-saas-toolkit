@@ -65,6 +65,12 @@ export const routes: RouteRecordRaw[] = [
         meta: { title: '角色权限', requiresAdmin: true },
       },
       {
+        path: 'admin/audit-logs',
+        name: 'admin-audit-logs',
+        component: () => import('../views/admin/AuditLogView.vue'),
+        meta: { title: '审计日志', requiresAdmin: true },
+      },
+      {
         path: 'parking',
         name: 'parking',
         component: () => import('../views/ParkingView.vue'),

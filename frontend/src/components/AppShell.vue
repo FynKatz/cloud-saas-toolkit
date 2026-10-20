@@ -8,6 +8,7 @@ import {
   CircleUser,
   Container,
   Database,
+  FileText,
   Film,
   Hash,
   Heading,
@@ -57,6 +58,7 @@ const pendingUsers = ref(0)
 const adminNav = [
   { name: '用户管理', route: '/admin/users', icon: UserCog },
   { name: '角色权限', route: '/admin/roles', icon: ShieldCheck },
+  { name: '审计日志', route: '/admin/audit-logs', icon: FileText },
 ]
 
 async function loadPendingCount() {
