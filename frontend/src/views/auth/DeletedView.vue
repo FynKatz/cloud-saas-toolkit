@@ -16,7 +16,7 @@ async function handleLogout() {
 <template>
   <AuthShell title="账号已注销" subtitle="该账号已被管理员注销">
     <div class="flex flex-col items-center gap-4">
-      <div class="grid h-14 w-14 place-items-center rounded-full bg-slate-100 dark:bg-slate-800">
+      <div class="grid h-14 w-14 place-items-center rounded-full" style="background: var(--nav-hover)">
         <Ban class="h-7 w-7" style="color: var(--text-secondary)" />
       </div>
       <p class="text-center text-sm leading-relaxed" style="color: var(--text-secondary)">

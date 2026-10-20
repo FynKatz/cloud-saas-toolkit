@@ -2,6 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -43,7 +44,14 @@ Deno.serve(async (req) => {
     auth: { autoRefreshToken: false, persistSession: false },
   })
 
-  const { new_password } = await req.json()
+  const { old_password, new_password } = await req.json()
+
+  if (!old_password || typeof old_password !== 'string') {
+    return new Response(JSON.stringify({ error: '请输入当前密码' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
 
   if (!new_password || typeof new_password !== 'string' || new_password.length < 8) {
     return new Response(JSON.stringify({ error: '新密码至少 8 位' }), {
@@ -54,6 +62,28 @@ Deno.serve(async (req) => {
 
   if (!/[a-zA-Z]/.test(new_password) || !/[0-9]/.test(new_password)) {
     return new Response(JSON.stringify({ error: '密码必须包含字母和数字' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
+  if (old_password === new_password) {
+    return new Response(JSON.stringify({ error: '新密码不能与当前密码相同' }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
+  // Re-authenticate with the current password before allowing a credential change.
+  // Without this step an attacker holding a stolen session token could silently
+  // take over the account by rotating the password.
+  const { error: verifyError } = await anonClient.auth.signInWithPassword({
+    email: user.email!,
+    password: old_password,
+  })
+
+  if (verifyError) {
+    return new Response(JSON.stringify({ error: '当前密码不正确' }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
@@ -111,4 +141,3 @@ Deno.serve(async (req) => {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 })
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!

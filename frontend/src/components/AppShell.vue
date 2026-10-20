@@ -16,16 +16,19 @@ import {
   LogOut,
   LayoutDashboard,
   ListTodo,
+  ShieldCheck,
   Moon,
   PanelLeftClose,
   PanelLeftOpen,
   Puzzle,
   Search,
+  UserCog,
   Sun,
   Zap,
 } from 'lucide-vue-next'
 import { useAuthStore } from '../stores/auth'
 import { useToolsStore } from '../stores/tools'
+import { supabase } from '../lib/supabase'
 import { useTheme } from '../composables/useTheme'
 import { useRecent } from '../composables/useRecent'
 import { DASHBOARD_SEARCH_KEY } from '../lib/keys'
@@ -49,6 +52,21 @@ const toolsStore = useToolsStore()
 const theme = useTheme()
 const router = useRouter()
 const { addRecent } = useRecent()
+const pendingUsers = ref(0)
+
+const adminNav = [
+  { name: '用户管理', route: '/admin/users', icon: UserCog },
+  { name: '角色权限', route: '/admin/roles', icon: ShieldCheck },
+]
+
+async function loadPendingCount() {
+  if (!auth.isAdmin) return
+  const { count, error } = await supabase
+    .from('profiles')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'pending')
+  if (!error) pendingUsers.value = count ?? 0
+}
 
 const ICON_MAP: Record<string, Icon> = {
   Container,
@@ -130,6 +148,7 @@ function onOutsideClick(e: MouseEvent) {
 
 onMounted(() => {
   if (!toolsStore.initialized) toolsStore.load()
+  loadPendingCount()
 })
 
 provide(DASHBOARD_SEARCH_KEY, searchQuery)
@@ -180,6 +199,38 @@ provide(DASHBOARD_SEARCH_KEY, searchQuery)
         </div>
         <div v-if="toolsStore.loading" class="px-3 text-xs text-[var(--text-secondary)]">
           正在加载工具...
+        </div>
+
+        <div v-if="auth.isAdmin">
+          <div
+            v-if="!collapsed"
+            class="mb-2 px-3 text-[11px] font-medium uppercase tracking-normal text-[var(--nav-section)]"
+          >
+            系统管理
+          </div>
+          <div class="space-y-1">
+            <RouterLink
+              v-for="item in adminNav"
+              :key="item.route"
+              :to="item.route"
+              class="group flex h-10 items-center gap-3 rounded-md px-3 text-sm transition hover:bg-[var(--nav-hover)] hover:text-[var(--text)]"
+              :class="route.path === item.route ? 'bg-[var(--nav-hover)] text-[var(--text)]' : ''"
+              :title="collapsed ? item.name : undefined"
+            >
+              <component :is="item.icon" class="h-[18px] w-[18px] shrink-0" />
+              <span v-if="!collapsed" class="min-w-0 flex-1 truncate">{{ item.name }}</span>
+              <span
+                v-if="item.route === '/admin/users' && pendingUsers > 0 && !collapsed"
+                class="rounded-full bg-amber-400 px-1.5 text-[11px] font-semibold text-slate-900"
+              >
+                {{ pendingUsers }}
+              </span>
+              <span
+                v-else-if="item.route === '/admin/users' && pendingUsers > 0"
+                class="absolute right-2 top-1.5 h-1.5 w-1.5 rounded-full bg-amber-400"
+              />
+            </RouterLink>
+          </div>
         </div>
       </nav>
 

@@ -9,12 +9,16 @@ import { validatePassword } from '../../lib/username'
 const router = useRouter()
 const auth = useAuthStore()
 
-const form = reactive({ password: '', confirm: '' })
+const form = reactive({ current: '', password: '', confirm: '' })
 const error = ref('')
 const submitting = ref(false)
 
 async function handleSubmit() {
   error.value = ''
+  if (!form.current) {
+    error.value = '请输入当前密码'
+    return
+  }
   const pwCheck = validatePassword(form.password)
   if (!pwCheck.valid) {
     error.value = pwCheck.error!
@@ -28,12 +32,25 @@ async function handleSubmit() {
   submitting.value = true
   const { error: invokeError } = await supabase.functions.invoke(
     'user-change-password',
-    { method: 'POST', body: { new_password: form.password } },
+    {
+      method: 'POST',
+      body: { old_password: form.current, new_password: form.password },
+    },
   )
   submitting.value = false
 
   if (invokeError) {
-    error.value = '密码修改失败，请稍后重试'
+    const ctx = (invokeError as { context?: Response }).context
+    let message = '密码修改失败，请稍后重试'
+    if (ctx) {
+      try {
+        const payload = await ctx.json()
+        if (payload?.error) message = payload.error
+      } catch {
+        // fall back to the generic message
+      }
+    }
+    error.value = message
     return
   }
   await auth.refreshProfile()
@@ -49,6 +66,27 @@ async function handleSubmit() {
         class="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-400"
       >
         {{ error }}
+      </div>
+
+      <div>
+        <label
+          class="mb-1.5 block text-xs font-medium"
+          style="color: var(--text-secondary)"
+        >
+          当前密码
+        </label>
+        <input
+          v-model="form.current"
+          type="password"
+          autocomplete="current-password"
+          class="h-10 w-full rounded-md border px-3 text-sm outline-none transition"
+          :style="{
+            background: 'var(--bg)',
+            borderColor: 'var(--surface-border)',
+            color: 'var(--text)',
+          }"
+          placeholder="输入当前密码"
+        />
       </div>
 
       <div>

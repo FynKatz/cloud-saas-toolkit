@@ -53,6 +53,18 @@ export const routes: RouteRecordRaw[] = [
         meta: { title: 'Dashboard' },
       },
       {
+        path: 'admin/users',
+        name: 'admin-users',
+        component: () => import('../views/admin/UserManagementView.vue'),
+        meta: { title: '用户管理', requiresAdmin: true },
+      },
+      {
+        path: 'admin/roles',
+        name: 'admin-roles',
+        component: () => import('../views/admin/RoleManagementView.vue'),
+        meta: { title: '角色权限', requiresAdmin: true },
+      },
+      {
         path: 'parking',
         name: 'parking',
         component: () => import('../views/PlaceholderView.vue'),
@@ -162,6 +174,7 @@ export function setupRouterGuards(router: Router) {
 
     if (s === 'approved') {
       if (auth.mustChangePassword) return { name: 'change-password' }
+      if (to.meta.requiresAdmin && !auth.isAdmin) return { name: 'dashboard' }
       const toolId = to.meta.toolId as string | undefined
       if (toolId) {
         const toolsStore = useToolsStore()

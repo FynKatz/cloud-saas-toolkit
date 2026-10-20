@@ -18,6 +18,16 @@ export const useAuthStore = defineStore('auth', () => {
   const mustChangePassword = computed(
     () => profile.value?.must_change_password === true,
   )
+  const isAdmin = ref(false)
+
+  async function refreshAdminFlag(): Promise<void> {
+    if (!user.value) {
+      isAdmin.value = false
+      return
+    }
+    const { data } = await supabase.rpc('is_admin')
+    isAdmin.value = data === true
+  }
 
   async function refreshProfile(): Promise<void> {
     if (!user.value) {
@@ -38,16 +48,18 @@ export const useAuthStore = defineStore('auth', () => {
       session.value = data.session
       user.value = data.session?.user ?? null
       await refreshProfile()
+      await refreshAdminFlag()
     } finally {
       loading.value = false
       initialized.value = true
     }
   }
 
-  supabase.auth.onAuthStateChange((_event, newSession) => {
+  supabase.auth.onAuthStateChange(async (_event, newSession) => {
     session.value = newSession
     user.value = newSession?.user ?? null
-    refreshProfile()
+    await refreshProfile()
+    await refreshAdminFlag()
   })
 
   async function signUp(
@@ -70,6 +82,7 @@ export const useAuthStore = defineStore('auth', () => {
       session.value = data.session
       user.value = data.session.user
       await refreshProfile()
+      await refreshAdminFlag()
     }
     return {}
   }
@@ -87,6 +100,7 @@ export const useAuthStore = defineStore('auth', () => {
     session.value = data.session
     user.value = data.session.user
     await refreshProfile()
+    await refreshAdminFlag()
     return {}
   }
 
@@ -95,6 +109,7 @@ export const useAuthStore = defineStore('auth', () => {
     session.value = null
     user.value = null
     profile.value = null
+    isAdmin.value = false
     useToolsStore().reset()
   }
 
@@ -107,10 +122,12 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isApproved,
     mustChangePassword,
+    isAdmin,
     init,
     signUp,
     signIn,
     signOut,
     refreshProfile,
+    refreshAdminFlag,
   }
 })

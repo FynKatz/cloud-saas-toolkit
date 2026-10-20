@@ -471,7 +471,7 @@ insert into public.tools
 values
   ('docker-k8s-cheatsheet', 'Docker & K8S 速查', '速查参考', 'tools/docker-k8s', 'Container', 'Docker 与 Kubernetes 常用命令速查', 'none', false, 1),
   ('sql-cheatsheet', 'SQL 速查', '速查参考', 'tools/sql', 'Database', 'SQL 常用语法速查', 'none', false, 2),
-  ('redis-cheatsheet', 'Redis 速查', '速查参考', 'tools/redis', 'Database', 'Redis 常用命令速查', 'none', false, 3),
+  ('redis-cheatsheet', 'Redis 速查', '速查参考', 'tools/redis', 'Zap', 'Redis 常用命令速查', 'none', false, 3),
   ('typora-shortcuts', 'Typora 快捷键', '速查参考', 'tools/typora', 'Keyboard', 'Typora 快捷键速查', 'none', false, 4),
   ('chrome-extension-packaging', 'Chrome 扩展打包', '速查参考', 'tools/chrome-extension', 'Puzzle', 'Chrome 扩展打包步骤', 'none', false, 5),
   ('markdown-heading', 'Markdown 标题工具', '速查参考', 'tools/markdown-heading', 'Heading', 'Markdown 标题层级处理', 'none', false, 6),
