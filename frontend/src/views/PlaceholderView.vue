@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 const route = useRoute()
-const title = (route.meta.title as string) || '工具'
+const title = computed(() => (route.meta.title as string) || '工具')
 </script>
 
 <template>
