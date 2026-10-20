@@ -1,6 +1,8 @@
 import type { RouteRecordRaw, Router } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
 import DashboardView from '../views/DashboardView.vue'
+import { useAuthStore } from '../stores/auth'
+import { useToolsStore } from '../stores/tools'
 
 export const routes: RouteRecordRaw[] = [
   {
@@ -54,73 +56,73 @@ export const routes: RouteRecordRaw[] = [
         path: 'parking',
         name: 'parking',
         component: () => import('../views/PlaceholderView.vue'),
-        meta: { title: '停车管理' },
+  meta: { title: '停车管理', toolId: 'parking' },
       },
       {
         path: 'todo',
         name: 'todo',
         component: () => import('../views/PlaceholderView.vue'),
-        meta: { title: 'Todo' },
+  meta: { title: 'Todo', toolId: 'todo' },
       },
       {
         path: 'sql',
         name: 'sql',
         component: () => import('../views/PlaceholderView.vue'),
-        meta: { title: 'SQL 速查' },
+  meta: { title: 'SQL 速查', toolId: 'sql-cheatsheet' },
       },
       {
         path: 'redis',
         name: 'redis',
         component: () => import('../views/PlaceholderView.vue'),
-        meta: { title: 'Redis 速查' },
+  meta: { title: 'Redis 速查', toolId: 'redis-cheatsheet' },
       },
       {
         path: 'docker',
         name: 'docker',
         component: () => import('../views/PlaceholderView.vue'),
-        meta: { title: 'Docker & K8S 速查' },
+  meta: { title: 'Docker & K8S 速查', toolId: 'docker-k8s-cheatsheet' },
       },
       {
         path: 'movie',
         name: 'movie',
         component: () => import('../views/PlaceholderView.vue'),
-        meta: { title: 'Movie' },
+  meta: { title: 'Movie', toolId: 'movie' },
       },
       {
         path: 'collage',
         name: 'collage',
         component: () => import('../views/PlaceholderView.vue'),
-        meta: { title: 'Image Collage' },
+  meta: { title: 'Image Collage', toolId: 'image-stitch' },
       },
       {
         path: 'pixabay',
         name: 'pixabay',
         component: () => import('../views/PlaceholderView.vue'),
-        meta: { title: 'Pixabay Downloader' },
+  meta: { title: 'Pixabay Downloader', toolId: 'pixabay-download' },
       },
       {
         path: 'text-stats',
         name: 'text-stats',
         component: () => import('../views/PlaceholderView.vue'),
-        meta: { title: 'Text Statistics' },
+  meta: { title: 'Text Statistics', toolId: 'word-count' },
       },
       {
         path: 'typora',
         name: 'typora',
         component: () => import('../views/PlaceholderView.vue'),
-        meta: { title: 'Typora 速查' },
+  meta: { title: 'Typora 速查', toolId: 'typora-shortcuts' },
       },
       {
         path: 'chrome-pack',
         name: 'chrome-pack',
         component: () => import('../views/PlaceholderView.vue'),
-        meta: { title: 'Chrome Extension Pack' },
+  meta: { title: 'Chrome Extension Pack', toolId: 'chrome-extension-packaging' },
       },
       {
         path: 'markdown-heading',
         name: 'markdown-heading',
         component: () => import('../views/MarkdownHeadingView.vue'),
-        meta: { title: 'Markdown Heading' },
+  meta: { title: 'Markdown Heading', toolId: 'markdown-heading' },
       },
     ],
   },
@@ -128,7 +130,6 @@ export const routes: RouteRecordRaw[] = [
 
 export function setupRouterGuards(router: Router) {
   router.beforeEach(async (to) => {
-    const { useAuthStore } = await import('../stores/auth')
     const auth = useAuthStore()
 
     if (!auth.initialized) {
@@ -161,6 +162,12 @@ export function setupRouterGuards(router: Router) {
 
     if (s === 'approved') {
       if (auth.mustChangePassword) return { name: 'change-password' }
+      const toolId = to.meta.toolId as string | undefined
+      if (toolId) {
+        const toolsStore = useToolsStore()
+        if (!toolsStore.initialized) await toolsStore.load()
+        if (!toolsStore.hasTool(toolId)) return { name: 'dashboard' }
+      }
       return true
     }
 

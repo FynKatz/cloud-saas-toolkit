@@ -1,83 +1,81 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import {
+  Box,
+  Car,
   CircleUser,
   Container,
   Database,
-  FileType2,
   Film,
-  Heading1,
-  Images,
-  ImageDown,
+  Hash,
+  Heading,
+  Image,
+  Keyboard,
   LayoutDashboard,
   ListTodo,
   PanelLeftClose,
   PanelLeftOpen,
   Puzzle,
   Search,
-  SquareParking,
-  TextCursorInput,
   Zap,
 } from 'lucide-vue-next'
+import { useAuthStore } from '../stores/auth'
+import { useToolsStore } from '../stores/tools'
+import { toolPath } from '../types/tools'
+import type { Tool } from '../types/tools'
 
 type Icon = typeof LayoutDashboard
 
-interface NavEntry {
+interface ToolNav {
   id: string
   name: string
   icon: Icon
   route: string
 }
 
-interface NavGroup {
-  name: string
-  items: NavEntry[]
-}
-
 const collapsed = ref(false)
 const route = useRoute()
+const auth = useAuthStore()
+const toolsStore = useToolsStore()
 
-const groups: NavGroup[] = [
-  {
-    name: '总览',
-    items: [{ id: 'dashboard', name: '总览', icon: LayoutDashboard, route: '/' }],
-  },
-  {
-    name: '常用工具',
-    items: [
-      { id: 'parking', name: '停车管理', icon: SquareParking, route: '/parking' },
-      { id: 'todo', name: 'Todo', icon: ListTodo, route: '/todo' },
-      { id: 'sql', name: 'SQL 速查', icon: Database, route: '/sql' },
-      { id: 'redis', name: 'Redis 速查', icon: Zap, route: '/redis' },
-      { id: 'docker', name: 'Docker/K8S', icon: Container, route: '/docker' },
-    ],
-  },
-  {
-    name: '信息面板',
-    items: [
-      { id: 'movie', name: '家庭电影', icon: Film, route: '/movie' },
-    ],
-  },
-  {
-    name: '扩展工具',
-    items: [
-      { id: 'collage', name: '图片拼接', icon: Images, route: '/collage' },
-      { id: 'pixabay', name: 'Pixabay 下载', icon: ImageDown, route: '/pixabay' },
-      { id: 'text-stats', name: '文本统计', icon: TextCursorInput, route: '/text-stats' },
-      { id: 'typora', name: 'Typora 速查', icon: FileType2, route: '/typora' },
-      { id: 'chrome-pack', name: 'Chrome 扩展', icon: Puzzle, route: '/chrome-pack' },
-      { id: 'markdown-heading', name: 'Markdown 标题', icon: Heading1, route: '/markdown-heading' },
-    ],
-  },
-]
+const ICON_MAP: Record<string, Icon> = {
+  Container,
+  Database,
+  Zap,
+  Keyboard,
+  Puzzle,
+  Heading,
+  Car,
+  Image,
+  Hash,
+  Film,
+  ListTodo,
+  Box,
+}
+
+function toNav(tool: Tool): ToolNav {
+  return {
+    id: tool.id,
+    name: tool.name,
+    icon: ICON_MAP[tool.icon] ?? Box,
+    route: toolPath(tool),
+  }
+}
+
+const groups = computed(() =>
+  toolsStore.groupedTools.map((group) => ({
+    name: group.name,
+    items: group.tools.map(toNav),
+  })),
+)
 
 const currentTitle = computed(() => {
   const title = route.meta.title as string | undefined
   return title || 'Cloud SaaS Toolkit'
 })
 
-function isActive(item: NavEntry) {
+function isActive(item: ToolNav) {
   if (item.route === '/') return route.path === '/'
   return route.path === item.route
 }
@@ -85,6 +83,10 @@ function isActive(item: NavEntry) {
 function toggleSidebar() {
   collapsed.value = !collapsed.value
 }
+
+onMounted(() => {
+  if (!toolsStore.initialized) toolsStore.load()
+})
 </script>
 
 <template>
@@ -129,15 +131,18 @@ function toggleSidebar() {
             </RouterLink>
           </div>
         </div>
+        <div v-if="toolsStore.loading" class="px-3 text-xs text-slate-500">
+          正在加载工具...
+        </div>
       </nav>
 
       <div class="border-t border-slate-800 p-2">
         <div class="flex items-center gap-3 rounded-md px-2 py-2">
           <div class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-amber-400 text-xs font-semibold text-slate-900">
-            FY
+            {{ (auth.profile?.display_name || auth.profile?.username || 'FY').slice(0, 2).toUpperCase() }}
           </div>
           <div v-if="!collapsed" class="min-w-0">
-            <div class="truncate text-sm text-white">FynKatz</div>
+            <div class="truncate text-sm text-white">{{ auth.profile?.display_name || auth.profile?.username || 'FynKatz' }}</div>
             <div class="truncate text-[11px] text-slate-500">个人工作台</div>
           </div>
         </div>

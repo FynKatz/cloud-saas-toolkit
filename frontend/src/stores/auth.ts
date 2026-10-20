@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { User, Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
+import { useToolsStore } from './tools'
 import { toVirtualEmail } from '../types/auth'
 import type { Profile } from '../types/auth'
 
@@ -94,6 +95,7 @@ export const useAuthStore = defineStore('auth', () => {
     session.value = null
     user.value = null
     profile.value = null
+    useToolsStore().reset()
   }
 
   return {
