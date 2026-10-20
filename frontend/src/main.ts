@@ -1,8 +1,8 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { createPinia } from 'pinia'
-import { routes } from './router'
- import { useTheme } from './composables/useTheme'
+import { routes, setupRouterGuards } from './router'
+import { useTheme } from './composables/useTheme'
 import './style.css'
 import App from './App.vue'
 
@@ -11,10 +11,12 @@ const router = createRouter({
   routes,
 })
 
+setupRouterGuards(router)
+
 const pinia = createPinia()
 
- const theme = useTheme()
- theme.init()
+const theme = useTheme()
+theme.init()
 
 const app = createApp(App)
 app.use(router)

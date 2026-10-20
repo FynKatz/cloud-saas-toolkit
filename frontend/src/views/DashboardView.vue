@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Container, Database, Film, Heading1, Images, ImageDown, LayoutDashboard, ListTodo, Puzzle, SquareParking, TextCursorInput, Zap, FileType2, Play, Wrench } from 'lucide-vue-next'
+import { Container, Database, Film, Heading1, Images, ImageDown, ListTodo, Puzzle, SquareParking, TextCursorInput, Zap, FileType2, Play, Wrench } from 'lucide-vue-next'
 
 interface ToolItem {
   id: string
@@ -12,7 +12,6 @@ interface ToolItem {
   route: string
 }
 
-type Icon = typeof LayoutDashboard
 
 const tools: ToolItem[] = [
   { id: 'parking', name: '停车管理', description: '车牌录入、费用计算、历史查询', icon: SquareParking, category: '常用工具', status: 'ready', route: '/parking' },
