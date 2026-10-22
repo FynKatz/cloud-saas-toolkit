@@ -302,3 +302,37 @@
      下一步遇到网络问题先跑 `net-doctor.sh`，不跑完四步不许下结论。
 - 安全提醒（已告知用户）：该代理密码在本机 git 配置里是**明文**，建议改钥匙串并考虑改密。
   文档与脚本一律不回显该值。
+
+### 2026-10-22 — 问题全量收集与修复（Phase 5 前置清障）
+- 动作：应用户「把发现的问题全部收集并解决完成」的要求，逐项取证 → 修复 → 生产验证。
+  清单见 `docs/ISSUES-20261022.md`（14 项，含 6 个执行中新发现的）。
+- **根因级发现**：`tsconfig.app.json` 的 `baseUrl` 在 TS 6.0.3 下报 TS5101，使
+  `vue-tsc -b && vite build` 必然失败 —— 这就是 2026-10-20 起两次 Netlify prod 构建
+  error、**Phase 1–4 从未上线**的唯一根因。此前四轮开发无人跑过生产构建。
+  教训：每轮收尾必须真跑一次 `npm run build`，不能只看 dev server。
+- 顺带查出：Netlify 本账号 FREE 计划下 account 级环境变量 403（需升级）、site 级 404，
+  无法用 API 配 → 改由 `netlify.toml` 在构建时从已跟踪的 `.env.secrets` 生成
+  `frontend/.env`，既保持单一事实源，又只放 `VITE_` 公开变量。
+- 新发现的缺陷（均非本轮引入，属存量）：
+  - 无 SPA 回退规则 → 部署后所有深链与刷新必 404（`createWebHistory` 的必备配套）。
+  - `index.html` 有未提交的 `window.__DEV_AUTH=true` 调试后门（被 `import.meta.env.DEV`
+    挡住，实测未绕过鉴权，但不应进生产 HTML）。
+  - DEV 离线 seed 的 **id 写错**（`text-stats`/`chrome-pack` vs 守卫要的
+    `word-count`/`chrome-extension-packaging`），离线模式下两页会被弹回首页。
+  - 顶栏/面包屑用路由硬编码标题，与侧栏取自 `tools.name` 的名称不一致，共 8 处。
+    修法不是逐条改字符串，而是让 AppShell 从 store 按 toolId 取名，消除双份事实源。
+- 流程失误与纠正（记为反面教材）：
+  1. `netlify-deploy.mjs` 未传 `draft: true`，本意「验证产物的草稿部署」**直接上线替换了
+     旧静态站**。已改为默认 draft、仅 `--publish` 提升主版本，并复测确认不再影响线上；
+     该意外上线已在 ISSUES 文档「意外变更声明」中向用户显式披露。
+  2. 用 `if git push ... | tail` 判断成败 —— 管道把退出码换成 `tail` 的 0，
+     把 503 失败误报成 "attempt 1 OK"。`push-retry.sh` 里已写明这个坑。
+  3. 首版路由巡检脚本用固定 `sleep 4.5s` 读 DOM，SPA 未加载完就取 header，
+     误报 7/12 条失败。改为轮询就绪后 12/12 全通过。**测试工具的假阳性同样有害。**
+- 分支链首次走通：`feature/2610 → dev → int → stg → prod` 逐级 ff 合并并双推
+  GitHub + Gitee，五分支三处对齐。推 GitHub 首次 503、第二次成功，印证「间歇性」，
+  重试逻辑确认为必需。
+- 最终生产验证：推 prod 触发 **git 构建** `state=ready`/`context=production`，
+  线上真实登录全链路 200、侧栏渲染定稿 4 组 12 项、深链 `/parking` 200、
+  12 条路由标题与 DB 一致、产物无后门无越权密钥、零 console 错误。
+- 状态：Phase 5 可以开始，规格 v1.1 + 只读基线 + 可用部署链路三者齐备。
