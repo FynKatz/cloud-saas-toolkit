@@ -135,10 +135,131 @@ const usageRows = computed(() => {
   return top.map((r) => ({ ...r, pct: r.value === null ? 0 : Math.round((r.value / max) * 100) }))
 })
 
+/* ---------- activity feed: real audit_logs, RLS-scoped ---------- */
+interface AuditLogEntry {
+  id: string
+  actor_id: string | null
+  action: string
+  target_type: string | null
+  created_at: string
+}
+
+const ACTIVITY_LABELS: Record<string, string> = {
+  admin_approve_user: '审批通过用户',
+  admin_reject_user: '审批拒绝用户',
+  admin_create_user: '创建用户',
+  admin_delete_user: '删除用户',
+  admin_restore_user: '恢复用户',
+  admin_reset_password: '重置密码',
+  admin_create_role: '创建角色',
+  admin_update_role: '更新角色',
+  admin_delete_role: '删除角色',
+  admin_set_role_permission: '设置角色权限',
+  admin_assign_user_role: '分配用户角色',
+  admin_unassign_user_role: '解除用户角色',
+  user_reapply: '重新申请',
+  user_change_password: '修改密码',
+  pixabay_proxy: 'Pixabay 代理请求',
+  tmdb_proxy: 'TMDB 代理请求',
+}
+
+const feed = ref<AuditLogEntry[]>([])
+const feedLoading = ref(true)
+const trend = ref<number[]>(Array(7).fill(0))
+const trendLoading = ref(true)
+const axisLabels = ref<string[]>([])
+
+function feedTitle(action: string) {
+  return ACTIVITY_LABELS[action] ?? action
+}
+
+function feedDot(action: string) {
+  return feedTitle(action).charAt(0)
+}
+
+function timeAgo(ts: string) {
+  const diff = Date.now() - new Date(ts).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return '刚刚'
+  if (mins < 60) return `${mins} 分钟前`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs} 小时前`
+  return `${Math.floor(hrs / 24)} 天前`
+}
+
+async function loadActivity() {
+  feedLoading.value = true
+  trendLoading.value = true
+
+  const now = new Date()
+  const start = new Date(now.getTime() - 6 * 86400000)
+  start.setHours(0, 0, 0, 0)
+  const iso = start.toISOString()
+
+  const [feedRes, trendRes] = await Promise.all([
+    supabase
+      .from('audit_logs')
+      .select('id,actor_id,action,target_type,created_at')
+      .order('created_at', { ascending: false })
+      .limit(8),
+    supabase
+      .from('audit_logs')
+      .select('created_at')
+      .gte('created_at', iso)
+      .order('created_at', { ascending: true }),
+  ])
+
+  feedLoading.value = false
+  trendLoading.value = false
+
+  if (!feedRes.error) feed.value = (feedRes.data as AuditLogEntry[]) ?? []
+
+  const labels: string[] = []
+  const days = Array(7).fill(0)
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 86400000)
+    labels.push(['日', '一', '二', '三', '四', '五', '六'][d.getDay()])
+  }
+  axisLabels.value = labels
+
+  if (!trendRes.error && trendRes.data) {
+    for (const r of trendRes.data as { created_at: string }[]) {
+      const d = new Date(r.created_at)
+      const idx = Math.floor((now.getTime() - d.getTime()) / 86400000)
+      if (idx >= 0 && idx < 7) days[6 - idx]++
+    }
+  }
+  trend.value = days
+}
+
+const trendPath = computed(() => {
+  const w = 560
+  const h = 180
+  const max = Math.max(1, ...trend.value)
+  const pts = trend.value.map((v, i) => ({
+    x: (i / 6) * w,
+    y: h - (v / max) * (h - 40) - 16,
+  }))
+  const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
+  return `${line} L${w},${h} L0,${h} Z`
+})
+
+const trendLine = computed(() => {
+  const w = 560
+  const h = 180
+  const max = Math.max(1, ...trend.value)
+  const pts = trend.value.map((v, i) => ({
+    x: (i / 6) * w,
+    y: h - (v / max) * (h - 40) - 16,
+  }))
+  return `M${pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L')}`
+})
+
 onMounted(() => {
   if (!toolsStore.initialized) toolsStore.load()
   favorites.load()
   loadCounts()
+  loadActivity()
 })
 </script>
 
@@ -242,18 +363,19 @@ onMounted(() => {
           <div class="panel-head"><h3>使用趋势</h3><span class="tag">近 7 天</span></div>
           <div class="panel-body">
             <div class="area">
-              <svg viewBox="0 0 560 180" preserveAspectRatio="none">
+              <svg viewBox="0 0 560 180" preserveAspectRatio="none" v-if="!trendLoading">
                 <defs>
                   <linearGradient id="dashArea" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stop-color="#5533ff" stop-opacity=".22" />
                     <stop offset="100%" stop-color="#5533ff" stop-opacity="0" />
                   </linearGradient>
                 </defs>
-                <path d="M0,130 C50,120 80,80 130,86 C180,92 200,140 250,120 C300,100 320,58 380,64 C430,70 470,40 560,30 L560,180 L0,180 Z" fill="url(#dashArea)" />
-                <path d="M0,130 C50,120 80,80 130,86 C180,92 200,140 250,120 C300,100 320,58 380,64 C430,70 470,40 560,30" fill="none" stroke="#5533ff" stroke-width="2.5" />
+                <path :d="trendPath" fill="url(#dashArea)" />
+                <path :d="trendLine" fill="none" stroke="#5533ff" stroke-width="2.5" />
               </svg>
+              <div v-else class="empty" style="height:180px"><p>加载中...</p></div>
             </div>
-            <div class="axis"><span>周一</span><span>周二</span><span>周三</span><span>周四</span><span>周五</span><span>周六</span><span>周日</span></div>
+            <div class="axis"><span v-for="l in axisLabels" :key="l">{{ l }}</span></div>
           </div>
         </div>
         <div class="panel">
@@ -313,11 +435,16 @@ onMounted(() => {
       <!-- ⑧ 底部双栏 -->
       <div class="bottom-row">
         <div class="panel">
-          <div class="panel-head"><h3>活动流</h3><span class="tag">演示</span></div>
-          <div class="feed-row"><div class="feed-dot dot-v">停</div><div class="feed-main"><div class="ftitle">停车费结算</div><div class="fmeta">粤B · 8H2K9 · 2 小时前</div></div><div class="feed-amt">¥36.00</div></div>
-          <div class="feed-row"><div class="feed-dot dot-l">影</div><div class="feed-main"><div class="ftitle">电影条目更新</div><div class="fmeta">沙丘 2 · 已看</div></div><div class="feed-amt">+1</div></div>
-          <div class="feed-row"><div class="feed-dot dot-g">待</div><div class="feed-main"><div class="ftitle">待办完成</div><div class="fmeta">整理季度材料</div></div><div class="feed-amt">+1</div></div>
-          <div class="feed-row"><div class="feed-dot dot-v">速</div><div class="feed-main"><div class="ftitle">速查表导出</div><div class="fmeta">CSV · 12 行</div></div><div class="feed-amt">1</div></div>
+          <div class="panel-head"><h3>活动流</h3><span class="tag">审计日志</span></div>
+          <div v-if="feedLoading" class="empty"><p>加载中...</p></div>
+          <div v-else-if="feed.length === 0" class="empty"><p>暂无活动记录</p></div>
+          <div v-for="item in feed" :key="item.id" class="feed-row">
+            <div class="feed-dot dot-v">{{ feedDot(item.action) }}</div>
+            <div class="feed-main">
+              <div class="ftitle">{{ feedTitle(item.action) }}</div>
+              <div class="fmeta">{{ timeAgo(item.created_at) }}<span v-if="item.target_type"> · {{ item.target_type }}</span></div>
+            </div>
+          </div>
         </div>
         <div class="panel">
           <div class="panel-head"><h3>工具使用占比</h3><span class="tag">有数据表的工具</span></div>
@@ -442,8 +569,6 @@ onMounted(() => {
 .feed-row:last-child { border-bottom: none; }
 .feed-dot { width: 32px; height: 32px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
 .dot-v { background: var(--violet-soft); color: var(--violet); }
-.dot-l { background: var(--chip-neutral); color: var(--ink-2); }
-.dot-g { background: var(--violet-soft); color: var(--violet); }
 .feed-main { flex: 1; min-width: 0; }
 .ftitle { font-size: 13px; font-weight: 600; color: var(--ink); }
 .fmeta { font-size: 11px; color: var(--label-muted); margin-top: 2px; }
