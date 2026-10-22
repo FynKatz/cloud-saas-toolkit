@@ -106,6 +106,8 @@ node scripts/supabase-cdp.mjs sql --file supabase/migrations/xxx.sql
 | 坑 | 现象 | 正确做法 |
 |---|---|---|
 | 误判平台封锁 | 一次 curl `000` 就断言「被墙」 | 走完四步 ladder |
+| Netlify `state=error` 但其实是好事 | 提交只含 docs/scripts 时，构建产物与线上逐字节相同，Netlify 报 `Canceled build due to no content change` 并把 deploy 标为 `error` | **不是故障**：它会保留上一个成功版本继续服务。先 `git show --name-only <sha>` 确认没碰 `frontend/` 即可判定 |
+| Netlify 日志取不到 | `/deploys/{id}/log`、`/logRequests` 在 FREE 计划返回 404 | 别绕；改用「提交是否触及 frontend/」直接推断，或看 `error_message` 字段 |
 | 误判「只能走浏览器」 | 测到 407 就收工去做 CDP | 第 4 步先找现成凭据 |
 | 绕远路做了浏览器工具 | CDP 能跑但依赖登录态、SPA 要等 | 能用 API 就用 API，CDP 只作兜底 |
 | SPA 加载时间 | 固定 `sleep 8` 后编辑器还没挂载 | 轮询 `window.monaco` + Run 按钮 |
