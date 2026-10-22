@@ -2,61 +2,102 @@
 @variant dark (&:where(.dark, .dark *));
  
  :root {
-   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-   --bg: #F8F9FA;
-   --surface: #FFFFFF;
-   --surface-border: #E5E7EB;
-   --accent: #6366F1;
-   --accent-soft: #EEF2FF;
-   --text: #111827;
-   --text-secondary: #6B7280;
-   --nav-hover: #F3F4F6;
-   --nav-text: #4B5563;
-   --nav-section: #9CA3AF;
-   --sidebar-bg: #FFFFFF;
-   --sidebar-border: #E5E7EB;
-   --sidebar-card-bg: #F3F4F6;
-   --sidebar-card-border: #E5E7EB;
-   --drawer-bg: #F9FAFB;
-   --drawer-border: #E5E7EB;
-   --shadow-card: 0 1px 3px rgba(0, 0, 0, .06);
-   --shadow-hover: 0 4px 16px rgba(0, 0, 0, .08);
-   color-scheme: light;
-   font-synthesis: none;
-   text-rendering: optimizeLegibility;
-   -webkit-font-smoothing: antialiased;
-   -moz-osx-font-smoothing: grayscale;
- }
+  /* ============================================================
+     Layer 1 — 基线原始 token（docs/design/baseline/dashboard-layout.html）
+     AppShell / DashboardView 逐条照抄基线 CSS，故原名一并保留。
+     ============================================================ */
+  --violet: #5533ff;
+  --violet-soft: #eeeeff;
+  --violet-line: #ddddff;
+  --lime: #ddff55;
+  --lime-fg: #3b4200;
+  --ink: #191b1f;
+  --ink-2: #5a6068;
+  --ink-3: #939aa4;
+  --line: #eceef2;
+  --page: #ffffff;
+  --card: #ffffff;
+  --hover: #f2f2f7;
+  --chip-neutral: #f5f5f8;
+  --radius: 14px;
+  --radius-sm: 10px;
+
+  /* ============================================================
+     Layer 2 — 既有语义名，映射到 Layer 1。
+     12 个工具页 + admin + auth 共 800+ 处引用这些名字，
+     只改映射即可整站换肤，不必逐页重写。
+     基线是「白底 + 1px 描边」而非「灰底 + 白卡」，所以 --bg 走白。
+     ============================================================ */
+  --font-sans: 'Inter', 'SF Pro Text', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --bg: var(--page);
+  --surface: var(--card);
+  --surface-border: var(--line);
+  --accent: var(--violet);
+  --accent-soft: var(--violet-soft);
+  --text: var(--ink);
+  --text-secondary: var(--ink-2);
+  --nav-hover: var(--hover);
+  --nav-text: var(--ink-2);
+  --nav-section: var(--ink-3);
+  --sidebar-bg: #fbfbfd;
+  --sidebar-border: var(--line);
+  --sidebar-card-bg: var(--chip-neutral);
+  --sidebar-card-border: var(--line);
+  --drawer-bg: var(--chip-neutral);
+  --drawer-border: var(--line);
+  /* 基线用描边区分层级，不用阴影 */
+  --shadow-card: none;
+  --shadow-hover: 0 4px 16px rgba(85, 51, 255, .10);
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 暗夜：黑底 + 灰阶 + 紫强调。用户明确要求不得出现绿色。 */
+.dark {
+  --violet: #8b78ff;              /* 暗底上提亮一档，保对比度 */
+  --violet-soft: rgba(139, 120, 255, .14);
+  --violet-line: rgba(139, 120, 255, .34);
+  --lime: rgba(139, 120, 255, .18); /* 原荧光黄绿在暗色下改为紫色调 */
+  --lime-fg: #b9adff;
+  --ink: #eceef2;
+  --ink-2: #a2a8b3;
+  --ink-3: #6b7280;
+  --line: #26262c;
+  --page: #0c0c0e;
+  --card: #151519;
+  --hover: rgba(255, 255, 255, .05);
+  --chip-neutral: #1c1c21;
+
+  --bg: var(--page);
+  --surface: var(--card);
+  --surface-border: var(--line);
+  --accent: var(--violet);
+  --accent-soft: var(--violet-soft);
+  --text: var(--ink);
+  --text-secondary: var(--ink-2);
+  --nav-hover: var(--hover);
+  --nav-text: var(--ink-2);
+  --nav-section: var(--ink-3);
+  --sidebar-bg: #101013;
+  --sidebar-border: var(--line);
+  --sidebar-card-bg: var(--chip-neutral);
+  --sidebar-card-border: var(--line);
+  --drawer-bg: var(--chip-neutral);
+  --drawer-border: var(--line);
+  --shadow-card: none;
+  --shadow-hover: 0 4px 20px rgba(0, 0, 0, .5);
+  color-scheme: dark;
+}
  
- .dark {
-   --bg: #0C0C0E;
-   --surface: #18181C;
-   --surface-border: #27272D;
-   --accent: #818CF8;
-   --accent-soft: rgba(129, 140, 248, .12);
-   --text: #E4E4EC;
-   --text-secondary: #7C7C8A;
-   --nav-hover: rgba(255, 255, 255, .04);
-   --nav-text: #8B8B96;
-   --nav-section: #5C5C68;
-   --sidebar-bg: #111114;
-   --sidebar-border: #1E1E24;
-   --sidebar-card-bg: #18181C;
-   --sidebar-card-border: #27272D;
-   --drawer-bg: #121216;
-   --drawer-border: #27272D;
-   --shadow-card: 0 0 0 1px rgba(255, 255, 255, .06);
-   --shadow-hover: 0 0 0 1px rgba(129, 140, 248, .3), 0 4px 20px rgba(0, 0, 0, .5);
-   color-scheme: dark;
- }
- 
- *, *::before, *::after {
-   box-sizing: border-box;
-   margin: 0;
-   padding: 0;
- }
- 
+/* 不要再写未分层的 `* { margin:0; padding:0 }` 通用 reset。
+   Tailwind v4 的 preflight 已经在 @layer base 里提供了同样的声明；
+   自己再写一份会变成「未分层」规则，而未分层声明优先于所有 @layer 内容，
+   会把 @layer utilities 里的 padding-*/margin-* 全部压成 0
+   （实测 p-4 / px-6 / pl-[220px] 计算值均为 0px，导致整站无内边距）。 */
  html, body, #app {
    min-height: 100%;
  }
