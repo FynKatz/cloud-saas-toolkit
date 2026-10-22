@@ -101,7 +101,17 @@ const groups = computed(() =>
   })),
 )
 
+// Header/breadcrumb title must match the sidebar label. Per the locked design
+// decision the display name comes from tools.name in Supabase, so derive it
+// from the store instead of duplicating 8 hardcoded route meta titles.
+// Falls back to meta.title while the store is still loading, or for non-tool
+// routes (dashboard, admin, auth) that have no toolId.
 const currentTitle = computed(() => {
+  const toolId = route.meta.toolId as string | undefined
+  if (toolId) {
+    const tool = toolsStore.tools.find((t) => t.id === toolId)
+    if (tool?.name) return tool.name
+  }
   const title = route.meta.title as string | undefined
   return title || 'Cloud SaaS Toolkit'
 })
