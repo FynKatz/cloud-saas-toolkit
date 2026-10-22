@@ -52,20 +52,30 @@ Browser
 - 私有工具 RLS 隔离、共享工具对所有已授权用户可见。
 - 审计日志、收藏、最近使用收尾。
 
-### Phase 5: 设计系统 + 全站 UI/UX 统一（当前阶段）
+### Phase 5: 设计系统 + 全站 UI/UX 统一 — ✅ 已完成并上线（2026-10-22）
 
-定性为**重建**，不是打补丁。依据 `docs/design/dashboard-layout-spec.md` v1.1 与
+定性为**重建**，不是打补丁。依据 `docs/design/dashboard-layout-spec.md` v1.1（含 §11 偏离清单）与
 只读基线 `docs/design/baseline/dashboard-layout.html`。
 
-- 5.1 `src/style.css` 换成定稿 Cake token（浅色 + 暗夜双份）。
-- 5.2 `AppShell.vue` 复刻基线导航骨架：220↔56 收缩、抽屉分组、汉堡常驻、
-  固定项走滚动锚点；scoped 普通 CSS，不走 Tailwind 工具类。
-- 5.3 `DashboardView.vue` 按 8 个 block 重建；KPI 接真实计数，空状态分级。
-- 5.4 暗夜模式一并交付（黑底 `#0C0C0E` + 紫强调，禁绿）。
-- 5.5 全页面 1:1 对照基线验收（菜单交互 + 页内交互 + 内容与迁移前一致）。
+- 5.1 ✅ `src/style.css` 换成定稿 Cake token（浅色 + 暗夜双份）。
+  过程中挖出全站根因：未分层的 `* { padding:0 }` 压掉了 Tailwind 所有 padding/margin
+  工具类，是「UI 一塌糊涂」的主因；另修 `useTheme` 导致暗夜无法持久化。
+- 5.2 ✅ `AppShell.vue` 复刻基线导航骨架：220↔56 收缩、抽屉分组、汉堡常驻、
+  固定项走滚动锚点；scoped 普通 CSS，不走 Tailwind 工具类。CDP 交互 10/10。
+- 5.3 ✅ `DashboardView.vue` 按 8 个 block 重建；KPI 接真实计数，空状态分级。
+- 5.4 ✅ 暗夜模式一并交付（黑底 `#0C0C0E` + 紫强调，禁绿）。双主题 16 页审计全通过。
+- 5.5 ✅ 全页面验收：构建产物回归 36/36、生产检查 9/9、无 JS 异常。
+
+验证工具已入库：`scripts/serve-dist.mjs`（带 SPA 回退地测产物）。
 
 已完成前置：DB 分组 migration 已执行（`20261021010000_tool_categories_b_grouping.sql`）。
-待处理：`router/index.ts` 的 DEV 离线 seed 分类仍是旧值，5.2 时同步。
+已完成前置：`router/index.ts` 的 DEV 离线 seed 已按真实库重生成（含修正错误的 id）。
+
+### Phase 6: 后续可做（未开始）
+
+- 面积图与活动流接 `audit_logs`，替换静态演示（当前已明确标注「演示」）。
+- 未使用的 shadcn 脚手架（`lib/utils.ts`、reka-ui 等）是否清理。
+- 停车/电影/待办数据由用户自行录入后，KPI 与占比表自动生效。
 
 ## Repository Rules
 
