@@ -1,0 +1,19 @@
+# Netlify 构建配置（版本化，优先于 UI 里的同名设置）
+#
+# 为什么需要：frontend/.env 被 gitignore，Netlify 上不存在该文件，
+# 而 site/account 级环境变量接口在本账号（FREE）下不可写
+# （account 级返回 403 需升级，site 级返回 404）。
+# 因此构建时从已跟踪的 .env.secrets 生成 frontend/.env，
+# 保持 .env.secrets 为唯一事实源（见 PRD §8.1）。
+#
+# 只有 VITE_ 前缀的公开变量会被写入，Vite 会内联进产物；
+# SERVICE_ROLE / PIXABAY / TMDB / ADMIN 密码等不在此列，不进前端包。
+
+[build]
+  base = "frontend"
+  publish = "dist"
+  command = "grep '^VITE_' ../.env.secrets > .env && npm run build"
+
+[build.environment]
+  # Vite 8 要求 Node ^20.19.0 || >=22.12.0；固定主版本避免"本地能过线上挂"
+  NODE_VERSION = "22"

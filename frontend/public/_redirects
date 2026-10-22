@@ -1,0 +1,5 @@
+# SPA fallback — Vue Router uses createWebHistory(), so any deep link or
+# refresh on a non-root path must be served index.html.
+# Copied verbatim into dist/ by Vite, so it applies to both git-triggered
+# builds and direct Deploy API uploads.
+/*  /index.html  200
