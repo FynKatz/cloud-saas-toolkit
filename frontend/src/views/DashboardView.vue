@@ -156,7 +156,6 @@ const ACTIVITY_LABELS: Record<string, string> = {
   admin_delete_role: '删除角色',
   admin_set_role_permission: '设置角色权限',
   admin_assign_user_role: '分配用户角色',
-  admin_unassign_user_role: '解除用户角色',
   user_reapply: '重新申请',
   user_change_password: '修改密码',
   pixabay_proxy: 'Pixabay 代理请求',

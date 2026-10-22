@@ -237,18 +237,18 @@ user_id UUID REFERENCES auth.users(id) NOT NULL
 
 | # | 工具 | 分类 | 数据范围 | 可写 | 状态 |
 |---|------|------|---------|------|------|
-| 1 | Docker & K8S 速查 | 速查参考 | 无（纯前端） | 否 | ready |
-| 2 | SQL 速查 | 速查参考 | 无（纯前端） | 否 | ready |
-| 3 | Redis 速查 | 速查参考 | 无（纯前端） | 否 | ready |
+| 1 | SQL 速查 | 速查参考 | 无（纯前端） | 否 | ready |
+| 2 | Redis 速查 | 速查参考 | 无（纯前端） | 否 | ready |
+| 3 | Docker & K8S 速查 | 速查参考 | 无（纯前端） | 否 | ready |
 | 4 | Typora 快捷键 | 速查参考 | 无（纯前端） | 否 | ready |
-| 5 | Chrome 扩展打包 | 速查参考 | 无（纯前端） | 否 | ready |
-| 6 | Markdown 标题工具 | 速查参考 | 无（纯前端） | 否 | ready |
-| 7 | 停车收费 | 交互工具 | shared | 是 | ready |
-| 8 | 图片拼接 | 交互工具 | 无（纯前端） | 否 | ready |
-| 9 | 字数统计 | 交互工具 | 无（纯前端） | 否 | ready |
-| 10 | Pixabay 下载 | 交互工具 | 无（纯前端） | 否 | ready |
-| 11 | 家庭电影 | 信息面板 | shared | 是 | ready |
-| 12 | Todo | 任务管理 | private | 是 | ready |
+| 5 | 停车收费 | 数据应用 | shared | 是 | ready |
+| 6 | Todo | 数据应用 | private | 是 | ready |
+| 7 | 家庭电影 | 数据应用 | shared | 是 | ready |
+| 8 | 图片拼接 | 图形工具 | 无（纯前端） | 否 | ready |
+| 9 | Pixabay 下载 | 图形工具 | 无（纯前端） | 否 | ready |
+| 10 | 字数统计 | 文本工具 | 无（纯前端） | 否 | ready |
+| 11 | Chrome 扩展打包 | 文本工具 | 无（纯前端） | 否 | ready |
+| 12 | Markdown 标题工具 | 文本工具 | 无（纯前端） | 否 | ready |
 
 注：海南航空页面已删除，不纳入本期。
 
@@ -266,7 +266,7 @@ user_id UUID REFERENCES auth.users(id) NOT NULL
 
 ### 5.7 工作台与导航
 
-- 四分类：速查参考、交互工具、信息面板、任务管理。
+- 四分类：速查参考、数据应用、图形工具、文本工具。
 - 无权限工具的分类整个隐藏。
 - 首页：搜索框 + 最近使用 + Bento 卡片网格。
 - 收藏与最近使用按当前权限过滤，被撤权限的工具不再显示。
@@ -296,8 +296,7 @@ user_id UUID REFERENCES auth.users(id) NOT NULL
 | `admin_update_role` | `{role_id, name?, description?}` | `{success}` | admin 修改角色名称/描述 |
 | `admin_delete_role` | `{role_id}` | `{success}` | admin 删除非系统角色；仍有用户绑定时禁止删除 |
 | `admin_set_role_permission` | `{role_id, tool_id, access_level}` | `{success}` | admin 设置角色对工具的操作权限（含移除：`access_level=null`） |
-| `admin_assign_user_role` | `{user_id, role_ids}` | `{success}` | admin 为用户设置角色（全量替换，DELETE + INSERT 原子事务）；不保留旧角色，role_ids 为空数组时移除全部角色；最后一个 active admin 的 admin 角色不可被移除（与 `admin_unassign_user_role` 共用同一保护逻辑） |
-| `admin_unassign_user_role` | `{user_id, role_id}` | `{success}` | admin 解除用户的单个角色绑定；最后一个 active admin 的 admin 角色不可被移除 |
+| `admin_assign_user_role` | `{user_id, role_ids}` | `{success}` | admin 为用户设置角色（全量替换，DELETE + INSERT 原子事务）；不保留旧角色，role_ids 为空数组时移除全部角色；单角色解绑同样通过本函数以「传入剩余 role_ids」实现；最后一个 active admin 的 admin 角色不可被移除 |
 
 除 `user_reapply` 和 `check_username` 外，每个 Edge Function 在入口处验证调用方的 Supabase JWT，提取 `user_id`，显式查询 `user_roles` + `profiles.status` 判定 admin 身份后才执行操作，非 admin 调用返回 403。Edge Function 跑在 service role 上下文，`auth.uid()` 为 NULL，不能复用 RLS 版 `is_admin()`，必须手动查表鉴权（详见安全要求 §8）。`user_reapply` 校验 JWT `sub` 对应本人且 `status='rejected'`；`check_username` 只返回结果码（`forbidden` / `available` / `exists` / `deleted` / `reserved` / `invalid`），不返回其他用户数据。
 

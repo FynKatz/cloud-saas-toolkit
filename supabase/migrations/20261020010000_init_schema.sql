@@ -507,18 +507,18 @@ on conflict (name) do nothing;
 insert into public.tools
   (id, name, category, route, icon, description, data_scope, writable, sort_order)
 values
-  ('docker-k8s-cheatsheet', 'Docker & K8S 速查', '速查参考', 'tools/docker-k8s', 'Container', 'Docker 与 Kubernetes 常用命令速查', 'none', false, 1),
-  ('sql-cheatsheet', 'SQL 速查', '速查参考', 'tools/sql', 'Database', 'SQL 常用语法速查', 'none', false, 2),
-  ('redis-cheatsheet', 'Redis 速查', '速查参考', 'tools/redis', 'Zap', 'Redis 常用命令速查', 'none', false, 3),
+  ('sql-cheatsheet', 'SQL 速查', '速查参考', 'tools/sql', 'Database', 'SQL 常用语法速查', 'none', false, 1),
+  ('redis-cheatsheet', 'Redis 速查', '速查参考', 'tools/redis', 'Zap', 'Redis 常用命令速查', 'none', false, 2),
+  ('docker-k8s-cheatsheet', 'Docker & K8S 速查', '速查参考', 'tools/docker-k8s', 'Container', 'Docker 与 Kubernetes 常用命令速查', 'none', false, 3),
   ('typora-shortcuts', 'Typora 快捷键', '速查参考', 'tools/typora', 'Keyboard', 'Typora 快捷键速查', 'none', false, 4),
-  ('chrome-extension-packaging', 'Chrome 扩展打包', '速查参考', 'tools/chrome-extension', 'Puzzle', 'Chrome 扩展打包步骤', 'none', false, 5),
-  ('markdown-heading', 'Markdown 标题工具', '速查参考', 'tools/markdown-heading', 'Heading', 'Markdown 标题层级处理', 'none', false, 6),
-  ('parking', '停车收费', '交互工具', 'tools/parking', 'Car', '家庭停车收费信息', 'shared', true, 7),
-  ('image-stitch', '图片拼接', '交互工具', 'tools/image-stitch', 'Image', '图片拼接工具', 'none', false, 8),
-  ('word-count', '字数统计', '交互工具', 'tools/word-count', 'Hash', '文本字数统计', 'none', false, 9),
-  ('pixabay-download', 'Pixabay 下载', '交互工具', 'tools/pixabay', 'Image', 'Pixabay 图片搜索下载', 'none', false, 10),
-  ('movie', '家庭电影', '信息面板', 'tools/movie', 'Film', '家庭电影库', 'shared', true, 11),
-  ('todo', 'Todo', '任务管理', 'tools/todo', 'ListTodo', '个人待办事项', 'private', true, 12)
+  ('parking', '停车收费', '数据应用', 'tools/parking', 'Car', '家庭停车收费信息', 'shared', true, 5),
+  ('todo', 'Todo', '数据应用', 'tools/todo', 'ListTodo', '个人待办事项', 'private', true, 6),
+  ('movie', '家庭电影', '数据应用', 'tools/movie', 'Film', '家庭电影库', 'shared', true, 7),
+  ('image-stitch', '图片拼接', '图形工具', 'tools/image-stitch', 'Image', '图片拼接工具', 'none', false, 8),
+  ('pixabay-download', 'Pixabay 下载', '图形工具', 'tools/pixabay', 'Image', 'Pixabay 图片搜索下载', 'none', false, 9),
+  ('word-count', '字数统计', '文本工具', 'tools/word-count', 'Hash', '文本字数统计', 'none', false, 10),
+  ('chrome-extension-packaging', 'Chrome 扩展打包', '文本工具', 'tools/chrome-extension', 'Puzzle', 'Chrome 扩展打包步骤', 'none', false, 11),
+  ('markdown-heading', 'Markdown 标题工具', '文本工具', 'tools/markdown-heading', 'Heading', 'Markdown 标题层级处理', 'none', false, 12)
 on conflict (id) do update set
   name = excluded.name,
   category = excluded.category,
