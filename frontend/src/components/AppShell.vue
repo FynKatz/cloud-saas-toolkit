@@ -144,8 +144,9 @@ watch(openUserMenu, (val) => {
 })
 
 onMounted(() => {
-  // Re-entering the workspace is when an admin's permission change should show up.
-  toolsStore.load(true)
+  if (!toolsStore.initialized || toolsStore.tools.length === 0) {
+    toolsStore.load(true)
+  }
   loadPendingCount()
 })
 

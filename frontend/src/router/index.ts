@@ -172,7 +172,7 @@ export function setupRouterGuards(router: Router) {
         const { data } = await import('../lib/supabase').then(m =>
           m.supabase.from('tools').select('*').order('sort_order')
         ).catch(() => ({ data: null }))
-        if (!data) {
+        if (!data || data.length === 0) {
           // Offline — seed with hardcoded tools matching our routes
           // Offline DEV seed — must mirror public.tools exactly.
           // ids here were previously wrong ('text-stats' / 'chrome-pack'), which made the
