@@ -298,7 +298,7 @@ provide(DASHBOARD_SEARCH_KEY, searchQuery)
 }
 .brand { display: flex; align-items: center; gap: 10px; padding: 0 16px 14px; }
 .brand-logo {
-  width: 30px; height: 30px; border-radius: 9px; background: var(--violet);
+  width: 30px; height: 30px; border-radius: 9px; background: var(--violet-solid);
   color: #fff; display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: 14px; flex-shrink: 0;
 }
@@ -338,7 +338,7 @@ provide(DASHBOARD_SEARCH_KEY, searchQuery)
 .sidebar.collapsed .sidebar-footer .user-row span { display: none; }
 
 .nav { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0 10px; }
-.nav-loading { padding: 4px 10px; font-size: 11.5px; color: var(--ink-3); }
+.nav-loading { padding: 4px 10px; font-size: 11.5px; color: var(--label-muted); }
 
 /* 导航项（展开态基础样式，固定项与抽屉项共用） */
 .nav-item {
@@ -356,7 +356,7 @@ provide(DASHBOARD_SEARCH_KEY, searchQuery)
 .fixed-nav { margin-bottom: 12px; }
 .divider-text {
   display: flex; align-items: center; gap: 10px; padding: 4px 10px 8px;
-  color: var(--ink-3); font-size: 10.5px; font-weight: 600;
+  color: var(--label-muted); font-size: 10.5px; font-weight: 600;
   text-transform: uppercase; letter-spacing: .5px;
 }
 
@@ -383,13 +383,14 @@ provide(DASHBOARD_SEARCH_KEY, searchQuery)
 
 .side-card {
   margin: 12px 14px 0; padding: 14px; border-radius: var(--radius);
-  background: linear-gradient(160deg, var(--violet), #7a5cff); color: #fff;
+  background: linear-gradient(160deg, var(--violet-solid), #7a5cff); color: #fff;
 }
 .side-card h4 { font-size: 13px; font-weight: 650; }
 .side-card p { font-size: 11.5px; opacity: .85; margin-top: 4px; line-height: 1.45; }
 .side-card button {
   margin-top: 10px; width: 100%; border: none; border-radius: 8px;
-  background: #fff; color: var(--violet); font-weight: 650; font-size: 12.5px;
+  /* 白底上的文字走深紫，否则暗色下提亮版紫字压不住白底 */
+  background: #fff; color: var(--violet-solid); font-weight: 650; font-size: 12.5px;
   padding: 7px 0; cursor: pointer; font-family: inherit;
 }
 
@@ -397,7 +398,7 @@ provide(DASHBOARD_SEARCH_KEY, searchQuery)
 .user-row { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 9px; color: var(--ink-2); font-size: 12px; }
 .user-row span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .user-dot {
-  width: 22px; height: 22px; border-radius: 50%; background: var(--violet);
+  width: 22px; height: 22px; border-radius: 50%; background: var(--violet-solid);
   color: #fff; display: flex; align-items: center; justify-content: center;
   font-size: 10px; font-weight: 600; flex-shrink: 0;
 }
@@ -408,7 +409,7 @@ provide(DASHBOARD_SEARCH_KEY, searchQuery)
   height: 56px; min-height: 56px; display: flex; align-items: center; gap: 14px;
   padding: 0 28px; border-bottom: 1px solid var(--line); background: var(--card);
 }
-.topbar-breadcrumb { font-size: 13px; color: var(--ink-3); }
+.topbar-breadcrumb { font-size: 13px; color: var(--label-muted); }
 .topbar-breadcrumb b { color: var(--ink); font-weight: 650; }
 .spacer { flex: 1; }
 .icon-btn {
@@ -427,7 +428,7 @@ provide(DASHBOARD_SEARCH_KEY, searchQuery)
 }
 .pop-head { border-bottom: 1px solid var(--line); padding: 12px 14px; }
 .pop-name { font-size: 13px; font-weight: 650; color: var(--ink); }
-.pop-role { margin-top: 2px; font-size: 11px; color: var(--ink-3); }
+.pop-role { margin-top: 2px; font-size: 11px; color: var(--label-muted); }
 .pop-item {
   display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px;
   border: none; background: none; cursor: pointer; font-family: inherit;
