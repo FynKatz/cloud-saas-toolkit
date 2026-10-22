@@ -12,3 +12,4 @@ build/
 gh_token.txt
 supabase_token.txt
 .wrangler/
+.playwright-mcp/
