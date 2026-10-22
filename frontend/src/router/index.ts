@@ -146,12 +146,66 @@ export const routes: RouteRecordRaw[] = [
   },
 ]
 
+function isDevMode(): boolean {
+  try {
+    return (window as any).__DEV_AUTH === true
+  } catch {
+    return false
+  }
+}
+
 export function setupRouterGuards(router: Router) {
   router.beforeEach(async (to) => {
     const auth = useAuthStore()
 
     if (!auth.initialized) {
       await auth.init()
+    }
+
+    // Dev mode — no Supabase: fake admin session and load all tools
+    if (import.meta.env.DEV && isDevMode()) {
+      // Let anything through; AppShell uses tools store for nav, seed it
+      auth.user = { id: 'dev', email: 'dev@dev' } as any
+      auth.isAdmin = true
+      const toolsStore = useToolsStore()
+      if (!toolsStore.initialized) {
+        const { data } = await import('../lib/supabase').then(m =>
+          m.supabase.from('tools').select('*').order('sort_order')
+        ).catch(() => ({ data: null }))
+        if (!data) {
+          // Offline — seed with hardcoded tools matching our routes
+          // Offline DEV seed — must mirror public.tools exactly.
+          // ids here were previously wrong ('text-stats' / 'chrome-pack'), which made the
+          // route guard's hasTool(toolId) check fail and bounce those pages to /dashboard.
+          // Regenerate with:
+          //   sh scripts/supa-sql.sh "select id,name,category,icon,data_scope,writable,
+          //     sort_order from public.tools order by sort_order"
+          const offlineTools: any[] = [
+            { id: 'sql-cheatsheet', name: 'SQL 速查', category: '速查参考', sort_order: 1, writable: false, data_scope: 'none', icon: 'Database' },
+            { id: 'redis-cheatsheet', name: 'Redis 速查', category: '速查参考', sort_order: 2, writable: false, data_scope: 'none', icon: 'Zap' },
+            { id: 'docker-k8s-cheatsheet', name: 'Docker & K8S 速查', category: '速查参考', sort_order: 3, writable: false, data_scope: 'none', icon: 'Container' },
+            { id: 'typora-shortcuts', name: 'Typora 快捷键', category: '速查参考', sort_order: 4, writable: false, data_scope: 'none', icon: 'Keyboard' },
+            { id: 'parking', name: '停车收费', category: '数据应用', sort_order: 5, writable: true, data_scope: 'shared', icon: 'Car' },
+            { id: 'todo', name: 'Todo', category: '数据应用', sort_order: 6, writable: true, data_scope: 'private', icon: 'ListTodo' },
+            { id: 'movie', name: '家庭电影', category: '数据应用', sort_order: 7, writable: true, data_scope: 'shared', icon: 'Film' },
+            { id: 'image-stitch', name: '图片拼接', category: '图形工具', sort_order: 8, writable: false, data_scope: 'none', icon: 'Image' },
+            { id: 'pixabay-download', name: 'Pixabay 下载', category: '图形工具', sort_order: 9, writable: false, data_scope: 'none', icon: 'Image' },
+            { id: 'word-count', name: '字数统计', category: '文本工具', sort_order: 10, writable: false, data_scope: 'none', icon: 'Hash' },
+            { id: 'chrome-extension-packaging', name: 'Chrome 扩展打包', category: '文本工具', sort_order: 11, writable: false, data_scope: 'none', icon: 'Puzzle' },
+            { id: 'markdown-heading', name: 'Markdown 标题工具', category: '文本工具', sort_order: 12, writable: false, data_scope: 'none', icon: 'Heading' },
+          ]
+          toolsStore.tools = offlineTools as any
+          toolsStore.initialized = true
+        } else {
+          toolsStore.tools = data as any
+          toolsStore.initialized = true
+        }
+        // Grant all tools as edit
+        for (const tool of toolsStore.tools) {
+          toolsStore.permissions[tool.id] = 'edit'
+        }
+      }
+      return true
     }
 
     const publicNames = new Set(['login', 'register'])
