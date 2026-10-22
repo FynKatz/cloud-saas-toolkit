@@ -11,6 +11,16 @@
 
 ---
 
+### 2026-10-22 — Phase 6 收尾：数据驱动 Dashboard + 脚手架清扫
+- 动作：阶段收尾。6.1 DashboardView 活动流与趋势图从 static demo 改为真实 `audit_logs`（RLS-scoped）；
+  6.2 彻底移除 shadcn-vue/reka-ui 脚手架残留。
+- 6.1 范围：`ACTIVITY_LABELS` 映射 17 种 `action` → 中文标签；`loadActivity()` 拉近 8 条 + 近 7 天计数；
+  SVG 面积图/折线图由 `trendPath`/`trendLine` computed 实时计算；空/加载态完备。
+- 6.2 范围：删除 `components.json`、`src/lib/utils.ts`（`cn()` helper）、4 个 npm 包（class-variance-authority/
+  clsx/reka-ui/tailwind-merge）、`style.css` 中 43 行死 CSS（`@theme inline` + `#shadcn-demo-root`）。
+  确认全仓库零 shadcn/reka 引用，`npm install` 0 vulns，`vue-tsc -b + vite build` 通过。
+- 6.3：停车/电影/待办数据由用户自行录入后 KPI 与占比表自动生效，无需代码改动。
+- 提交：`2ad4a15` feat(phase6) — 6 files, +136/-303。
 ## 记录格式
 
 ```

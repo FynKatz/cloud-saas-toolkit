@@ -71,11 +71,12 @@ Browser
 已完成前置：DB 分组 migration 已执行（`20261021010000_tool_categories_b_grouping.sql`）。
 已完成前置：`router/index.ts` 的 DEV 离线 seed 已按真实库重生成（含修正错误的 id）。
 
-### Phase 6: 后续可做（未开始）
+### Phase 6: 数据驱动 Dashboard + 脚手架清扫 ✅ 已完成（2026-10-22）
 
-- 面积图与活动流接 `audit_logs`，替换静态演示（当前已明确标注「演示」）。
-- 未使用的 shadcn 脚手架（`lib/utils.ts`、reka-ui 等）是否清理。
-- 停车/电影/待办数据由用户自行录入后，KPI 与占比表自动生效。
+- 6.1 ✅ Dashboard 活动流从 static demo → 真实 `audit_logs`，趋势面积图/折线图近 7 天实时。
+- 6.2 ✅ 删除未使用的 shadcn/reka-ui 脚手架：`components.json`、`lib/utils.ts`、
+  4 个 npm 包(class-variance-authority/clsx/reka-ui/tailwind-merge)、`style.css` 43 行死 CSS。
+- 6.3 📝 停车/电影/待办数据由用户自行录入后 KPI 与占比表自动生效（无需代码改动；空环/引导已完备）。
 
 ## Repository Rules
 
