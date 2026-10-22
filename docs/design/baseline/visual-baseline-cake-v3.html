@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard 方案 B · Cake Equity 风格</title>
+<style>
+:root{
+  --violet:#5533ff;
+  --violet-soft:#eeeeff;
+  --violet-line:#ddddff;
+  --lime:#ddff55;
+  --ink:#191b1f;
+  --ink-2:#5a6068;
+  --ink-3:#939aa4;
+  --line:#eceef2;
+  --page:#ffffff;
+  --card:#ffffff;
+  --radius:14px;
+  --font:"Inter","SF Pro Text",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);font-size:13.5px;color:var(--ink);background:var(--page);-webkit-font-smoothing:antialiased}
+.app{display:flex;height:100vh}
+
+/* ---------- sidebar ---------- */
+.sidebar{width:212px;min-width:212px;background:#fbfbfd;border-right:1px solid var(--line);padding:16px 0;display:flex;flex-direction:column;overflow:hidden;transition:width .16s,min-width .16s}
+.brand{display:flex;align-items:center;gap:10px;padding:0 18px 18px}
+.brand-logo{width:30px;height:30px;border-radius:9px;background:var(--violet);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.brand-name{font-weight:650;font-size:14.5px;white-space:nowrap;overflow:hidden}
+.sidebar-collapse-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:var(--ink-3);border-radius:8px;flex-shrink:0;font-size:15px;padding:0}
+.sidebar-collapse-btn:hover{background:#f2f2f7;color:var(--ink)}
+.sidebar.collapsed{width:48px;min-width:48px;padding:8px 0}
+.sidebar.collapsed .brand{justify-content:center;padding:0 0 12px}
+.sidebar.collapsed .brand-logo{display:none}
+.sidebar.collapsed .brand-name{display:none}
+.sidebar.collapsed .nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 4px;margin:0}
+.sidebar.collapsed .nav-group{margin:0 0 8px}
+.sidebar.collapsed .nav-group-header{display:none}
+.sidebar.collapsed .nav-items{display:flex !important;flex-direction:column;align-items:center;gap:4px;margin:0;padding:0}
+.sidebar.collapsed .nav-item{display:flex !important;align-items:center;justify-content:center;width:40px;min-width:40px;height:40px;min-height:40px;padding:0 !important;margin:0 !important;font-size:0;gap:0;border-radius:10px;flex-shrink:0}
+.sidebar.collapsed .nav-item:hover{background:#f2f2f7}
+.sidebar.collapsed .nav-item.active{background:var(--violet-soft)}
+.sidebar.collapsed .nav-item svg{width:20px;height:20px;display:block;flex-shrink:0}
+.sidebar.collapsed .side-card{display:none}
+
+.sidebar-footer{border-top:1px solid var(--line);padding:8px;margin-top:auto}
+.sidebar-footer .user-row{display:flex;align-items:center;gap:8px;color:var(--ink-3);font-size:11px;padding:4px 6px}
+.sidebar-footer .user-dot{width:18px;height:18px;border-radius:50%;background:var(--violet);color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;flex-shrink:0}
+.sidebar.collapsed .sidebar-footer .user-row span{display:none}
+.sidebar.collapsed .sidebar-footer .user-row{justify-content:center;padding:4px 0}
+.nav{flex:1;overflow-y:auto;padding:0 10px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;color:var(--ink-2);font-size:13.5px;cursor:pointer;margin-bottom:2px}
+.nav-item:hover{background:#f2f2f7}
+.nav-item.active{background:var(--violet-soft);color:var(--violet);font-weight:600}
+.nav-item svg{width:16px;height:16px}
+
+.nav-group{margin-bottom:6px}
+.nav-group-header{display:flex;align-items:center;gap:10px;width:100%;height:34px;padding:0 10px;border:none;background:none;cursor:pointer;color:var(--ink-2);font-family:var(--font);font-size:12px;font-weight:600;text-align:left;border-radius:8px;transition:color .16s,background .16s}
+.nav-group-header:hover{background:rgba(0,0,0,.03);color:var(--ink)}
+.grp-dot{width:5px;height:5px;border-radius:50%;background:var(--ink-2);flex-shrink:0}
+.chev{width:12px;height:12px;margin-left:auto;opacity:.5;transition:transform .16s,opacity .16s;flex-shrink:0}
+.chev.open{transform:rotate(90deg);opacity:1}
+.nav-items{display:flex;flex-direction:column;gap:2px;margin-left:14px}
+.nav-group.collapsed .nav-items{display:none}
+.side-card{margin:12px 14px 0;padding:14px;border-radius:var(--radius);background:linear-gradient(160deg,var(--violet),#7a5cff);color:#fff}
+.side-card h4{font-size:13.5px;font-weight:650}
+.side-card p{font-size:11.5px;opacity:.85;margin-top:4px;line-height:1.45}
+.side-card button{margin-top:10px;width:100%;border:none;border-radius:8px;background:#fff;color:var(--violet);font-weight:650;font-size:12.5px;padding:7px 0;cursor:pointer}
+
+/* ---------- main ---------- */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:58px;min-height:58px;display:flex;align-items:center;gap:14px;padding:0 28px;border-bottom:1px solid var(--line)}
+.chain{display:flex;align-items:center;gap:10px}
+.chain select{border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:13px;font-family:var(--font);background:#fff;color:var(--ink)}
+.spacer{flex:1}
+.ghost-btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 13px;font-size:12.5px;color:var(--ink-2);cursor:pointer;font-family:var(--font)}
+.primary-btn{border:none;background:var(--violet);color:#fff;border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font)}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--lime);color:#2b2f00;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+
+.content{flex:1;overflow-y:auto;padding:24px 28px 44px}
+.hero{display:flex;align-items:flex-start;gap:18px;flex-wrap:wrap}
+.hero h1{font-size:23px;font-weight:680;letter-spacing:-.4px}
+.hero p{color:var(--ink-2);font-size:13px;margin-top:5px}
+.hero .spacer{flex:1}
+
+/* ---------- takeover banner ---------- */
+.banner{display:flex;align-items:center;gap:14px;margin-top:20px;padding:16px 20px;border-radius:var(--radius);background:var(--violet-soft);border:1px solid var(--violet-line)}
+.banner-badge{width:38px;height:38px;border-radius:11px;background:var(--violet);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.banner-main{flex:1}
+.banner-main h4{font-size:14px;font-weight:650}
+.banner-main p{font-size:12.5px;color:#5b58a8;margin-top:3px}
+.banner-cta{border:1px solid var(--violet);background:#fff;color:var(--violet);border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer}
+
+/* ---------- KPI cards ---------- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:17px 18px}
+.kpi-label{font-size:11.5px;color:var(--ink-3);font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+.kpi-value{font-size:26px;font-weight:680;letter-spacing:-.6px;margin-top:8px}
+.kpi-foot{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11.5px;color:var(--ink-2)}
+.chip{display:inline-block;padding:2px 7px;border-radius:99px;background:var(--lime);color:#3b4200;font-weight:700;font-size:11px}
+.chip.v{background:var(--violet-soft);color:var(--violet)}
+
+/* ---------- charts row ---------- */
+.charts{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-top:22px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--line)}
+.panel-head h3{font-size:14px;font-weight:650}
+.panel-head .tag{font-size:11.5px;color:var(--violet);background:var(--violet-soft);border-radius:99px;padding:3px 9px;font-weight:600}
+.panel-body{padding:16px 18px}
+
+/* area chart */
+.area{position:relative;height:190px}
+.area svg{width:100%;height:100%;display:block}
+.axis{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-3);margin-top:6px}
+
+/* donut */
+.donut-wrap{display:flex;align-items:center;gap:18px}
+.donut{width:132px;height:132px;border-radius:50%;flex-shrink:0;
+  background:conic-gradient(var(--violet) 0 46%, #8b78ff 46% 72%, var(--lime) 72% 90%, #e8e8f2 90% 100%);
+  display:flex;align-items:center;justify-content:center;position:relative}
+.donut::after{content:"";position:absolute;inset:26px;border-radius:50%;background:#fff}
+.donut-label{position:relative;z-index:1;text-align:center}
+.donut-label b{font-size:19px;font-weight:680;display:block}
+.donut-label span{font-size:10.5px;color:var(--ink-3)}
+.legend{flex:1}
+.legend-row{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--ink-2);padding:5px 0}
+.swatch{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+.legend-row b{margin-left:auto;color:var(--ink);font-weight:600}
+
+/* ---------- activity feed ---------- */
+.feed{margin-top:22px}
+.feed-row{display:flex;align-items:center;gap:13px;padding:13px 18px;border-bottom:1px solid #f4f5f8}
+.feed-row:last-child{border-bottom:none}
+.feed-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.ico-v{background:var(--violet-soft);color:var(--violet)}
+.ico-l{background:#f4ffd0;color:#5c6b00}
+.ico-g{background:#e9f7ef;color:#12805c}
+.feed-main{flex:1;min-width:0}
+.feed-title{font-size:13.5px;font-weight:600}
+.feed-meta{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.feed-amt{font-size:13.5px;font-weight:650;font-variant-numeric:tabular-nums}
+
+/* ---------- table ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:var(--ink-3);font-weight:650;padding:11px 18px;border-bottom:1px solid var(--line)}
+.tbl td{padding:13px 18px;border-bottom:1px solid #f4f5f8;color:var(--ink-2)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl td:first-child{color:var(--ink);font-weight:600}
+.bar-mini{height:6px;width:80px;border-radius:99px;background:#eceef2;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px}
+.bar-mini i{display:block;height:100%;background:var(--violet)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+          <div class="brand"><div class="brand-logo">C</div><div class="brand-name">Cloud Toolkit</div><button class="sidebar-collapse-btn" onclick="toggleSidebar()" title="菜单"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4h12M2 8h12M2 12h12"/></svg></button></div>
+    <nav class="nav" id="sideNav">
+      <div class="nav-group" id="grp-core">
+        <button class="nav-group-header" onclick="toggleGroup('grp-core')"><span class="grp-dot"></span><span>核心工具</span><svg class="chev open" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4l4 4-4 4"/></svg></button>
+        <div class="nav-items">
+          <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>概览</div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>速查工具</div>
+        </div>
+      </div>
+      <div class="nav-group" id="grp-data">
+        <button class="nav-group-header" onclick="toggleGroup('grp-data')"><span class="grp-dot"></span><span>数据管理</span><svg class="chev open" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4l4 4-4 4"/></svg></button>
+        <div class="nav-items">
+          <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>停车管理</div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 12l9 4 9-4"/></svg>电影清单</div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0114 0"/></svg>通讯录</div>
+        </div>
+      </div>
+    </nav>
+    <div class="side-card">
+      <h4>迁移动态</h4>
+      <p>旧站工具已全部接入新工作台，权限与菜单已收口。</p>
+      <button>查看迁移报告</button>
+    </div>
+    <div class="sidebar-footer">
+      <div class="user-row"><div class="user-dot">E</div><span>easyyhu · Admin</span></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="chain">
+        <select><option>全部工作区</option><option>停车</option><option>电影</option></select>
+      </div>
+      <div class="spacer"></div>
+      <button class="ghost-btn">导入数据</button>
+      <button class="primary-btn">新建记录</button>
+      <div class="avatar">E</div>
+    </header>
+
+    <div class="content">
+      <div class="hero">
+        <div>
+          <h1>公司总览</h1>
+          <p>停车、电影、通讯录与速查工具的统一数据视图</p>
+        </div>
+        <div class="spacer"></div>
+        <button class="ghost-btn">近 30 天</button>
+      </div>
+
+      <div class="banner">
+        <div class="banner-badge">V</div>
+        <div class="banner-main">
+          <h4>新一轮数据已完成对账</h4>
+          <p>本次共合并 1,284 条停车记录与 316 条电影条目，无冲突项。</p>
+        </div>
+        <button class="banner-cta">立即查看</button>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><div class="kpi-label">工具总数</div><div class="kpi-value">12</div><div class="kpi-foot"><span class="chip">+3</span>本月新增</div></div>
+        <div class="kpi"><div class="kpi-label">停车记录</div><div class="kpi-value">1,284</div><div class="kpi-foot"><span class="chip v">+48</span>本周</div></div>
+        <div class="kpi"><div class="kpi-label">电影条目</div><div class="kpi-value">316</div><div class="kpi-foot"><span class="chip v">-2</span>已归档</div></div>
+        <div class="kpi"><div class="kpi-label">通讯录</div><div class="kpi-value">92</div><div class="kpi-foot"><span class="chip">+5</span>本周</div></div>
+      </div>
+
+      <div class="charts">
+        <div class="panel">
+          <div class="panel-head"><h3>估值 / 流量走势</h3><span class="tag">近 7 天</span></div>
+          <div class="panel-body">
+            <div class="area">
+              <svg viewBox="0 0 560 190" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#5533ff" stop-opacity=".28"/>
+                    <stop offset="100%" stop-color="#5533ff" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,140 C60,120 90,80 140,86 C190,92 210,130 260,120 C310,110 330,58 390,64 C440,69 470,40 560,30 L560,190 L0,190 Z" fill="url(#g1)"/>
+                <path d="M0,140 C60,120 90,80 140,86 C190,92 210,130 260,120 C310,110 330,58 390,64 C440,69 470,40 560,30" fill="none" stroke="#5533ff" stroke-width="2.5"/>
+              </svg>
+            </div>
+            <div class="axis"><span>10-15</span><span>10-16</span><span>10-17</span><span>10-18</span><span>10-19</span><span>10-20</span><span>10-21</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>数据构成</h3><span class="tag">合计 1,692</span></div>
+          <div class="panel-body">
+            <div class="donut-wrap">
+              <div class="donut"><div class="donut-label"><b>76%</b><span>停车占比</span></div></div>
+              <div class="legend">
+                <div class="legend-row"><span class="swatch" style="background:#5533ff"></span>停车记录<b>1,284</b></div>
+                <div class="legend-row"><span class="swatch" style="background:#8b78ff"></span>电影条目<b>316</b></div>
+                <div class="legend-row"><span class="swatch" style="background:#ddff55"></span>通讯录<b>92</b></div>
+                <div class="legend-row"><span class="swatch" style="background:#e8e8f2"></span>其他<b>0</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="charts" style="grid-template-columns:1fr 1fr">
+        <div class="panel feed" style="margin-top:0">
+          <div class="panel-head"><h3>活动流</h3><span class="tag">实时</span></div>
+          <div class="feed-row"><div class="feed-ico ico-v">停</div><div class="feed-main"><div class="feed-title">停车费已结算</div><div class="feed-meta">粤B · 8H2K9 · 2 小时前</div></div><div class="feed-amt">¥36.00</div></div>
+          <div class="feed-row"><div class="feed-ico ico-l">影</div><div class="feed-main"><div class="feed-title">电影条目更新</div><div class="feed-meta">沙丘 2 · 已看</div></div><div class="feed-amt">+1</div></div>
+          <div class="feed-row"><div class="feed-ico ico-g">联</div><div class="feed-main"><div class="feed-title">通讯录新增</div><div class="feed-meta">供应商 · 5 位联系人</div></div><div class="feed-amt">+5</div></div>
+          <div class="feed-row"><div class="feed-ico ico-v">速</div><div class="feed-main"><div class="feed-title">速查表导出</div><div class="feed-meta">CSV · 12 行</div></div><div class="feed-amt">1</div></div>
+        </div>
+
+        <div class="panel" style="margin-top:0">
+          <div class="panel-head"><h3>按工具使用占比</h3><span class="tag">本月</span></div>
+          <table class="tbl">
+            <thead><tr><th>工具</th><th>使用量</th></tr></thead>
+            <tbody>
+              <tr><td>停车管理</td><td><span class="bar-mini"><i style="width:82%"></i></span>1,284</td></tr>
+              <tr><td>电影清单</td><td><span class="bar-mini"><i style="width:26%"></i></span>316</td></tr>
+              <tr><td>通讯录</td><td><span class="bar-mini"><i style="width:12%"></i></span>92</td></tr>
+              <tr><td>速查工具</td><td><span class="bar-mini"><i style="width:9%"></i></span>64</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function toggleSidebar(){
+  var s=document.querySelector(".sidebar");
+  s.classList.toggle("collapsed");
+  var b=document.querySelector(".sidebar-collapse-btn");
+  if(b)b.title=s.classList.contains("collapsed")?"展开菜单":"收起菜单";
+}
+function toggleGroup(id){
+  if(document.querySelector(".sidebar").classList.contains("collapsed")){toggleSidebar();return;}
+  var g=document.getElementById(id);
+  g.classList.toggle("collapsed");
+  var c=g.querySelector(".chev");
+  if(c)c.classList.toggle("open");
+}
+</script>
+</body>
+</html>
