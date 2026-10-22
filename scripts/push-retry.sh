@@ -10,6 +10,10 @@
 #
 # 注意：不要用 `git push ... | tail` 判断成败 —— 管道会把退出码换成
 #       tail 的 0，导致失败被误判为成功（本轮真的踩过）。
+#
+# 也不要只依赖重试：git push 本身没有超时，代理半死时会永久挂起
+# （2026-10-22 实测卡住 12 分钟无输出）。这里用 http.lowSpeed* 让停滞连接中断，
+# 才能真的进入下一轮重试。
 
 set -u
 RETRIES="${PUSH_RETRIES:-5}"
@@ -29,9 +33,12 @@ esac
 FAILED=""
 for R in $REMOTES; do
   for B in "$@"; do
+# A stalled corporate proxy can make CONNECT hang forever; abort when the
+# transfer stays under 1KB/s for 25s so the retry loop can actually fire.
+# POSIX-safe: no bash arrays, this script is invoked with `sh`.
     i=1
     while [ "$i" -le "$RETRIES" ]; do
-      if OUT=$(git push "$R" "$B" 2>&1); then
+      if OUT=$(git -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=25 push "$R" "$B" 2>&1); then
         echo "OK   $R/$B  (attempt $i)"
         break
       fi
