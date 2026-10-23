@@ -4,20 +4,17 @@
 
 ## Current State
 
-- 静态工具页面已从原 Netlify 站点恢复到本仓库。
+- 当前仓库为完整工程：Vue 3 + Vite 前端 + Supabase（Auth/RLS/DB）+ Netlify 部署。
 - Git 远端：`origin` (GitHub) / `gitee` (Gitee 镜像)。
 - 分支策略：`feature/2610 → dev → int → stg → prod`。
-- `prod` 分支通过 Netlify 自动部署到 https://cloud-saas-toolkit.netlify.app。
-- Supabase 密钥存于 `frontend/.env`（已 gitignore），`.env.example` 供参考。
+- `prod` 分支通过 Netlify 自动部署到 https://cloud-saas-toolkit.netlify.app，线上为 Vue 版本。
 - 密钥按 A/B/C 三级管理（见 [PRD §8.1](docs/PRD.md)）：`.env.secrets`（git 跟踪）为单一事实源，`frontend/.env`（gitignore）存公开 `VITE_` 变量，C 级机密不进入前端产物。
-- **Phase 1–4 已完成**（功能层面：数据层 / 认证权限 / 前端骨架 / 12 工具迁移）。
-- **UI/UX 尚未达标**，单列 Phase 5 重建；设计已定稿，见
-  [docs/design/dashboard-layout-spec.md](./docs/design/dashboard-layout-spec.md) v1.1。
+- **Phase 1–6 已完成**：数据层 / 认证权限 / 前端重构 / 工具迁移 / 全站 UI/UX 统一 / 数据驱动 Dashboard。
+- **Phase 7 系统通知已完成**（2026-10-23）：黑名单式已读/已关、通知中心、Admin 管理。
 - 运维通道：复用 git config 里带域凭据的代理后，shell 可直达 Supabase / Netlify / Gitee，
   migration 用 `sh scripts/supa-sql.sh --file <path>`；浏览器 CDP 仅作兜底。
   GitHub 在本网络不稳定，详见 [docs/runbook-corporate-network.md](./docs/runbook-corporate-network.md)。
-- **部署现状**：线上仍是旧静态站，Phase 1–4 的 Vue 版本从未成功上线
-  （2026-10-20 两次 prod 构建 error）。见 runbook §4。
+- 当前开发分支：`feature/2610`；`dev` 已同步并随维护批次推进。
 
 ## Target Architecture
 
@@ -77,6 +74,15 @@ Browser
 - 6.2 ✅ 删除未使用的 shadcn/reka-ui 脚手架：`components.json`、`lib/utils.ts`、
   4 个 npm 包(class-variance-authority/clsx/reka-ui/tailwind-merge)、`style.css` 43 行死 CSS。
 - 6.3 📝 停车/电影/待办数据由用户自行录入后 KPI 与占比表自动生效（无需代码改动；空环/引导已完备）。
+
+### Phase 7: 系统通知 ✅ 已完成（2026-10-23）
+
+- 7.1 ✅ 数据层：`system_notifications` + `user_notification_reads`，RLS 只暴露已发布未过期通知；
+  Admin 可全权管理；读/关记录按 `(notification_id, user_id)` 唯一。
+- 7.2 ✅ 用户端：AppShell 横幅（未读不重复展示、关闭后不再出现）、通知中心（未读/已读/已关状态，
+  批量已读）。
+- 7.3 ✅ Admin 端：通知发布/撤回/归档，`read_count` 由 SECURITY DEFINER 触发器维护。
+- 7.4 ✅ 设计文档：`docs/dsgn-system-notifications.md`。
 
 ## Repository Rules
 

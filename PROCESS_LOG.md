@@ -401,3 +401,17 @@
 4. 自动化测试会污染真实数据，收尾要清点并回滚自己写入的行。
 5. 后台标签页不推进合成帧：涉及 transition / smooth scroll 的断言要么置前，
    要么改用 instant 验证几何。
+
+### 2026-10-23 — 系统通知全链路实现 + 基建维护同步
+- 动作：接用户“系统通知设计（新）”需求，完成 数据层/用户端/Admin端/设计文档并提交。
+- 依据：需求与方案确认流程（`docs/dsgn-system-notifications.md`）；本仓库 PRD §8 密钥管理规则；
+  运维通道沿用 `scripts/supa-sql.sh`，浏览器 CDP 仅作兜底。
+- 决策：
+  - 通知采用“黑名单式”模型：`user_notification_reads` 记录 read/dismiss，横幅对已关闭通知不重复出现，
+    通知中心仍可查看历史。
+  - RLS 只暴露 `published` 且未过期、已到发布时间的通知；Admin 走 `public.is_admin()` 全权管理。
+  - `read_count` 由 SECURITY DEFINER 触发器维护；前端不直接算原理化已读数。
+  - Phase 1–6 状态在 ROADMAP 中校正为“已完成并上线 Vue 版本”，不再把线上标记为旧静态站。
+- 交付：migration `20261023010000_system_notifications.sql` + 前端通知横幅/中心/Admin 管理；
+  ROADMAP/PROCESS_LOG 同步。
+- 待用户实测：Admin 发布一条真实通知后，登录查看横幅、点击关闭，确认下次登录不再提示。
