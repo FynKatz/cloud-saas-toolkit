@@ -53,6 +53,12 @@ export const routes: RouteRecordRaw[] = [
         meta: { title: 'Dashboard' },
       },
       {
+        path: 'notifications',
+        name: 'notifications',
+        component: () => import('../views/NotificationCenterView.vue'),
+        meta: { title: '系统通知', requiresAuth: true },
+      },
+      {
         path: 'admin/users',
         name: 'admin-users',
         component: () => import('../views/admin/UserManagementView.vue'),
@@ -69,6 +75,12 @@ export const routes: RouteRecordRaw[] = [
         name: 'admin-audit-logs',
         component: () => import('../views/admin/AuditLogView.vue'),
         meta: { title: '审计日志', requiresAdmin: true },
+      },
+      {
+        path: 'admin/notifications',
+        name: 'admin-notifications',
+        component: () => import('../views/admin/NotificationManagementView.vue'),
+        meta: { title: '系统通知', requiresAdmin: true },
       },
       {
         path: 'parking',

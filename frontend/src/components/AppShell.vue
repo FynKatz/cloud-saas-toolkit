@@ -20,6 +20,7 @@ import {
   LogOut,
   Menu,
   Moon,
+  Megaphone,
   Puzzle,
   ShieldCheck,
   Star,
@@ -32,6 +33,7 @@ import { useToolsStore } from '../stores/tools'
 import { supabase } from '../lib/supabase'
 import { useTheme } from '../composables/useTheme'
 import { useRecent } from '../composables/useRecent'
+import { useNotifications, NOTIFICATION_KEY } from '../composables/useNotifications'
 import { DASHBOARD_SEARCH_KEY } from '../lib/keys'
 import { toolPath } from '../types/tools'
 import type { Tool } from '../types/tools'
@@ -44,6 +46,7 @@ const auth = useAuthStore()
 const toolsStore = useToolsStore()
 const theme = useTheme()
 const { addRecent } = useRecent()
+const notifications = useNotifications()
 
 // Collapse is a user preference, so it must survive navigation and reload.
 // (The static baseline has no state at all, so this is a deliberate addition,
@@ -61,6 +64,7 @@ const ICON_MAP: Record<string, Icon> = {
 
 const adminNav = [
   { name: '用户管理', route: '/admin/users', icon: UserCog },
+  { name: '系统通知', route: '/admin/notifications', icon: Megaphone },
   { name: '角色权限', route: '/admin/roles', icon: ShieldCheck },
   { name: '审计日志', route: '/admin/audit-logs', icon: FileText },
 ]
@@ -148,9 +152,15 @@ onMounted(() => {
     toolsStore.load(true)
   }
   loadPendingCount()
+  notifications.loadBanner()
+})
+
+watch(() => route.path, (p) => {
+  if (p === '/') notifications.loadBanner()
 })
 
 provide(DASHBOARD_SEARCH_KEY, searchQuery)
+provide(NOTIFICATION_KEY, notifications)
 </script>
 
 <template>

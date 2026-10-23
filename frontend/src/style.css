@@ -131,3 +131,61 @@
    background: var(--accent);
    color: #fff;
  }
+
+/* ============================================================
+   Layer 3 — 全局组件样式（AppShell / DashboardView / NotificationBanner / admin 预览共享）
+   ============================================================ */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 15px 20px;
+  border-radius: var(--radius);
+  background: var(--violet-soft);
+  border: 1px solid var(--violet-line);
+}
+.banner-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--violet-solid);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-size: 15px;
+}
+.banner-main {
+  flex: 1;
+  min-width: 0;
+}
+.banner-main h4 {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--ink);
+}
+.banner-main p {
+  font-size: 12px;
+  color: var(--ink-2);
+  margin-top: 2px;
+}
+.banner-cta {
+  border: 1px solid var(--violet);
+  background: var(--card);
+  color: var(--violet);
+  border-radius: 9px;
+  padding: 7px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: background .12s, color .12s;
+}
+.banner-cta:hover {
+  background: var(--violet);
+  color: #fff;
+}

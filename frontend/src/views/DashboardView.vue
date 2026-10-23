@@ -10,12 +10,15 @@ import { toolPath } from '../types/tools'
 import type { Tool } from '../types/tools'
 import { DASHBOARD_SEARCH_KEY } from '../lib/keys'
 import { supabase } from '../lib/supabase'
+import NotificationBanner from '../components/notification/NotificationBanner.vue'
+import { useInjectNotifications } from '../composables/useNotifications'
 
 const auth = useAuthStore()
 const toolsStore = useToolsStore()
 const { recentTools } = useRecent()
 const userId = computed(() => auth.user?.id)
 const favorites = useFavorites(userId)
+const notifications = useInjectNotifications()
 
 const localSearch = ref('')
 const injectedSearch = inject(DASHBOARD_SEARCH_KEY, ref(''))
@@ -277,7 +280,8 @@ onMounted(() => {
     </div>
 
     <!-- ② Banner（装饰） -->
-    <div class="banner">
+    <NotificationBanner v-if="notifications.currentBanner.value" />
+    <div v-else class="banner">
       <div class="banner-badge">C</div>
       <div class="banner-main">
         <h4>工具已统一收口</h4>
