@@ -14,6 +14,8 @@
 - 运维通道：复用 git config 里带域凭据的代理后，shell 可直达 Supabase / Netlify / Gitee，
   migration 用 `sh scripts/supa-sql.sh --file <path>`；浏览器 CDP 仅作兜底。
   GitHub 在本网络不稳定，详见 [docs/runbook-corporate-network.md](./docs/runbook-corporate-network.md)。
+- **代理自动防线（务必维护）**：本地在前端看不到数据时，第一先查 shell/浏览器是否缺同一份
+  AD 代理凭据，不要直接重开 CDP 或改网络；复测命令与结论必须同时写回 runbook。
 - 当前开发分支：`feature/2610`；`dev` 已同步并随维护批次推进。
 
 ## Target Architecture
