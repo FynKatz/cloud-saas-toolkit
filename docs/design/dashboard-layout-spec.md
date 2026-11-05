@@ -266,7 +266,7 @@ Step 1–5 全部完成，生产 `prodcheck` 9/9、构建产物回归 36/36、�
 只能走浏览器」的判断都是误判。
 
 - 首选：`sh scripts/supa-sql.sh --file supabase/migrations/xxx.sql`（Management API）
-- 兜底：`node scripts/supabase-cdp.mjs sql --file <path>`（已登录浏览器 CDP）
+- 兜底：`printf '%s' '{"file":"<path>"}' | sh scripts/supa-ego-cli.sh`（已登录浏览器 + ego-browser）
 - 需要用户介入的情况：Supabase token 过期、Gitee 凭据失效、或 GitHub 相关操作
   （本网络下 GitHub 不稳定，详见 runbook §3）
 

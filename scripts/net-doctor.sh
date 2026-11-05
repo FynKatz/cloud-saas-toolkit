@@ -114,7 +114,7 @@ fi
 
 if [ -z "$PXAUTH_URL" ]; then
   echo "    未找到内嵌凭据的代理（git config http.*.proxy / env）"
-  echo "    → 若第 3 步是 407：走浏览器兜底通道 scripts/supabase-cdp.mjs"
+  echo "    → 若第 3 步是 407：走浏览器兜底通道 sh scripts/supa-ego-cli.sh"
 else
   echo "    找到内嵌凭据的代理（来源 git config http.*.proxy），值已隐藏"
   for HOST in "$@"; do
@@ -136,7 +136,7 @@ echo " 判读顺序（每次都按这四步，别跳）"
 echo "  1. env 有没有 http_proxy/https_proxy —— 没有则 curl 在直连，失败不代表被墙"
 echo "  2. scutil --proxy 看 PAC 与默认出口"
 echo "  3. 显式 -x <proxy>（不带凭据）：407 = 缺认证，≠ 到不了"
-echo "  4. 用现成内嵌凭据的代理复测：通了 → shell 自助；仍不通 → 才考虑浏览器 CDP"
+echo "  4. 用现成内嵌凭据的代理复测：通了 → shell 自助；仍不通 → 才考虑 ego-browser 兜底"
 echo "     Supabase SQL 首选通道：sh scripts/supa-sql.sh \"<sql>\""
-echo "     浏览器兜底通道：       node scripts/supabase-cdp.mjs sql \"<sql>\""
+echo "     浏览器兜底通道：       printf '%s' '{\"sql\":\"<sql>\"}' | sh scripts/supa-ego-cli.sh"
 echo "============================================================"

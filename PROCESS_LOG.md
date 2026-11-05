@@ -80,7 +80,8 @@
 - [ ] 设计 token 模板（color/type/layout/principles）
 - [ ] 组件基座选型的判断依据
 - [ ] 【独立于 UI 流程】受限企业网络下的运维通道：
-      `scripts/net-doctor.sh` 四步判定 + `scripts/supabase-cdp.mjs` 浏览器 CDP 执行 SQL
+      `scripts/net-doctor.sh` 四步判定 + `scripts/supa-sql.sh`（Management API）+ 浏览器兜底
+      `scripts/supa-ego-cli.sh`（ego-browser；Test Chrome CDP 通道已于 2026-11-05 废弃）
       + `docs/runbook-corporate-network.md`。建议单独蒸馏成 skill，不混进 `uiux-design-flow`。
 
 ### 2026-10-20 — UI 骨架选型：本地还原三库对比
@@ -251,7 +252,7 @@
      浏览器持域凭据可通过，curl 没有凭据。**这才是真正的墙，不是"Supabase 被域名封锁"。**
 - 结论纠正：此前记的「公司网关屏蔽 Supabase」表述不准确，真实原因是 **shell 缺 AD 域代理认证**。
   推论：任何需要 Supabase 的操作，都可以走「已登录浏览器」这条路，不该推回给用户手工做。
-- 落地方案（已验证跑通，写入规格 §10）：CDP 驱动 Test Chrome(9231) 里已登录的 SQL Editor：
+- 落地方案（当时已验证跑通，写入规格 §10）：CDP 驱动 Test Chrome(9231) 里已登录的 SQL Editor：
   `window.monaco.editor.getModels()[0].setValue(sql)` → 点 `Run` 按钮 → 读 `.rdg-cell` 的
   **`textContent`** 取结果。
   - 坑 1：结果网格是 react-data-grid，用 `innerText` 会因虚拟化返回空串，必须 `textContent`。
@@ -271,7 +272,8 @@
 - 动作：不把一次性脚本留在 `/tmp`（会被清），全部提升为仓库内正式产物并实测通过：
   - `scripts/net-doctor.sh` —— 四步判定 ladder，输入 host 直接输出「真不可达」还是
     「只是 shell 缺域凭据、可走浏览器」。实测正确判出 `api.supabase.com` 为 407 域认证。
-  - `scripts/supabase-cdp.mjs` —— 在已登录 dashboard 标签页里执行 SQL。改进点：自动找/开
+  - `scripts/supabase-cdp.mjs` —— 在已登录 dashboard 标签页里执行 SQL（已于 2026-11-05
+    废弃，由 `scripts/supa-ego-cli.sh` + ego-browser 替代）。改进点：自动找/开
     标签页、**轮询** Monaco 就绪（替代原来的固定 sleep）、按 `.rdg-row` 分行解析、
     `--file` 直接跑迁移文件、`SUPA_PROJECT_REF`/`SUPA_CDP_PORT` 可覆盖。
     实测输出 `速查参考|4 数据应用|3 图形工具|2 文本工具|3`。
@@ -306,7 +308,7 @@
   - 规格 §10 与 ROADMAP 的通道描述同步纠正。
 - 元教训（这条比技术结论更该进 skill）：
   1. **观察到反例就必须解释**。`git 能通而 curl 不通` 是明显矛盾，当时追一句就能找到凭据。
-  2. **"我找到了可行方案" 会让人停止怀疑**。浏览器 CDP 跑通后我就没再回头看 shell，
+  2. **"我找到了可行方案" 会让人停止怀疑**。浏览器 CDP 兜底当时跑通后我就没再回头看 shell，
      绕了远路还自认为解决了。方案能跑 ≠ 方案是最优路径。
   3. 连续两轮在同一个判断上出错，说明缺的不是智力是**流程**：故把判定顺序写死成脚本，
      下一步遇到网络问题先跑 `net-doctor.sh`，不跑完四步不许下结论。
@@ -364,7 +366,7 @@
   永远活不过刷新。改为 apply 只切类、持久化只在 init/toggle。实测设定 dark 后刷新仍为暗。
 
 **Step 2 AppShell 抽屉骨架** — 逐条移植基线 CSS；基线写死的 #fff 一律换成主题 token，
-否则暗色失效。CDP 交互 10/10：收缩 220↔56、图标格 44×44、图标 20px、抽屉开合、
+否则暗色失效。交互核验 10/10：收缩 220↔56、图标格 44×44、图标 20px、抽屉开合、
 侧栏跳转、面包屑跟随 tools.name、无异常。
 
 **Step 3 DashboardView 8 block** — KPI 走真实计数（RLS 作用域），第 4 卡按定稿换成
@@ -405,7 +407,8 @@
 ### 2026-10-23 — 系统通知全链路实现 + 基建维护同步
 - 动作：接用户“系统通知设计（新）”需求，完成 数据层/用户端/Admin端/设计文档并提交。
 - 依据：需求与方案确认流程（`docs/dsgn-system-notifications.md`）；本仓库 PRD §8 密钥管理规则；
-  运维通道沿用 `scripts/supa-sql.sh`，浏览器 CDP 仅作兜底。
+  运维通道沿用 `scripts/supa-sql.sh`，浏览器兜底已切换为 `scripts/supa-ego-cli.sh`
+  （ego-browser；Test Chrome CDP 已废弃）。
 - 决策：
   - 通知采用“黑名单式”模型：`user_notification_reads` 记录 read/dismiss，横幅对已关闭通知不重复出现，
     通知中心仍可查看历史。

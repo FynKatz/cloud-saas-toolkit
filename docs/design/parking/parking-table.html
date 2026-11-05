@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>停车收费 · 密集管理列表</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+    .metric { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 13px 15px; min-width: 0; }
+    .metric-label { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; color: var(--ink-3); }
+    .metric-value { font-size: 22px; font-weight: 680; letter-spacing: -.3px; margin-top: 2px; }
+    .metric-note { font-size: 11px; color: var(--ink-2); margin-top: 1px; }
+    .metric-note .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--violet); margin-right: 4px; }
+    .toolbar { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; flex-wrap: wrap; }
+    .toolbar .search-wrap { width: min(300px, 100%); flex: 1 1 220px; }
+    .toolbar-actions { display: flex; gap: 8px; margin-left: auto; }
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; padding: 10px; background: var(--chip-neutral); border-radius: 12px; }
+    .filter-bar .select { min-width: 128px; height: 32px; font-size: 12.5px; }
+    .filter-count { margin-left: auto; color: var(--ink-3); font-size: 12px; }
+    .table-panel { overflow: hidden; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .data-table th { text-align: left; padding: 10px 14px; color: var(--ink-3); font-weight: 600; font-size: 10.5px; text-transform: uppercase; letter-spacing: .3px; border-bottom: 1px solid var(--line); background: var(--card); }
+    .data-table td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+    .data-table tbody tr { transition: background .12s; cursor: default; }
+    .data-table tbody tr:hover { background: var(--hover); }
+    .cell-location { display: flex; align-items: center; gap: 11px; min-width: 0; }
+    .cell-location .thumb { width: 42px; height: 42px; border-radius: 9px; flex-shrink: 0; }
+    .cell-title { font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 210px; }
+    .cell-sub { color: var(--ink-3); font-size: 11.5px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+    .tag { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 99px; background: var(--violet-soft); color: var(--violet); font-size: 10.5px; font-weight: 600; white-space: nowrap; }
+    .price-main { font-size: 14px; font-weight: 650; color: var(--ink); }
+    .price-sub { font-size: 11px; color: var(--ink-3); margin-top: 1px; }
+    .free-badge { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 6px; background: var(--chip-neutral); border: 1px solid var(--line); color: var(--ink-2); font-size: 11px; font-weight: 600; }
+    .row-actions { display: flex; gap: 4px; justify-content: flex-end; opacity: 0; transition: opacity .12s; }
+    .data-table tr:hover .row-actions { opacity: 1; }
+    .icon-btn-sm { width: 28px; height: 28px; border-radius: 7px; border: none; background: transparent; color: var(--ink-3); display: grid; place-items: center; }
+    .icon-btn-sm:hover { background: var(--hover); color: var(--ink); }
+    .mobile-note { display: none; }
+    @media (max-width: 900px) {
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .filter-count { display: none; }
+      .filter-bar { overflow-x: auto; flex-wrap: nowrap; }
+      .filter-bar .select { min-width: 116px; }
+    }
+    @media (max-width: 680px) {
+      .data-table thead { display: none; }
+      .data-table, .data-table tbody, .data-table tr, .data-table td { display: block; width: 100%; }
+      .data-table tbody tr { padding: 10px 12px; border-bottom: 1px solid var(--line); }
+      .data-table td { border: none; padding: 3px 0; }
+      .cell-location { max-width: 100%; }
+      .cell-title { max-width: 220px; }
+      .mobile-note { display: block; color: var(--ink-3); font-size: 11px; margin-top: 3px; }
+      .price-main, .price-sub { display: inline; margin-right: 6px; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<div id="drawerRoot"></div>
+<script src="shared.js"></script>
+<script src="common.js"></script>
+<script>
+  window.renderPage = function () {
+    root.innerHTML = shell('停车收费 · 管理列表', `
+      <div class="page-head">
+        <div><div class="section-title">停车收费</div><div class="subtitle">停车场与商场收费规则统一管理</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="alert('导出（交互示意）')">${icon('external')}导出</button>
+          <button class="btn btn-primary" onclick="openDrawer('form')">${icon('plus')}添加记录</button>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">全部记录</div><div class="metric-value">${window.MOCK_PARKING.length}</div><div class="metric-note"><span class="dot"></span>近 30 天新增 2</div></div>
+        <div class="metric"><div class="metric-label">覆盖省级</div><div class="metric-value">3</div><div class="metric-note">上海 / 浙江 / 广东</div></div>
+        <div class="metric"><div class="metric-label">免费停车</div><div class="metric-value">2</div><div class="metric-note">15 分钟 / 30 分钟</div></div>
+        <div class="metric"><div class="metric-label">平均日间价</div><div class="metric-value">¥11.5</div><div class="metric-note">按小时计费记录</div></div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap">${icon('search')}<input class="search-input filter-input" placeholder="搜索商场、地址或备注..." oninput="window.parkingFilters.query=this.value;renderList()" /></div>
+        <div class="toolbar-actions">
+          <button class="btn" onclick="alert('筛选（交互示意）')">${icon('filter')}更多筛选</button>
+          <button class="btn btn-ghost" onclick="resetFilters()">${icon('refresh')}重置</button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <select class="select filter-select" onchange="setFilter('province',this.value)">
+          <option value="">所有省份</option>
+          ${filterOptions('province').map(d => `<option value="${d.name}">${d.name}</option>`).join('')}
+        </select>
+        <select class="select filter-select" onchange="setFilter('city',this.value)">
+          <option value="">所有城市</option>
+          ${filterOptions('city').map(d => `<option value="${d.name}">${d.name}</option>`).join('')}
+        </select>
+        <select class="select filter-select" onchange="setFilter('district',this.value)">
+          <option value="">所有行政区</option>
+          ${filterOptions('district').map(d => `<option value="${d.name}">${d.name}</option>`).join('')}
+        </select>
+        <select class="select filter-select" onchange="setFilter('mall',this.value)">
+          <option value="">所有商场</option>
+          ${filterOptions('mall').map(m => `<option value="${m.name}">${m.name}</option>`).join('')}
+        </select>
+        <span class="filter-count" id="filterCount"></span>
+      </div>
+
+      <div class="panel table-panel">
+        <div class="panel-head"><h3>停车记录</h3><span class="chip chip-violet">${window.MOCK_PARKING.length} 条</span></div>
+        <div id="parkingRecords"></div>
+      </div>
+    `)
+    initTable()
+  }
+
+  function initTable() {
+    const root = document.getElementById('parkingRecords')
+    const list = applyFilters(window.MOCK_PARKING)
+    document.getElementById('filterCount').textContent = `${list.length} / ${window.MOCK_PARKING.length} 条`
+    root.innerHTML = `
+      <table class="data-table">
+        <thead><tr><th>位置</th><th>地址</th><th>免费 / 计费</th><th>日间</th><th>夜间</th><th style="text-align:right">操作</th></tr></thead>
+        <tbody>
+          ${list.map(r => `
+            <tr>
+              <td>
+                <div class="cell-location">
+                  <div class="thumb">${icon('image')}</div>
+                  <div style="min-width:0">
+                    <div class="cell-title">${r.mall}</div>
+                    <div class="cell-sub">${r.province} · ${r.city} · ${r.district}</div>
+                    <div class="mobile-note">${r.address}</div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="cell-sub" style="max-width:220px">${r.address}</div></td>
+              <td>
+                <div class="free-badge">免费 ${r.free} 分钟</div>
+                <div class="price-sub" style="margin-top:4px">${r.interval} 分钟重新计费</div>
+              </td>
+              <td><div class="price-main">${r.dayPrice} <span style="font-weight:500;font-size:11px;color:var(--ink-3)">${r.dayUnit}</span></div></td>
+              <td><div class="price-main">${r.nightPrice} <span style="font-weight:500;font-size:11px;color:var(--ink-3)">${r.nightUnit}</span></div></td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-btn-sm" title="详情" onclick="openDrawer('detail',${JSON.stringify(r)})">${icon('eye')}</button>
+                  <button class="icon-btn-sm" title="编辑" onclick="openDrawer('form',${JSON.stringify(r)})">${icon('edit')}</button>
+                  <button class="icon-btn-sm" title="删除" onclick="alert('删除（交互示意）')">${icon('trash')}</button>
+                </div>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`
+  }
+  window.renderList = initTable
+</script>
+</body>
+</html>

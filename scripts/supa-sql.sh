@@ -76,6 +76,6 @@ echo "HTTP $CODE"
 case "$CODE" in
   2*) printf '%s\n' "$OUT" ;;
   401|403) echo "ERROR: token rejected/expired. Refresh $TOKEN_FILE, or fall back to" >&2
-           echo "       scripts/supabase-cdp.mjs (browser channel). See runbook." >&2; exit 1 ;;
+           echo "       sh scripts/supa-ego-cli.sh (ego-browser channel). See runbook." >&2; exit 1 ;;
   *)  printf '%s\n' "$OUT" >&2; exit 1 ;;
 esac

@@ -5,7 +5,9 @@
 > 错在把「代理要求认证」当成「平台不可达」，又用浏览器绕了远路。
 > 保留这段历史作为反面教材，正确做法见 §1–§3。
 > **2026-10-23 再纠正（防止复发）**：以上结论不能只“记过一次”，每次遇到
-> `localhost` 前端没数据 / Supabase 超时 / CDP 兜底时，都要先退回 §1 四步。
+> `localhost` 前端没数据 / Supabase 超时 / 浏览器兜底时，都要先退回 §1 四步。
+> **2026-11-05 通道更新**：浏览器兜底由 Test Chrome CDP（已废弃）统一切换为
+> ego-browser（`scripts/supa-ego-cli.sh`），见 §2.2。
 
 ---
 
@@ -20,7 +22,7 @@
 
 - 前端本地 `localhost:5173` 打开没数据 → 这是前端进程没有代理，
   不是 Supabase 不可达；`npm run dev` 不会自动继承 git config 里的代理。
-- `scripts/supa-sql.sh` 是首选通道；`supabase-cdp.mjs` 只是兜底，不能默认先开浏览器。
+- `scripts/supa-sql.sh` 是首选通道；`scripts/supa-ego-cli.sh` 只是兜底，不能默认先开浏览器。
 - 复测结论（通过/未通过 + 命令 + HTTP 码）必须写回本文件，禁止“记过一次就不再查”。
 
 ---
@@ -63,23 +65,25 @@ echo "select 1" | sh scripts/supa-sql.sh -                   # 管道
 走 Supabase Management API `POST /v1/projects/<ref>/database/query`；
 token 取 `supabase_token.txt`，代理取 git config，二者均不回显。
 
-### 2.2 兜底：已登录浏览器 + CDP
+### 2.2 兜底：已登录浏览器 + ego-browser
 
 仅当 token 过期或 Management API 不可用时使用：
 
 ```sh
-node scripts/supabase-cdp.mjs tabs
-node scripts/supabase-cdp.mjs sql --file supabase/migrations/xxx.sql
+printf '%s' '{"cmd":"tabs"}' | sh scripts/supa-ego-cli.sh
+printf '%s' '{"file":"supabase/migrations/xxx.sql"}' | sh scripts/supa-ego-cli.sh
 ```
 
-原理：Test Chrome 的 CDP 端口（默认 9231）→ 找已登录的
-`supabase.com/dashboard/project/<ref>/sql/new` 标签页 → `window.monaco` 注入 SQL
-→ 点 Run → 读 react-data-grid。依赖浏览器登录态，这是它唯一的短板。
+原理：ego-browser 复用已登录的 `supabase.com/dashboard/project/<ref>/sql/new`
+标签页 → `window.monaco` 注入 SQL → 点 Run → 读 react-data-grid。
+依赖浏览器登录态，这是它唯一的短板；ego 的 nodejs 运行环境不继承 shell
+环境变量，参数统一放 stdin JSON。**使用前提：先让用户在 ego/浏览器里登录
+supabase.com 并保持会话；未登录时脚本只能看到 Sign in，不会自动代登录。**
 
 ### 2.3 通用套路（驱动别的平台时照抄）
 
-1. `GET http://127.0.0.1:<port>/json/list` 取 `webSocketDebuggerUrl`。
-2. `Runtime.evaluate` 带 `{ returnByValue: true, awaitPromise: true }`。
+1. `sh scripts/supa-ego-cli.sh` 从 stdin 读 JSON payload，经 `ego-browser nodejs` 注入。
+2. `taskSpace()/task.page()` 驱动页面，`page.evaluate` 带 `returnByValue` 语义。
 3. 优先用页面已暴露的全局对象注入内容，别模拟键盘。
 4. 状态变更后**轮询完成信号**，不要固定 `sleep`。
 
@@ -119,8 +123,8 @@ node scripts/supabase-cdp.mjs sql --file supabase/migrations/xxx.sql
 | 误判平台封锁 | 一次 curl `000` 就断言「被墙」 | 走完四步 ladder |
 | Netlify `state=error` 但其实是好事 | 提交只含 docs/scripts 时，构建产物与线上逐字节相同，Netlify 报 `Canceled build due to no content change` 并把 deploy 标为 `error` | **不是故障**：它会保留上一个成功版本继续服务。先 `git show --name-only <sha>` 确认没碰 `frontend/` 即可判定 |
 | Netlify 日志取不到 | `/deploys/{id}/log`、`/logRequests` 在 FREE 计划返回 404 | 别绕；改用「提交是否触及 frontend/」直接推断，或看 `error_message` 字段 |
-| 误判「只能走浏览器」 | 测到 407 就收工去做 CDP | 第 4 步先找现成凭据 |
-| 绕远路做了浏览器工具 | CDP 能跑但依赖登录态、SPA 要等 | 能用 API 就用 API，CDP 只作兜底 |
+| 误判「只能走浏览器」 | 测到 407 就收工去做浏览器兜底 | 第 4 步先找现成凭据 |
+| 绕远路做了浏览器工具 | 浏览器能跑但依赖登录态、SPA 要等 | 能用 API 就用 API，浏览器只作兜底 |
 | SPA 加载时间 | 固定 `sleep 8` 后编辑器还没挂载 | 轮询 `window.monaco` + Run 按钮 |
 | 读不到表格文本 | `.rdg-cell` 的 `innerText` 全空 | react-data-grid 虚拟化，用 **`textContent`** |
 | 抓不到查询请求 | `Network` 域里没有任何 SQL 请求 | 查询走 WebSocket，改读 DOM |
@@ -146,5 +150,5 @@ node scripts/supabase-cdp.mjs sql --file supabase/migrations/xxx.sql
 
 | 日期 | 语句 | 结果 |
 |---|---|---|
-| 2026-10-21 | `20261021010000_tool_categories_b_grouping.sql`（经浏览器 CDP） | `tools.category`/`sort_order` 改为定稿 B 分组 |
+| 2026-10-21 | `20261021010000_tool_categories_b_grouping.sql`（当时经 Test Chrome CDP，已废弃，现由 ego 通道替代） | `tools.category`/`sort_order` 改为定稿 B 分组 |
 | 2026-10-22 | 同一文件经 `supa-sql.sh` 重放（幂等 UPDATE） | `速查参考\|4 数据应用\|3 图形工具\|2 文本工具\|3`，与规格 §3.0 一致 |

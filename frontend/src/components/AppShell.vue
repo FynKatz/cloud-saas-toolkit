@@ -63,6 +63,7 @@ const ICON_MAP: Record<string, Icon> = {
 }
 
 const adminNav = [
+  { name: '数据管理', route: '/admin/data', icon: Database },
   { name: '用户管理', route: '/admin/users', icon: UserCog },
   { name: '系统通知', route: '/admin/notifications', icon: Megaphone },
   { name: '角色权限', route: '/admin/roles', icon: ShieldCheck },
@@ -102,7 +103,9 @@ const currentTitle = computed(() => {
 })
 
 function isRouteActive(target: string) {
-  return target === '/' ? route.path === '/' : route.path === target
+  if (target === '/') return route.path === '/'
+  if (target === '/admin/data' && route.path.startsWith('/admin/data')) return true
+  return route.path === target
 }
 
 async function goAnchor(id: 'recent' | 'favorites') {

@@ -12,10 +12,11 @@
 - **Phase 1–6 已完成**：数据层 / 认证权限 / 前端重构 / 工具迁移 / 全站 UI/UX 统一 / 数据驱动 Dashboard。
 - **Phase 7 系统通知已完成**（2026-10-23）：黑名单式已读/已关、通知中心、Admin 管理。
 - 运维通道：复用 git config 里带域凭据的代理后，shell 可直达 Supabase / Netlify / Gitee，
-  migration 用 `sh scripts/supa-sql.sh --file <path>`；浏览器 CDP 仅作兜底。
+  migration 用 `sh scripts/supa-sql.sh --file <path>`；浏览器兜底用
+  `scripts/supa-ego-cli.sh`（ego-browser，Test Chrome CDP 已废弃）。
   GitHub 在本网络不稳定，详见 [docs/runbook-corporate-network.md](./docs/runbook-corporate-network.md)。
 - **代理自动防线（务必维护）**：本地在前端看不到数据时，第一先查 shell/浏览器是否缺同一份
-  AD 代理凭据，不要直接重开 CDP 或改网络；复测命令与结论必须同时写回 runbook。
+  AD 代理凭据，不要直接改用浏览器兜底或改网络；复测命令与结论必须同时写回 runbook。
 - 当前开发分支：`feature/2610`；`dev` 已同步并随维护批次推进。
 
 ## Target Architecture
@@ -60,7 +61,7 @@ Browser
   过程中挖出全站根因：未分层的 `* { padding:0 }` 压掉了 Tailwind 所有 padding/margin
   工具类，是「UI 一塌糊涂」的主因；另修 `useTheme` 导致暗夜无法持久化。
 - 5.2 ✅ `AppShell.vue` 复刻基线导航骨架：220↔56 收缩、抽屉分组、汉堡常驻、
-  固定项走滚动锚点；scoped 普通 CSS，不走 Tailwind 工具类。CDP 交互 10/10。
+  固定项走滚动锚点；scoped 普通 CSS，不走 Tailwind 工具类。ego 交互核验 10/10。
 - 5.3 ✅ `DashboardView.vue` 按 8 个 block 重建；KPI 接真实计数，空状态分级。
 - 5.4 ✅ 暗夜模式一并交付（黑底 `#0C0C0E` + 紫强调，禁绿）。双主题 16 页审计全通过。
 - 5.5 ✅ 全页面验收：构建产物回归 36/36、生产检查 9/9、无 JS 异常。

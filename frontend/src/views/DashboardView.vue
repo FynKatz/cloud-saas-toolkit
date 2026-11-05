@@ -76,7 +76,7 @@ async function head(table: string): Promise<number> {
 async function loadCounts() {
   countsLoading.value = true
   const [parking, movies, tasks] = await Promise.all([
-    head('parking_info'), head('movies_library'), head('tasks'),
+    head('parking_locations'), head('movies_library'), head('tasks'),
   ])
   counts.value = {
     tools: toolsStore.allowedTools.length,

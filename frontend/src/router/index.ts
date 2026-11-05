@@ -77,6 +77,33 @@ export const routes: RouteRecordRaw[] = [
         meta: { title: '审计日志', requiresAdmin: true },
       },
       {
+        path: 'admin/data',
+        name: 'admin-data',
+        component: () => import('../views/admin/DataManagementView.vue'),
+        redirect: '/admin/data/regions',
+        meta: { title: '数据管理', requiresAdmin: true },
+        children: [
+          {
+            path: 'regions',
+            name: 'admin-data-regions',
+            component: () => import('../views/admin/RegionManagementView.vue'),
+            meta: { title: '省市行政区', requiresAdmin: true },
+          },
+          {
+            path: 'malls',
+            name: 'admin-data-malls',
+            component: () => import('../views/admin/MallManagementView.vue'),
+            meta: { title: '商场管理', requiresAdmin: true },
+          },
+          {
+            path: 'parking-locations',
+            name: 'admin-data-parking-locations',
+            component: () => import('../views/admin/ParkingLocationAdminView.vue'),
+            meta: { title: '停车场管理', requiresAdmin: true },
+          },
+        ],
+      },
+      {
         path: 'admin/notifications',
         name: 'admin-notifications',
         component: () => import('../views/admin/NotificationManagementView.vue'),

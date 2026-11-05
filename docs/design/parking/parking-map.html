@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>停车收费 · 地图总览</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+    .map-layout { display: grid; grid-template-columns: minmax(280px, 400px) 1fr; gap: 14px; align-items: start; }
+    .list-panel { max-height: calc(100vh - 170px); overflow-y: auto; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); }
+    .list-head { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .list-head h3 { margin: 0; font-size: 14px; font-weight: 650; }
+    .list-search { margin: 12px 16px; position: relative; }
+    .list-search .icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--ink-3); }
+    .list-search input { width: 100%; height: 34px; border: 1px solid var(--line); border-radius: 9px; background: var(--card); padding: 0 10px 0 32px; outline: none; font-size: 12.5px; color: var(--ink); }
+    .list-search input:focus { border-color: var(--violet); }
+    .list-filters { display: flex; gap: 6px; padding: 0 16px 12px; flex-wrap: wrap; }
+    .list-filters .select { height: 30px; min-width: 0; flex: 1; font-size: 12px; border-radius: 8px; padding: 0 7px; }
+    .records { display: flex; flex-direction: column; }
+    .record-card {
+      display: flex;
+      gap: 12px;
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--line);
+      cursor: pointer;
+      transition: background .12s;
+      min-width: 0;
+    }
+    .record-card:last-child { border-bottom: none; }
+    .record-card:hover { background: var(--hover); }
+    .record-card.active { background: var(--violet-soft); box-shadow: inset 3px 0 0 var(--violet); }
+    .record-thumb { width: 46px; height: 46px; border-radius: 10px; background: linear-gradient(135deg, #f0f0f6, #e4e6ef); position: relative; flex-shrink: 0; overflow: hidden; }
+    .dark .record-thumb { background: linear-gradient(135deg, #232329, #181a20); }
+    .record-thumb .icon { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); color: var(--ink-3); }
+    .record-main { flex: 1; min-width: 0; }
+    .record-title { font-size: 13px; font-weight: 650; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .record-meta { font-size: 11.5px; color: var(--ink-3); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .record-price { margin-top: 9px; display: flex; gap: 14px; align-items: center; }
+    .record-price .item { display: flex; align-items: baseline; gap: 5px; }
+    .record-price .num { font-size: 15px; font-weight: 680; letter-spacing: -.2px; }
+    .record-price .unit { font-size: 10.5px; color: var(--ink-3); }
+    .record-price .label { font-size: 10.5px; color: var(--ink-3); margin-left: 1px; }
+    .free-chip { height: 20px; padding: 0 7px; border-radius: 6px; background: var(--chip-neutral); border: 1px solid var(--line); color: var(--ink-2); font-size: 10.5px; font-weight: 600; display: inline-flex; align-items: center; margin-top: 8px; }
+    .map-wrap { position: relative; border-radius: var(--radius); border: 1px solid var(--line); overflow: hidden; background: #eef0f6; min-height: calc(100vh - 190px); height: calc(100vh - 190px); }
+    .dark .map-wrap { background: #17181d; }
+    .map-canvas { width: 100%; height: 100%; display: block; }
+    .map-controls { position: absolute; right: 14px; top: 14px; display: flex; flex-direction: column; gap: 6px; z-index: 5; }
+    .map-controls .btn { width: 34px; height: 34px; padding: 0; justify-content: center; background: var(--card); box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+    .map-search { position: absolute; left: 14px; top: 14px; z-index: 5; width: min(320px, calc(100% - 28px)); }
+    .map-search .search-input { box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+    .map-legend { position: absolute; left: 14px; bottom: 14px; z-index: 5; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 11px; font-size: 11px; color: var(--ink-2); display: flex; gap: 12px; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+    .map-legend .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+    .dot-violet { background: var(--violet); }
+    .dot-neutral { background: var(--ink-3); }
+    .map-bubble {
+      position: absolute;
+      z-index: 4;
+      width: 12px;
+      height: 12px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      background: var(--ink-3);
+      border: 2px solid #fff;
+      cursor: pointer;
+      transition: transform .12s, background .12s;
+      box-shadow: 0 2px 6px rgba(0,0,0,.18);
+    }
+    .dark .map-bubble { border-color: #19191d; }
+    .map-bubble.active { background: var(--violet-solid); transform: rotate(-45deg) scale(1.45); box-shadow: 0 4px 12px rgba(85,51,255,.35); }
+    .map-bubble-label {
+      position: absolute;
+      z-index: 4;
+      transform: translate(-50%, -100%);
+      left: 50%;
+      top: 50%;
+      margin-top: -24px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      box-shadow: 0 4px 14px rgba(0,0,0,.14);
+      border-radius: 8px;
+      padding: 5px 9px;
+      font-size: 11px;
+      white-space: nowrap;
+      color: var(--ink);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .12s;
+    }
+    .map-bubble:hover .map-bubble-label, .map-bubble.active .map-bubble-label { opacity: 1; }
+    .add-fab { position: fixed; right: 26px; bottom: 26px; z-index: 30; width: 46px; height: 46px; border-radius: 14px; background: var(--violet-solid); color: #fff; border: none; box-shadow: 0 8px 22px rgba(85,51,255,.32); display: grid; place-items: center; }
+    .add-fab .icon-lg { width: 20px; height: 20px; }
+    @media (max-width: 900px) {
+      .map-layout { grid-template-columns: 1fr; }
+      .map-wrap { min-height: 440px; height: 52vh; }
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<div id="drawerRoot"></div>
+<button class="add-fab" title="添加停车记录" onclick="openDrawer('form')">${'<svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'}</button>
+<script src="shared.js"></script>
+<script src="common.js"></script>
+<script>
+  window.activeRecord = window.MOCK_PARKING[0]
+  window.renderPage = function () {
+    root.innerHTML = shell('停车收费 · 地图总览', `
+      <div class="page-head">
+        <div><div class="section-title">停车收费</div><div class="subtitle">按地图浏览各地停车记录，点击标记查看详情</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="alert('范围搜索（交互示意）')">${icon('filter')}地图范围</button>
+          <button class="btn btn-primary" onclick="openDrawer('form')">${icon('plus')}添加记录</button>
+        </div>
+      </div>
+      <div class="map-layout">
+        <div class="list-panel">
+          <div class="list-head"><h3>附近停车</h3><span class="chip chip-violet" id="mapCount">4 条</span></div>
+          <div class="list-search">${icon('search')}<input id="mapSearch" placeholder="搜索商场、地址或备注..." oninput="window.parkingFilters.query=this.value;renderList()" /></div>
+          <div class="list-filters">
+            <select class="select" onchange="setFilter('province',this.value)">
+              <option value="">省份</option>
+              ${filterOptions('province').map(d => `<option>${d.name}</option>`).join('')}
+            </select>
+            <select class="select" onchange="setFilter('city',this.value)">
+              <option value="">城市</option>
+              ${filterOptions('city').map(d => `<option>${d.name}</option>`).join('')}
+            </select>
+            <select class="select" onchange="setFilter('district',this.value)">
+              <option value="">区县</option>
+              ${filterOptions('district').map(d => `<option>${d.name}</option>`).join('')}
+            </select>
+          </div>
+          <div class="records" id="parkingCards"></div>
+        </div>
+        <div class="map-wrap" id="mapWrap">
+          <canvas class="map-canvas" id="mapCanvas"></canvas>
+          <div class="map-search">${icon('search')}<input class="search-input" placeholder="搜索地图地点..." onkeydown="if(event.key==='Enter')alert('地图搜索（交互示意）')" /></div>
+          <div class="map-controls">
+            <button class="btn" title="放大" onclick="alert('放大（交互示意）')">${icon('plus')}</button>
+            <button class="btn" title="缩小" onclick="alert('缩小（交互示意）')">${icon('x')}</button>
+            <button class="btn" title="定位" onclick="alert('定位（交互示意）')">${icon('navigation')}</button>
+          </div>
+          <div class="map-legend"><span><span class="dot dot-violet"></span>当前选中</span><span><span class="dot dot-neutral"></span>其他记录</span></div>
+          <div id="mapBubbles" style="position:absolute;inset:0;z-index:3"></div>
+        </div>
+      </div>
+    `)
+    renderList()
+    renderMap()
+  }
+
+  window.renderPageSpecific = function () {
+    renderList()
+    renderMap()
+  }
+
+  function renderMap() {
+    const canvas = document.getElementById('mapCanvas')
+    if (canvas) drawFakeMap(canvas)
+    const box = document.getElementById('mapBubbles')
+    if (!box) return
+    const list = applyFilters(window.MOCK_PARKING)
+    document.getElementById('mapCount').textContent = `${list.length} 条`
+    box.innerHTML = list.map((r, i) => `
+      <div class="map-bubble ${window.activeRecord && window.activeRecord.id === r.id ? 'active' : ''}" style="left:${15 + (i * 220) % 62}%;top:${22 + (i * 137) % 55}%" data-id="${r.id}" onclick="selectRecord('${r.id}')">
+        <div class="map-bubble-label">${r.mall} · ${r.dayPrice}${r.dayUnit}</div>
+      </div>`).join('')
+  }
+
+  function selectRecord(id) {
+    window.activeRecord = window.MOCK_PARKING.find(r => r.id === id) || null
+    renderList()
+    renderMap()
+    openDrawer('detail', window.activeRecord)
+  }
+
+  window.renderList = function () {
+    const list = applyFilters(window.MOCK_PARKING)
+    const root = document.getElementById('parkingCards')
+    document.getElementById('mapCount').textContent = `${list.length} 条`
+    if (!root) return
+    if (!list.length) {
+      root.innerHTML = `<div class="empty-state">${icon('car')}<div style="font-size:13px;color:var(--ink-2)">没有符合条件的停车记录</div><button class="btn btn-sm" onclick="resetFilters()">清除筛选</button></div>`
+      return
+    }
+    root.innerHTML = list.map(r => `
+      <div class="record-card ${window.activeRecord && window.activeRecord.id === r.id ? 'active' : ''}" onclick="selectRecord('${r.id}')">
+        <div class="record-thumb">${icon('image')}</div>
+        <div class="record-main">
+          <div class="record-title">${r.mall}</div>
+          <div class="record-meta">${r.city} · ${r.district} · ${r.address}</div>
+          <div class="record-price">
+            <span class="item"><span class="num">${r.dayPrice}</span><span class="unit">${r.dayUnit}</span><span class="label">日间</span></span>
+            <span class="item"><span class="num">${r.nightPrice}</span><span class="unit">${r.nightUnit}</span><span class="label">夜间</span></span>
+          </div>
+          <span class="free-chip">免费 ${r.free} 分钟 · ${r.interval} 分钟重新计费</span>
+        </div>
+      </div>`).join('')
+  }
+</script>
+</body>
+</html>
