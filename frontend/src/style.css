@@ -106,7 +106,7 @@
 /* 不要再写未分层的 `* { margin:0; padding:0 }` 通用 reset。
    Tailwind v4 的 preflight 已经在 @layer base 里提供了同样的声明；
    自己再写一份会变成「未分层」规则，而未分层声明优先于所有 @layer 内容，
-   会把 @layer utilities 里的 padding-*/margin-* 全部压成 0
+   会把 @layer utilities 里的 padding-* / margin-* 全部压成 0
    （实测 p-4 / px-6 / pl-[220px] 计算值均为 0px，导致整站无内边距）。 */
  html, body, #app {
    min-height: 100%;

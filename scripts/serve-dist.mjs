@@ -47,6 +47,6 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`serving ${ROOT} at http://127.0.0.1:${PORT} (SPA fallback on)`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`serving ${ROOT} at http://0.0.0.0:${PORT} (SPA fallback on)`);
 });

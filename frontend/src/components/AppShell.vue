@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, provide, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   Car,
@@ -52,6 +52,13 @@ const notifications = useNotifications()
 // (The static baseline has no state at all, so this is a deliberate addition,
 // not a visual deviation.)
 const collapsed = ref(localStorage.getItem('sidebar-collapsed') === '1')
+
+ // Mobile auto-collapse: ≤768px starts as 56px rail; manual toggle transient, not persisted.
+ const isMobile = ref(window.innerWidth <= 768)
+ const mobileOpen = ref(false)
+ const sidebarCollapsed = computed(() =>
+   isMobile.value ? !mobileOpen.value : collapsed.value,
+ )
 const searchQuery = ref('')
 const pendingUsers = ref(0)
 const openUserMenu = ref(false)
@@ -88,7 +95,11 @@ function groupOpen(name: string) {
 
 function toggleGroup(name: string) {
   // Collapsed rail has no room for drawers; expand the sidebar first.
-  if (collapsed.value) { collapsed.value = false; return }
+  if (sidebarCollapsed.value) {
+    if (isMobile.value) mobileOpen.value = true
+    else collapsed.value = false
+    return
+  }
   openGroups[name] = !groupOpen(name)
 }
 
@@ -117,7 +128,8 @@ async function goAnchor(id: 'recent' | 'favorites') {
 }
 
 function toggleSidebar() {
-  collapsed.value = !collapsed.value
+  if (isMobile.value) mobileOpen.value = !mobileOpen.value
+  else collapsed.value = !collapsed.value
 }
 
 watch(collapsed, (v) => localStorage.setItem('sidebar-collapsed', v ? '1' : '0'))
@@ -150,12 +162,22 @@ watch(openUserMenu, (val) => {
   else document.removeEventListener('click', onOutsideClick)
 })
 
+function syncMobile() {
+  isMobile.value = window.innerWidth <= 768
+  if (isMobile.value) mobileOpen.value = false
+}
+
 onMounted(() => {
+  window.addEventListener('resize', syncMobile)
   if (!toolsStore.initialized || toolsStore.tools.length === 0) {
     toolsStore.load(true)
   }
   loadPendingCount()
   notifications.loadBanner()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', syncMobile)
 })
 
 watch(() => route.path, (p) => {
@@ -168,13 +190,13 @@ provide(NOTIFICATION_KEY, notifications)
 
 <template>
   <div class="app">
-    <aside class="sidebar" :class="{ collapsed }">
+    <aside class="sidebar" :class="{ collapsed: sidebarCollapsed }">
       <div class="brand">
         <div class="brand-logo">C</div>
         <div class="brand-name">Cloud Toolkit</div>
         <button
           class="sidebar-collapse-btn"
-          :title="collapsed ? '展开菜单' : '收起菜单'"
+          :title="sidebarCollapsed ? '展开菜单' : '收起菜单'"
           @click="toggleSidebar"
         >
           <Menu />
@@ -243,7 +265,7 @@ provide(NOTIFICATION_KEY, notifications)
             >
               <component :is="item.icon" /><span>{{ item.name }}</span>
               <span
-                v-if="item.route === '/admin/users' && pendingUsers > 0 && !collapsed"
+                v-if="item.route === '/admin/users' && pendingUsers > 0 && !sidebarCollapsed"
                 class="badge"
               >{{ pendingUsers }}</span>
             </RouterLink>

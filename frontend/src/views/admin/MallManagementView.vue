@@ -92,14 +92,15 @@ function flash(msg: string) {
 async function load() {
   loading.value = true
   errorMsg.value = ''
-  const [mallResult, regionResult] = await Promise.all([
-    supabase.from('parking_malls').select('*').order('created_at', { ascending: false }),
-    fetchAllRegions(),
-  ])
+  const mallResult = await supabase.from('parking_malls').select('*').order('created_at', { ascending: false })
   loading.value = false
   if (mallResult.error) errorMsg.value = mallResult.error.message
   else rows.value = (mallResult.data as ParkingMall[]) ?? []
-  if (!regionResult.error) regions.value = regionResult.rows
+
+  // 行政区在后台异步加载，不阻塞主表展示
+  fetchAllRegions().then((r) => {
+    if (!r.error) regions.value = r.rows
+  })
 }
 
 async function fetchAllRegions(): Promise<{ rows: RegionRow[]; error?: { message: string } }> {

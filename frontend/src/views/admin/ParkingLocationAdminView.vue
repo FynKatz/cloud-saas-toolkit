@@ -137,16 +137,19 @@ function priceText(v: number | null): string {
 async function load() {
   loading.value = true
   errorMsg.value = ''
-  const [locResult, mallResult, regionResult] = await Promise.all([
+  const [locResult, mallResult] = await Promise.all([
     supabase.from('parking_locations').select('*').order('created_at', { ascending: false }),
     supabase.from('parking_malls').select('*'),
-    fetchAllRegions(),
   ])
   loading.value = false
   if (locResult.error) errorMsg.value = locResult.error.message
   else rows.value = (locResult.data as ParkingLocation[]) ?? []
   if (!mallResult.error) malls.value = (mallResult.data as ParkingMall[]) ?? []
-  if (!regionResult.error) regions.value = regionResult.rows
+
+  // 行政区在后台异步加载，不阻塞主表展示
+  fetchAllRegions().then((r) => {
+    if (!r.error) regions.value = r.rows
+  })
 
   if (!locResult.error && locResult.data?.length) {
     const ids = [...new Set(locResult.data.map((r: ParkingLocation) => r.user_id))]

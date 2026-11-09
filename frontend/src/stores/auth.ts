@@ -78,11 +78,17 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  supabase.auth.onAuthStateChange(async (_event, newSession) => {
+  // Supabase 会在持有内部 auth 锁的情况下同步触发该回调。若在回调里直接
+  // await 任何 supabase 调用（from/rpc 内部会再次 getSession 取同一把锁），
+  // 就会自锁：请求虽然返回 200，但 Promise 永不结算，表现为登录一直停留在
+  // “登录中…”。因此这里只同步更新会话引用，实际拉取推迟到锁释放之后。
+  supabase.auth.onAuthStateChange((_event, newSession) => {
     session.value = newSession
     user.value = newSession?.user ?? null
-    await refreshProfile()
-    await refreshAdminFlag()
+    setTimeout(() => {
+      void refreshProfile()
+      void refreshAdminFlag()
+    }, 0)
   })
 
   async function signUp(

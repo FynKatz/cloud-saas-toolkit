@@ -96,7 +96,9 @@ const cities = computed(() =>
 
 const districts = computed(() =>
   regions.districts.value.filter(
-    (r) => !cityCode.value || r.city_code === cityCode.value,
+    (r) => (cityCode.value
+      ? r.city_code === cityCode.value
+      : !provinceCode.value || r.province_code === provinceCode.value),
   ),
 )
 
@@ -617,7 +619,7 @@ async function runAddressSearch() {
   }
 }
 
-function applyMapSearch() {
+async function applyMapSearch() {
   searchQuery.value = mapSearch.value.trim()
   if (!searchQuery.value) {
     mapStatus.value = ''
@@ -625,9 +627,12 @@ function applyMapSearch() {
   }
   if (filtered.value.length) {
     renderMarkers()
+    // filtered 变更会触发 watch → renderMarkers → fitMarkers 覆写 mapStatus，
+    // 等这一轮 flush 结束后再写过滤提示，避免被同步覆盖。
+    await nextTick()
     mapStatus.value = `已按「${searchQuery.value}」过滤，共 ${filtered.value.length} 个停车场`
   } else {
-    runAddressSearch()
+    await runAddressSearch()
   }
 }
 
@@ -1020,11 +1025,13 @@ onBeforeUnmount(() => {
               {{ selected.is_favorited ? '已收藏' : '收藏停车场' }}
             </button>
             <div class="foot-spacer" />
-            <button class="btn" @click="openEdit(selected)"><Edit :size="15" />编辑</button>
-            <button class="btn" @click="setStatus(selected, selected.status === 'active' ? 'inactive' : 'active')">
-              {{ selected.status === 'active' ? '停用' : '启用' }}
-            </button>
-            <button class="btn danger" @click="removeLocation(selected)"><Trash2 :size="15" />删除</button>
+            <template v-if="parking.canAdmin.value">
+              <button class="btn" @click="openEdit(selected)"><Edit :size="15" />编辑</button>
+              <button class="btn" @click="setStatus(selected, selected.status === 'active' ? 'inactive' : 'active')">
+                {{ selected.status === 'active' ? '停用' : '启用' }}
+              </button>
+              <button class="btn danger" @click="removeLocation(selected)"><Trash2 :size="15" />删除</button>
+            </template>
           </footer>
         </aside>
       </div>

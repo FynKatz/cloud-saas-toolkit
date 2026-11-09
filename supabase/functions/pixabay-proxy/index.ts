@@ -33,6 +33,12 @@ Deno.serve(async (req) => {
   const service = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { autoRefreshToken: false, persistSession: false },
   })
+  // has_tool_permission() 内部依赖 auth.uid()，必须用调用者 JWT 的 client 执行；
+  // 用 service_role client 调用时 auth.uid() 为 null，会恒定判定无权限。
+  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+    global: { headers: { Authorization: authHeader } },
+  })
 
   const { data: profile } = await service
     .from('profiles')
@@ -43,7 +49,7 @@ Deno.serve(async (req) => {
     return json({ error: '账号尚未通过审批' }, 403)
   }
 
-  const { data: permitted } = await service.rpc('has_tool_permission', {
+  const { data: permitted } = await userClient.rpc('has_tool_permission', {
     p_tool_id: 'pixabay-download',
     p_required_level: 'view',
   })

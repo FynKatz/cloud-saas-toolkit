@@ -67,3 +67,7 @@ feature/2610 → dev → int → stg → prod
 - 共享/私有隔离只改 RLS，不改表结构。
 - 权限采用多角色并集（`bool_or`），支持 view/edit 两级操作粒度。
 - 系统通知采用黑名单模型，关闭后不重复出现。
+
+## 9. Ego-browser（遵循全局 `ego-workbench` skill）
+
+ego 操作遵循全局 `ego-workbench` skill，TaskSpace `Cloud SaaS Toolkit`。详细规则与 SOP 见 `~/.codex/skills/ego-workbench/SKILL.md`。
