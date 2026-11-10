@@ -53,7 +53,11 @@ feature/2610 → dev → int → stg → prod
 - **Supabase SQL/migration**：`sh scripts/supa-sql.sh --file <path>`（复用 git config 代理凭据）。
 - **浏览器兜底**：`scripts/supa-ego-cli.sh`（ego-browser 在已登录 Supabase 的标签页内注入 SQL）。
 - **Test Chrome CDP 已废弃**，脚本 `scripts/supabase-cdp.mjs` 已删除。
-- GitHub 在本公司网络下间歇性 503，`push-retry.sh` 已内置重试逻辑。
+- **GitHub 推送必须走 `sh scripts/push-retry.sh origin <branch>...`，禁止裸 `git push origin`。**
+  GitHub 走 git 专用代理 `http.https://github.com.proxy`（`172.30.243.124:8080`，Basic Auth），
+  与 ego/浏览器的 relay（`proxy-mac.bmwbrill.cn:8080`，NTLM）是两条不同网络路径。
+  `push-retry.sh` 里 `lowSpeed` 超时 + 重试逻辑是为了应对间歇性 503；它 retry 全失败
+  之前，不得根据 curl/ego relay 的结果、或上下文里"GitHub 被封锁"的旧结论跳过推送。
 - 代理防线：shell 依赖 `proxy-mac.bmwbrill.cn:8080`（AD 域认证），浏览器持有已登录 Supabase/netlify 会话。本机 `no_proxy` 不含 Supabase 域名时不要裸连。
 
 ## 7. 测试卫生

@@ -99,6 +99,7 @@ supabase.com 并保持会话；未登录时脚本只能看到 Sign in，不会�
 | `api.netlify.com` | 无 token 401 → 带 token 正常列站点/部署 | 可达 |
 | `gitee.com` | 200；`git ls-remote gitee` 成功 | **可达，可自助推送** |
 | `github.com` | 5 次 curl 全 `000`；`git ls-remote origin` 2 次失败（更早成功过一次） | **不稳定，按不可用规划** |
+| `github.com`（2026-11-10 复查） | curl 经 ego relay 仍失败；`curl -x http.https://github.com.proxy` 返回 200；`git ls-remote origin` 成功；`push-retry.sh origin` 五分支全部 attempt 1 成功 | **走 git 专用代理可推，不要套用 ego relay 结论** |
 
 要点：GitHub 时通时不通，**不要把依赖它的流程当成可靠路径**。
 
