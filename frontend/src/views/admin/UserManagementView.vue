@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   Check,
   KeyRound,
@@ -17,6 +18,7 @@ import type { AdminUser, AdminUserStatus } from '../../types/admin'
 
 const admin = useAdminStore()
 const auth = useAuthStore()
+const router = useRouter()
 
 const filter = ref<AdminUserStatus | 'all'>('all')
 const keyword = ref('')
@@ -107,6 +109,16 @@ async function submit() {
     } else if (activeModal.value === 'reset' && target.value) {
       const res = await admin.resetPassword(target.value.id, form.password)
       if (res.error) return (error.value = res.error)
+      if (target.value.id === auth.user?.id) {
+        flash('密码已重置，即将跳转登录页')
+        closeModal()
+        busy.value = false
+        setTimeout(async () => {
+          await auth.signOut()
+          router.replace('/login')
+        }, 1500)
+        return
+      }
       flash('密码已重置，该用户所有会话已失效')
     } else if (activeModal.value === 'roles' && target.value) {
       const res = await admin.assignUserRole(target.value.id, form.roleIds)
@@ -218,7 +230,6 @@ onMounted(async () => {
           <tr v-for="user in filtered" :key="user.id" class="transition hover:bg-[var(--nav-hover)]">
             <td class="px-4 py-3">
               <div class="font-medium text-[var(--text)]">{{ user.username }}</div>
-              <div v-if="user.must_change_password" class="text-[11px] text-amber-600">待首次改密</div>
             </td>
             <td class="px-4 py-3">
               <span class="rounded px-2 py-0.5 text-[11px] font-medium" :class="statusMeta[user.status].cls">

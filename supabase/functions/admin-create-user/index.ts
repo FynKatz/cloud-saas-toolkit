@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
     .from('profiles')
     .update({
       status: 'approved',
-      must_change_password: true,
+      must_change_password: false,
       created_by: user.id,
       approved_by: user.id,
       approved_at: new Date().toISOString(),

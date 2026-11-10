@@ -251,8 +251,7 @@ export function setupRouterGuards(router: Router) {
     if (publicNames.has(to.name as string)) {
       if (auth.isAuthenticated) {
         const s = auth.profile?.status
-        if (s === 'approved' && !auth.mustChangePassword) return { name: 'dashboard' }
-        if (s === 'approved' && auth.mustChangePassword) return { name: 'change-password' }
+        if (s === 'approved') return { name: 'dashboard' }
         if (s === 'pending') return { name: 'pending' }
         if (s === 'rejected') return { name: 'rejected' }
         if (s === 'deleted') return { name: 'deleted' }
@@ -267,12 +266,11 @@ export function setupRouterGuards(router: Router) {
     const s = auth.profile?.status
 
     if (to.name === 'change-password') {
-      if (s === 'approved' && auth.mustChangePassword) return true
-      return { name: s === 'approved' ? 'dashboard' : 'login' }
+      if (s === 'approved') return true
+      return { name: 'login' }
     }
 
     if (s === 'approved') {
-      if (auth.mustChangePassword) return { name: 'change-password' }
       if (to.meta.requiresAdmin && !auth.isAdmin) return { name: 'dashboard' }
       const toolId = to.meta.toolId as string | undefined
       if (toolId) {

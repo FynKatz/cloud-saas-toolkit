@@ -36,11 +36,7 @@ async function handleLogin() {
 function redirectByStatus() {
   const s = auth.profile?.status
   if (s === 'approved') {
-    if (auth.mustChangePassword) {
-      router.replace({ name: 'change-password' })
-    } else {
-      router.replace({ name: 'dashboard' })
-    }
+    router.replace({ name: 'dashboard' })
   } else if (s === 'pending') {
     router.replace({ name: 'pending' })
   } else if (s === 'rejected') {

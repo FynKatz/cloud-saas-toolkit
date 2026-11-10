@@ -54,12 +54,13 @@ async function handleSubmit() {
     return
   }
   await auth.refreshProfile()
-  router.replace({ name: 'dashboard' })
+  await auth.signOut()
+  router.replace({ name: 'login' })
 }
 </script>
 
 <template>
-  <AuthShell title="设置新密码" subtitle="首次登录需修改临时密码">
+  <AuthShell title="修改密码" subtitle="输入当前密码，设置新的登录密码">
     <form class="space-y-4" @submit.prevent="handleSubmit">
       <div
         v-if="error"

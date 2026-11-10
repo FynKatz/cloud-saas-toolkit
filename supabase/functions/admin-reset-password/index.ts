@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
 
   const { error: profileError } = await service
     .from('profiles')
-    .update({ must_change_password: true, password_changed_at: new Date().toISOString() })
+    .update({ must_change_password: false, password_changed_at: new Date().toISOString() })
     .eq('id', targetId)
   if (profileError) return json({ error: '更新用户状态失败' }, 500)
 
