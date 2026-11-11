@@ -332,13 +332,13 @@ onMounted(async () => {
               <input v-model="form.username" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" placeholder="小写字母、数字、_ 或 -" />
             </label>
             <label class="block">
-              <span class="mb-1 block text-xs text-[var(--text-secondary)]">临时密码</span>
+              <span class="mb-1 block text-xs text-[var(--text-secondary)]">密码</span>
               <input v-model="form.password" type="text" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" placeholder="至少 8 位，含字母和数字" />
             </label>
           </template>
 
           <label v-if="activeModal === 'reset'" class="block">
-            <span class="mb-1 block text-xs text-[var(--text-secondary)]">新临时密码</span>
+            <span class="mb-1 block text-xs text-[var(--text-secondary)]">新密码</span>
             <input v-model="form.password" type="text" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" placeholder="至少 8 位，含字母和数字" />
           </label>
 
