@@ -2,8 +2,8 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
-  Check,
-  KeyRound,
+  Pencil,
+  Shield,
   Plus,
   RotateCcw,
   Search,
@@ -266,14 +266,14 @@ onMounted(async () => {
                     title="管理角色"
                     @click="openModal('roles', user)"
                   >
-                    <Check class="h-4 w-4" />
+                    <Shield class="h-4 w-4" />
                   </button>
                   <button
                     class="grid h-7 w-7 place-items-center rounded text-[var(--text-secondary)] hover:bg-[var(--nav-hover)]"
                     title="重置密码"
                     @click="openModal('reset', user)"
                   >
-                    <KeyRound class="h-4 w-4" />
+                    <Pencil class="h-4 w-4" />
                   </button>
                   <button
                     class="grid h-7 w-7 place-items-center rounded text-rose-600 hover:bg-rose-50"
