@@ -75,3 +75,24 @@ feature/2610 → dev → int → stg → prod
 ## 9. Ego-browser（遵循全局 `ego-workbench` skill）
 
 ego 操作遵循全局 `ego-workbench` skill，TaskSpace `Cloud SaaS Toolkit`。详细规则与 SOP 见 `~/.codex/skills/ego-workbench/SKILL.md`。
+
+## 10. 部署（Netlify 直传）
+
+**不依赖 GitHub 自动触发。** Netlify Continuous Deployment 需升级付费计划，本工程使用 API 直传部署。
+
+**每次上线步骤：**
+
+```bash
+# 1. 构建（密钥需预填充 frontend/.env）
+grep '^VITE_' .env.secrets > frontend/.env
+cd frontend && npm run build
+
+# 2. 直传 + 上线（走 ego relay，免费；不带 --publish 只传草稿）
+SUPA_PROXY=http://127.0.0.1:18899 node scripts/netlify-deploy.mjs --publish
+```
+
+- 凭据来源：`.env.secrets` 中的 `NETLIFY_AUTH_TOKEN`。
+- 传输层：curl 走 ego relay（`127.0.0.1:18899`），`SUPA_PROXY` 注入代理地址。
+- 脚本位置：`scripts/netlify-deploy.mjs`。
+- 线上主域：`https://cloud-saas-toolkit.netlify.app`。
+- 查询部署记录：`GET /api/v1/sites/{site_id}/deploys`（同一个 token）。
