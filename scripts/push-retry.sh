@@ -16,6 +16,26 @@
 # 才能真的进入下一轮重试。
 
 set -u
+
+# --- 代理防护栅栏 ---
+# 本脚本引用 AGENTS.md §6 与 docs/runbook-corporate-network.md：
+# GitHub 推送必须走 git 专用代理（http.https://github.com.proxy），
+# 严禁被环境变量或命令行覆盖为 ego relay（127.0.0.1:18899）。
+# 如果调用方设置了 HTTP_PROXY/HTTPS_PROXY/http_proxy/https_proxy
+# 为 ego relay，直接报错退出，避免静默返回间歇性 503。
+BOGUS_PROXY="127.0.0.1:18899"
+for _p in HTTP_PROXY HTTPS_PROXY http_proxy https_proxy; do
+  eval "_pv=\${$_p:-}"
+  case "$_pv" in
+    *"$BOGUS_PROXY"*)
+      echo "FATAL: HTTP_PROXY/HTTPS_PROXY is set to ego relay ($BOGUS_PROXY)" >&2
+      echo "       GitHub 推送走 git 专用代理，不要套用 ego relay。" >&2
+      echo "       See AGENTS.md §6, docs/runbook-corporate-network.md." >&2
+      exit 2
+      ;;
+  esac
+done
+
 RETRIES="${PUSH_RETRIES:-5}"
 SLEEP="${PUSH_RETRY_SLEEP:-5}"
 
