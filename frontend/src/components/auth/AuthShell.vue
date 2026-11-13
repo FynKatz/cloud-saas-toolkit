@@ -1,13 +1,31 @@
 <script setup lang="ts">
 import { Sun, Moon, LogIn } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
 import { useTheme } from '../../composables/useTheme'
+import { useAuthStore } from '../../stores/auth'
+import { i18n } from '../../i18n'
+
+const { t } = i18n.global
+const router = useRouter()
+const auth = useAuthStore()
 
 defineProps<{
   title: string
   subtitle?: string
+  /**
+   * 只有 /change-password 需要返回应用：它是壳外路由（与 path:'/' 平级），
+   * 进去以后没有任何导航，只能靠浏览器后退。登录/注册/审批中/被拒/已注销
+   * 这几页共用本组件，绝不能长出返回按钮，所以默认关闭。
+   */
+  showBack?: boolean
 }>()
 
 const { isDark, toggle } = useTheme()
+
+async function logout() {
+  await auth.signOut()
+  router.push('/login')
+}
 </script>
 
 <template>
@@ -70,6 +88,25 @@ const { isDark, toggle } = useTheme()
 
       <div class="w-full">
         <slot />
+      </div>
+
+      <div v-if="showBack" class="mt-6 flex items-center justify-between gap-3 text-[13px]">
+        <button
+          type="button"
+          class="rounded-md border px-3 py-2 transition"
+          :style="{ borderColor: 'var(--surface-border)', color: 'var(--text)' }"
+          @click="router.push('/')"
+        >
+          {{ t('common.backToOverview') }}
+        </button>
+        <button
+          type="button"
+          class="rounded-md px-3 py-2 transition"
+          style="color: var(--text-secondary)"
+          @click="logout"
+        >
+          {{ t('account.logout') }}
+        </button>
       </div>
     </div>
   </div>

@@ -198,8 +198,15 @@ export function setupRouterGuards(router: Router) {
   router.beforeEach(async (to) => {
     const auth = useAuthStore()
 
+    // 冷加载时 init 内部会 await profile 查询。网络挂起时这个 await 不结算，
+    // 守卫就一直 pending，用户看到的是永久空白页（比半空壳更糟）。
+    // 加超时兜底：init 若 10s 没完成，下面按「profile 不可用」处理，落到登录页。
+    // init 的 promise 仍在后台跑，成功后会正常写回状态。
     if (!auth.initialized) {
-      await auth.init()
+      await Promise.race([
+        auth.init(),
+        new Promise<void>((resolve) => setTimeout(resolve, 10000)),
+      ])
     }
 
     // Dev mode — no Supabase: fake admin session and load all tools
@@ -262,6 +269,20 @@ export function setupRouterGuards(router: Router) {
 
     if (!auth.isAuthenticated) {
       return { name: 'login', query: { redirect: to.fullPath } }
+    }
+
+    // 会话存在但 profile 为 null（init 超时，或 refreshProfile 吞掉了网络错误）时，
+    // 下面所有 status 分支都会落空并走到末尾 return true，
+    // 用户就会带着 0 工具、无 admin 标记进入壳，渲染出一半空导航。
+    // 补一次带错误返回的加载（同样加超时），仍失败就退回登录页，而不是给一个坏壳。
+    if (!auth.profile) {
+      const { error } = await Promise.race([
+        auth.loadProfileChecked(),
+        new Promise<{ error: string }>((resolve) =>
+          setTimeout(() => resolve({ error: 'TIMEOUT' }), 8000),
+        ),
+      ])
+      if (error) return { name: 'login', query: { redirect: to.fullPath } }
     }
 
     const s = auth.profile?.status

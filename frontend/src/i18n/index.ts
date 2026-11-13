@@ -2,6 +2,9 @@ import { createI18n } from 'vue-i18n'
 
 const messages = {
   zh: {
+    brand: {
+      name: 'Taulko',
+    },
     nav: {
       workspace: '工作台',
       search: '搜索',
@@ -10,12 +13,22 @@ const messages = {
       overview: '概览',
       recent: '最近使用',
       favorites: '收藏',
-      adminPanel: '管理面板',
       dataManagement: '数据管理',
       userManagement: '用户管理',
       notificationManagement: '通知管理',
       rolePermissions: '角色权限',
       auditLogs: '审计日志',
+      notificationCenter: '通知中心',
+      dataRegions: '省市行政区',
+      dataMalls: '商场管理',
+      dataParkingLocations: '停车场管理',
+      searchPlaceholder: '搜索工具…',
+      searchPill: '搜索',
+      collapseSidebar: '收起侧栏',
+      expandSidebar: '展开侧栏',
+      favoritesCount: '{count} 个收藏',
+      account: '用户',
+      calendarSlot: '日程',
     },
     search: {
       placeholder: '搜索工具、命令…',
@@ -54,6 +67,9 @@ const messages = {
     },
   },
   en: {
+    brand: {
+      name: 'Taulko',
+    },
     nav: {
       workspace: 'Workspace',
       search: 'Search',
@@ -62,12 +78,22 @@ const messages = {
       overview: 'Overview',
       recent: 'Recent',
       favorites: 'Favorites',
-      adminPanel: 'Admin Panel',
       dataManagement: 'Data Management',
       userManagement: 'Users',
       notificationManagement: 'Notifications',
       rolePermissions: 'Roles',
       auditLogs: 'Audit Logs',
+      notificationCenter: 'Notification center',
+      dataRegions: 'Regions',
+      dataMalls: 'Malls',
+      dataParkingLocations: 'Parking lots',
+      searchPlaceholder: 'Search tools…',
+      searchPill: 'Search',
+      collapseSidebar: 'Collapse sidebar',
+      expandSidebar: 'Expand sidebar',
+      favoritesCount: '{count} favorites',
+      account: 'Account',
+      calendarSlot: 'Calendar',
     },
     search: {
       placeholder: 'Search tools, commands…',

@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useInjectNotifications } from '../../composables/useNotifications'
+import { useAuthStore } from '../../stores/auth'
+import { isSafeNavTarget } from '../../lib/navTarget'
 
 const notifications = useInjectNotifications()
 const router = useRouter()
+const auth = useAuthStore()
 
 function handleDismiss() {
   if (notifications.currentBanner.value && !notifications.bannerDismissing.value) {
@@ -15,7 +18,8 @@ function handleDetail() {
   if (notifications.currentBanner.value) {
     notifications.markRead(notifications.currentBanner.value.id)
     const target = notifications.currentBanner.value.target_route
-    if (target) {
+    // 与 v2 横幅同一套白名单校验
+    if (isSafeNavTarget(target, auth.isAdmin ?? false)) {
       router.push(target)
     } else {
       router.push('/notifications')

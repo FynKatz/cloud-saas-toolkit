@@ -3,9 +3,12 @@ import { onMounted, ref, computed } from 'vue'
 import { Check, ChevronRight } from 'lucide-vue-next'
 import { useNotifications, type NotificationItem } from '../composables/useNotifications'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+import { isSafeNavTarget } from '../lib/navTarget'
 
 const notifications = useNotifications()
 const router = useRouter()
+const auth = useAuthStore()
 
 const expandedId = ref<string | null>(null)
 const filterUnread = ref(false)
@@ -31,7 +34,9 @@ function toggleExpand(id: string, item: NotificationItem) {
 }
 
 function handleGo(route: string | null) {
-  if (route) router.push(route)
+  // target_route 是后台自由文本，路由表没有 catch-all，填错会落进空白页
+  if (isSafeNavTarget(route, auth.isAdmin ?? false)) router.push(route)
+  else router.push('/notifications')
 }
 
 

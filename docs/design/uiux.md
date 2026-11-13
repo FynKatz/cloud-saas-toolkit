@@ -12,21 +12,30 @@
 - **浅色主题**：所有 v2 token 定义在 `:root` 伪类下，作为默认值。
 - **深色主题**：由 `preferencesStore` 在 `<html>` 元素上挂载 `class="dark"`。
   CSS 使用 `html.dark` 选择器覆写 L2/内容区 token。
-  L1 常量（`--v2-l1-*`）不参与覆写，L1 恒暗。
+  L1 常量不参与覆写，L1 恒暗。
 - **实现模板**：
   ```css
   :root {
-    --v2-l2-bg: #ffffff;
+    --cu-nav-rail-bg: #f9f9f9;
     --v2-content-bg: #f4f5f7;
     /* ... 其余浅色 token */
   }
   html.dark {
-    --v2-l2-bg: #1a1d27;
+    --cu-nav-rail-bg: #1a1d27;
     --v2-content-bg: #0f1119;
     /* ... 其余深色 token */
   }
   ```
-- L1 token 单独放在 `html { }` 规则块中，不随 `html.dark` 变化。同时应添加独立 class 作用域防御：L1 token 使用 `--v2-l1-*` 命名，`:root` 和 `html.dark` 块内绝不写入 `--v2-l1-*` 前缀变量，以保证 L1 恒暗语义不会被后续维护者误覆写。
+- **恒暗命名空间（导航改造后定稿）**：真正恒暗的只有 L1 黑色面板一族 ——
+  `--cu-l1-panel-*` / `--cu-l1-item*` / `--cu-l1-badge` / `--cu-l1-glow*`，它们只允许出现在
+  `html { }` 规则块内，`:root` 与 `html.dark` 一律不得重声明（`html.dark` 特异度 0,1,1 高于
+  `html` 的 0,0,1，一旦重声明恒暗语义就反转）。
+  注意 `--cu-l1-rail-*` 这类**尺寸**不属于恒暗集，因此改名 `--cu-rail-width`，避免与机检前缀冲突。
+  机检：`grep -nE '^\s*--cu-l1-' frontend/src/style.css` 只允许命中 `html {` 块。
+- L1 那条 `#f9f9f9` 沟槽底**不属恒暗集**：它改名 `--cu-nav-rail-bg`，随主题覆写，并与 L2 面板底
+  合并成同一个 token。暗色下若仍留 `#f9f9f9`，会在深色 L2 旁边形成一条刺眼亮带。
+  黑面板在暗色下保持纯 `#000`（不改成 `#0d0f16`）：与 `#1a1d27` 轨道差 26 级灰阶，边缘仍然清晰，
+  且 ClickUp 自己的暗色也是纯黑轨。
 
 ### 命名规则
 
@@ -177,7 +186,8 @@
 |---|---|---|
 | Dropdown/Popover | 10 | 下拉菜单、popover、tooltip |
 | Sticky | 15 | 粘性表头、Topbar |
-| L1 标签浮层 | 25 | PrimaryRail 标签浮层 |
+| 全宽顶栏 | 20 | GlobalTopbar —— 必须高于副标题栏/L1/L2，否则头像下拉会被副标题栏盖住（面板的 z-index 困在顶栏自建的层叠上下文内部） |
+| 顶栏头像浮层 | 30 | GlobalTopbar 头像下拉（`--cu-z-topbar-popover`） |
 | Drawer | 55 | 桌面侧边抽屉 + 移动端 L2 侧边抽屉（统一层级） |
 | Modal backdrop | 65 | 模态框遮罩（高于 Drawer 55，确保 Drawer 内触发的 Modal 遮罩能覆盖 Drawer） |
 | Modal | 60 | 模态框 |
@@ -191,7 +201,8 @@
 |---|---|---|
 | `--v2-z-dropdown` | 10 | 下拉菜单、popover、tooltip |
 | `--v2-z-sticky` | 15 | 粘性表头、Topbar |
-| `--v2-z-label-panel` | 25 | PrimaryRail 标签浮层 |
+| `--cu-z-topbar` | 20 | 全宽顶栏（高于副标题栏/L1/L2） |
+| `--cu-z-topbar-popover` | 30 | 全宽顶栏头像下拉 |
 | `--v2-z-modal-backdrop` | 65 | 模态框遮罩（高于 Drawer 55） |
 | `--v2-z-drawer` | 55 | 侧边抽屉（桌面+移动端统一） |
 | `--v2-z-modal` | 60 | 模态框 |
@@ -225,15 +236,21 @@
 
 ## 3. 图标系统
 
-- 继续使用 `lucide-vue-next`。
-- 图标尺寸：L1 15×15px，L2 顶级项 18×18px，L2 子项 15×15px，Topbar 16×16px，Popover 内 15×15px，Toast 内 16×16px，Avatar popover 菜单项 15×15px。
-- L1 图标可点击区域：40×40px 满宽，桌面不做 44px 硬性要求。
+- **导航层（L1 / L2 / 全宽顶栏 / 移动端底栏）统一走 `CuIcon`**：24 栅格、`stroke-width: 1.5`、
+  `stroke-linejoin/linecap: round`，duotone 元素用实心填充。不再与 lucide 混发 —— 参考稿的导航图标
+  半数带填充，lucide 是严格 2px 纯描边，两者并排就能看出粗细与填充差异。
+- 图标尺寸：L1 18px、L2 行与顶栏 16px、L2 私有锁 12px、顶栏 chevron 10px、chip 旗帜 14px。
+- 内容区（工具页内部）仍可用 lucide，属红色区域，不在本次范围。
+- 工具图标源收敛为一份：`lib/toolIcons.ts` 的 `getToolIcon(icon, id)`，
+  `AppShellV2` 原有的本地 `ICON_MAP` 已删除。`pixabay-download` 与 `image-stitch` 的 DB icon
+  同为 `Image`，按 tool id 覆盖成 `download`，不动 DB、不加 migration。
+- L1 单项为 55×66 的「图标 + 下方文字」整块可点区，桌面不做 44px 硬性要求。
 
 ## 4. 动效规范
 
 | 交互 | 属性 | 时长 | 缓动 |
 |------|------|------|------|
-| L1 标签浮层展开/收起 | opacity + translateX | 200ms / 150ms | ease-out |
+| ~~L1 标签浮层展开/收起~~ | — | — | 作废：L1 文字恒显，无展开态 |
 | L2 收折 | width | 250ms | ease-out |
 | L2 内部内容淡入淡出 | opacity | 150ms | ease-out |
 | L1 图标 hover | background | 120ms | ease |
@@ -251,25 +268,35 @@
 - `prefers-reduced-motion: reduce` 下所有动效直接跳转，不播放。
 - **JS 动画适配**：使用 `useReducedMotion()` composable（基于 `matchMedia('(prefers-reduced-motion: reduce)')`），返回 `ref<boolean>`。Vue `<Transition>` 组件通过监听该 composable 返回值，将 CSS `duration` 覆写为 `0s`。
 
-## 5. L1 标签浮层 (Label Panel)
+## 5. L1 显示形态（原「标签浮层」章节作废）
 
-- 触发：鼠标悬浮或点击 L1 顶部的"展开"图标（三条横线）。
-- **hover 延迟**：300ms（防误触）。mouseleave 后 150ms 延迟收起。
-- 浮层宽度 180px，从 L1 右侧滑出，叠加在 L2 上（z-index 25）。
-- 背景 `rgba(19,21,31,0.94)` + `backdrop-filter: blur(8px)`。
-- **fallback**：不支持 `backdrop-filter` 时 fallback `background: rgba(19,21,31,0.97)`。
-- 每条显示：图标 (15px) + 中文标签 (13px) + 如果有未读数，红色圆形角标。
-- 点击浮层内的项 = 点击 L1 图标的同等行为。
-- 点击浮层外区域 → 关闭浮层，不传事件给 L2（pointer-events 穿透）。
-- **键盘可访问性**：浮层打开时焦点自动移入，浮层内 Tab/Shift+Tab 循环；Esc 关闭并焦点回到展开按钮；浮层容器设 `role="menu"`，每项 `role="menuitem"`。
-- **移动端不显示标签浮层**（无 hover）。首次访问时桌面端默认展开标签面板一次，并显示 onboarding tooltip 指向展开按钮。
+L1 不再有展开态。参考 ClickUp，L1 是 67px 轨道内一块 55px 黑色圆角面板，
+每项**图标 18px + 下方 11px 文字恒显**，单项 pitch 66px，整块可点。
 
-## 6. L2 收折到 0 后的 UI
+- 激活项：图标转实心白、文字 600，图标背后一圈 40px 多彩辉光（`blur(4px)`，
+  黑面板 `overflow: hidden` 裁切，blur 配大会溢出并糊到下方标签）。
+- 文字超出 49px 槽宽时省略号截断并带 `title` 兜底 —— 与参考稿 "Dashboa…" 同行为；
+  英文下 `Workspace` / `Notifications` 必然截断，属预期。
+- 角标 16×16、`#e93c81`，**定位基准是面板**（距面板右缘 6px），不是图标盒。
+- 原 `labelPanelOpen` 状态、300/150ms hover 定时器、`openLabelPanel`/`closeLabelPanel`
+  悬空监听、`--v2-z-label-panel` token 已全部删除。
 
-- L2 收折到 0px 后，内容区全宽。
-- Topbar 最左侧增加汉堡按钮 (☰)，点击展开 L2。
-- 汉堡按钮 hover 高亮，收折态默认可见，展开态隐藏。
-- **收折入口**：L2 侧栏右上角显示 `<` 折叠按钮（16×16px ChevronLeft 图标），点击后 L2 收折到 0。按钮仅在 L2 展开态显示，与 Topbar 汉堡按钮互为反转。
+## 6. L2 收折
+
+- L2 收折后内容区左移占满，宽度由 `--cu-l2-width` 单点定义（桌面与移动端抽屉共用）。
+- **收折入口是一对互补控件 + 快捷键**：
+  ① L2 头部标题右侧的收起按钮（28×28，`panel-left` 字形，仅桌面显示）；
+  ② 页面副标题栏最左侧的展开按钮（28×28，`panel-left-open` 字形，**仅收折态显示**，仅桌面）；
+  ③ `⌘\` 两者通用。
+  之所以必须成对：L2 一旦收折，整个 aside 不再渲染，它内部的收起按钮也随之消失；
+  若没有副标题栏的回展开按钮，鼠标用户收起后就只能靠键盘找回侧栏。
+  收起按钮插在标题与 `+ Create` 胶囊之间，胶囊仍是最后一个子元素，
+  因此其右缘照旧与行命中区对齐（实测同为 326），不会在右侧留下空洞。
+- **单一真值源**：`navVisible = isMobile ? mobileL2Open : !sidebarCollapsed`。
+  L2 渲染条件只读它。此前 `sidebarCollapsed` 是持久化的桌面偏好，在移动端是死值，
+  导致「移动端点收起没反应」，已一并修掉。
+- 移动端不出现这两个按钮：L2 是抽屉，由底部 tab 打开、头部 X 关闭。
+- 收折态持久化到 `v2.sidebar-collapsed`，刷新后保持。
 
 ## 7. 移动端 (≤768px) — Phase 5（当前未上线）
 
@@ -283,17 +310,21 @@
 | 2 | search | 放大镜 |
 | 3 | notifications | 铃铛 |
 | 4 | admin (仅 admin) | 盾牌 |
-| 5 | more (用户 + 偏好) | 三个点 |
+| 5 | account | user-plus（打开顶栏头像下拉） |
 
-- 高度 48px，底色 #13151f，安全区 padding 内。
-- 当前 active 图标白色+底部蓝色短线。
+- 高度 48px（`--cu-mobile-tabbar-height`，与 L2 抽屉的 `bottom` 共用同一个 token），底色 `--cu-mobile-tabbar-bg`，安全区 padding 内。
+- 当前 active 项用文字转强色；「account」tab 的 active 态跟随头像下拉是否展开。
 - 普通用户 4 项均匀分布（无 admin 盾牌），管理员 5 项均匀分布。
 - **图标下方加小号文字标签**（11px），解决移动端无 hover 时的不可识别问题。
-- "更多"底部 action sheet：点击弹出 action sheet，包含：头像+用户名、修改密码、日间/暗夜切换、中文/English 切换、退出登录。
+- 第 5 项**不再走 `select('workspace')`**（那会连带 `router.push('/')` 把用户弹回概览），
+  改为打开全宽顶栏的头像下拉；打开前必须先关抽屉，因为抽屉 z-index 55 高于头像浮层 30。
+- 主题/语言不在此重复：它们在全宽顶栏右侧，移动端命中区放大到 44×44。
 
 ### L2 → 左侧 drawer
 
 - 覆盖模式，z-index `--v2-z-drawer`（55）。
+- **`top` 必须让出全宽顶栏**（`var(--cu-topbar-height)`），否则抽屉会盖住搜索胶囊与头像；
+  抽屉打开时顶栏降 z 或置 `inert`。
 - 背景半透明遮罩。
 - 内部结构 = 桌面 L2 完整树（分组可展开收起）。
 - **关闭方式**：
@@ -302,11 +333,15 @@
   ③ `Esc` 键
   ④ 左滑手势（需判断手势起点在 drawer 内，避免与浏览器后退冲突）
 - **无障碍**：drawer 打开时容器设 `role="dialog" aria-modal="true"`，焦点移入 drawer；Tab/Shift+Tab 在 drawer 内循环捕获；背景内容（L1 + 内容区）设 `inert`；关闭后焦点回到触发按钮。
-- **内容区 padding**：移动端 `16px 16px 32px`。
+- **内容区 padding**：移动端 `16px 16px calc(var(--cu-mobile-tabbar-height) + 16px)`。
+  旧值 32px 小于 48px 的固定 tab bar，会把最后一行永久压住约 16px，已修正。
+- 副标题栏在移动端降到 40px（`--cu-mobile-subbar-height`），全宽顶栏仍保持 42px。
 
 ## 8. 搜索 Command Palette
 
-- 触发：点击 L1 搜索图标 / `Ctrl+K`。
+- 触发：点击**全宽顶栏中央的搜索胶囊** / `Ctrl+K`。
+  胶囊必须是 `<button>` 而不是 `<input>`：`handleKeydown` 在焦点位于输入框内时刻意忽略 `⌘K`，
+  做成 input 会导致焦点停在胶囊上时按 `⌘K` 无效。
 - 浮层 480px 宽，居中 / 偏右上布局，深色半透明遮罩。
 - **定位**：视口水平居中、垂直距顶 15%。
 - 输入框顶：placeholder "搜索工具、命令…"。
@@ -320,9 +355,15 @@
 ### 8.1 与 L2 侧栏搜索的关系
 
 - **侧栏搜索**：只过滤当前工作台工具列表（computed 即时过滤，无需 debounce），保留在 Dashboard 内部。
-- **全局搜索 (command palette)**：全站索引（工具 + 页面 + 操作），由 L1 触发。
+- **全局搜索 (command palette)**：全站索引（工具 + 页面 + 操作），由全宽顶栏中央的搜索胶囊触发。
 - 两套搜索不联动、不同步输入，职责明确分离。
 - **侧栏搜索仅在 workspace L2 渲染**，admin/notifications 不显示侧栏搜索框。
+
+> 导航改造后两者职责不变，但入口位置换了：全局搜索从 L1 放大镜移到顶栏胶囊；
+> L2 侧栏就地过滤框**保留**（它过滤的是当前分组树、保留分组结构，与 palette 的
+> 「全量工具名匹配后跳转」不等价，删掉即能力回退）。
+> 已知空洞：palette 目前只索引 `allowedTools`，不含管理页与通知页，
+> 因此它**不能**当作管理台的兜底可达路径。
 
 ## 9. 通知交互
 
@@ -335,7 +376,12 @@
 
 ## 10. 主题/语言偏好弹窗
 
-- 点击 L1 底部齿轮图标 → 弹出 popover (180px × 100px)。关闭方式：点击外部区域、再次点击齿轮、Esc；关闭后焦点回到齿轮。
+**已作废**：不再有「偏好弹窗」。主题与语言在全宽顶栏右侧各占一个 16px 图标位，
+**一键直接切换**，不经过弹窗；`⌘\` 与顶栏第三个图标负责侧栏收折。
+
+顶栏右侧唯一保留弹窗的是头像下拉（`修改密码` / `退出登录` + 角色标签），
+关闭方式四种：再次点击头像、`Esc`（走 escStack）、导航到新页面、点击组件外部。
+「点击外部关闭」是本次新补的能力，此前 v2 从未实现。
 - 分组显示：
   - **外观**区域：太阳图标 + "日间模式" / 月亮图标 + "暗夜模式"（toggle 样式）
   - **语言**区域：Globe (Lucide 16px) + "中文" / "English"（toggle 样式）
@@ -353,7 +399,7 @@
 | 搜索无结果 | SearchX | 未找到匹配的搜索结果 | 试试换个关键词 | 清除搜索 |
 | 搜索权限受限 | ShieldOff | 该功能仅限管理员使用 | 当前账号无此权限 | 关闭搜索 |
 | 收藏为空 | Star | 还没有收藏任何工具 | 点击工具旁的星标即可收藏 | 浏览工具 |
-| 管理面板子页无数据 | Inbox | 暂无数据 | 当前没有待处理的项目 | — |
+| 管理台子页无数据 | Inbox | 暂无数据 | 当前没有待处理的项目 | — |
 | 工具分组因权限全隐藏 | — | — | 该分组在 L2 直接不渲染，不留空位 | — |
 | 用户管理为空 | Users | 暂无用户数据 | 可通过右上角"新建用户"添加 | 新建用户 |
 | 角色权限为空 | Shield | 暂无角色 | 点击右上角创建第一个角色 | 创建角色 |
@@ -418,7 +464,7 @@
 | L2 工具分组 | 5 行浅灰条（宽 60%/80%/90%/70%/85%）+ shimmer 动画 |
 | 内容区 Dashboard | 4 个卡片骨架（圆角 10px，高 120px） |
 | 工具页 | 内容区全宽骨架条 + shimmer |
-| 管理面板表格 | 表头固定 + 5 行数据骨架 |
+| 管理台表格 | 表头固定 + 5 行数据骨架 |
 
 ## 15. 离线体验
 
@@ -479,16 +525,16 @@
 - Modal 居中、max-w 480px，背景遮罩 `rgba(0,0,0,0.5)`。
 - Drawer 顶对齐、w 520px（90vw 移动端），背景 `--v2-l2-bg`，打开时挂 `aria-modal="true"`。
 
-## 22. 管理面板页面级交互规格
+## 22. 管理台页面级交互规格
 
-> **已知限制**：v2 管理控制台默认落地页为数据管理（`/admin/data`），暂无管理总览仪表盘（如待审批用户卡片、最近审计事件摘要等一屏概览）。后续版本扩展。
+> **已知限制**：v2 管理台默认落地页为数据管理（`/admin/data`），暂无管理总览仪表盘（如待审批用户卡片、最近审计事件摘要等一屏概览）。后续版本扩展。
 
 ### 22.0 管理子页面通用规则
 
 - 所有创建/编辑走右侧 Drawer（w 520px）或 Modal（确认类弹窗）。
 - 所有删除操作（用户逻辑删除除外）走 Modal 确认弹窗，不可撤销。
 - 所有列表支持搜索和排序（默认按创建时间倒序）。
-- 管理子页面间切换通过 L2 管理面板导航项或顶部 Tab 行。
+- 管理子页面间切换通过 L2 管理台导航项或顶部 Tab 行（页面内部导航，保留）。
 
 ### 22.1 用户管理
 

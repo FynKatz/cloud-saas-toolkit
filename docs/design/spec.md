@@ -7,38 +7,50 @@
 V2 是一次前端架构升级：引入 ClickUp+Remote 双层导航，重构 AppShell 为四组件模型，统一深浅色主题与语言偏好管理，而不改变现有工具页面的功能和权限模型。
 
 - **上一版本**：v1.0.0（tag: `1.0.0`），单层侧栏 (220/56px)，AppShell 单文件 ~560 行。
-- **目标**：L1 PrimaryRail (40px 黑条，固定)+ L2 ContextSidebar (232px 白/灰，可折叠到 0) + 内容区。
+- **目标**：全宽顶栏 + L1 PrimaryRail + L2 ContextSidebar + 内容区。
+
+> **导航改造定稿（2026-11-13）**：几何、配色、图标语法与验收锚点以
+> [nav-clickup-spec.md](nav-clickup-spec.md) 为准，参考素材在 `clickup-ref/`。
+> 本节下面这张 ASCII 图和 §3/§4 已按该文件同步；与之冲突的旧数值（40px / 232px /
+> 标签浮层 / L1 内搜索项）一律作废。
 
 ## 2. 架构总览
 
 ```text
-┌──────────┬────────────┬────────────────────────┐
-│ L1       │ L2         │ 内容区                  │
-│ 40px     │ 232↔0px   │ flex:1                 │
-│ #13151f  │ #ffffff    │ #f4f5f7                │
-│          │            │                        │
-│ [Logo]   │ 分组导航   │ Topbar (面包屑 + 汉堡按钮) │
-│ [工作台] │ 概览       │ RouterView             │
-│ [搜索]   │ 最近使用   │                        │
-│ [通知]   │ 收藏       │                        │
-│ [管理台] │ 工具分组…  │                        │
-│          │ 管理面板   │                        │
-│ [用户]   │            │                        │
-│ [偏好]   │            │                        │
-└──────────┴────────────┴────────────────────────┘
+┌────────────────────────────────────────────────┐
+│ GlobalTopbar  42px  #fdfdfd                     │
+│ [workspace 胶囊][日历]   [搜索胶囊 316 居中]      │
+│                                   [主题][语言][头像]      │
+├────┬──────────────┬────────────────────────────┤
+│ L1 │ L2           │ 内容区                      │
+│ 67 │ 281          │ flex:1                     │
+│ 轨道 #f9f9f9      │ #f9f9f9  #f4f5f7           │
+│ ┌──┐              │                            │
+│ │55│ 黑面板 #000   │ 分组导航                    │
+│ │工作台           │ 概览                        │
+│ │通知  (辉光)     │ 最近使用                     │
+│ │管理台           │ 收藏                        │
+│ │  …              │ 工具分组…                   │
+│ │Invite(静态)     │ ••• More (静态)             │
+│ └──┘              │ [N 个收藏] chip             │
+│                   ├────────────────────────────┤
+│                   │ Topbar 48px [展开]面包屑 + 离线 │
+│                   │ RouterView                 │
+└────┴──────────────┴────────────────────────────┘
 ```
 
 ## 3. 组件树
 
 ```text
 App.vue
- ├─ AppShellV2.vue         (--v2-* token 作用域容器，仅在 VITE_NAV_V2=1 时渲染)
- │    ├─ PrimaryRail.vue   (L1 — 40px, 全局上下文切换)
- │    │    └─ LabelPanel.vue  (标签浮层, 绝对定位在 PrimaryRail 右侧、叠加于 L2 之上; 不 Teleport)
- │    ├─ ContextSidebar.vue(L2 — 232↔0px, 当前上下文导航)
+ ├─ AppShellV2.vue         (纵向壳：GlobalTopbar + .v2-row(L1|L2|.v2-main)，仅在 VITE_NAV_V2=1 时渲染)
+ │    ├─ GlobalTopbar.vue  (全宽顶栏 42px — workspace 胶囊 / 搜索胶囊 / 主题 / 语言 / 头像下拉)
+ │    ├─ CuIcon.vue        (导航图标，24 栅格 stroke 1.5 + duotone 填充；数据在 cuGlyphs.ts)
+ │    ├─ PrimaryRail.vue   (L1 — 67px 轨道内 55px 黑色圆角面板，图标+下方文字恒显)
+ │    ├─ ContextSidebar.vue(L2 — 281px，当前上下文导航)
  │    │    ├─ NavGroup.vue (可折叠分组)
  │    │    └─ NavItem.vue  (单个导航项)
- │    ├─ Topbar.vue        (面包屑 + 汉堡按钮)
+ │    ├─ Topbar.vue        (页面副标题栏 48px — 仅面包屑 + 离线提示)
  │    ├─ NotificationBanner.vue (全局通知横幅，全宽；z-index --v2-z-notification-banner 90；消费 online/offline/全局 alert；Phase 4 实现)
  │    ├─ ErrorBoundary.vue (onErrorCaptured 封装，包裹 RouterView)
  │    ├─ DashboardBanner.vue    (由 AppShellV2 在 <main id="main-content"> 容器内、<RouterView> 之上、Topbar 之下统一渲染；随内容流，无独立 z-index；关闭交互由 AppShellV2 管理)
@@ -48,23 +60,31 @@ App.vue
  ├─ Modal.vue              (Teleport to="body", 确认弹窗，z-index 60)
  ├─ Drawer.vue             (Teleport to="body", 侧边抽屉，z-index 55)
  ├─ Skeleton.vue           (共享组件，骨架屏，多个页面引用)
- ├─ AvatarPopover.vue      (L1 底部，由 PrimaryRail 内部渲染；popover 自身 Teleport to body；对齐 PrimaryRail 左侧)
  └─ EmptyState.vue         (共享组件，多个页面引用)
 ```
+
+说明：`LabelPanel.vue` 与 `AvatarPopover.vue` 从未作为独立文件存在过，标签浮层机制
+也已随 L1 恒显文字一并作废；账户菜单实现在 `GlobalTopbar.vue` 内部，不 Teleport。
 
 ## 4. L1 (PrimaryRail) 入口清单
 
 | # | 图标 | ID | 含义 | 权限 |
 |---|------|----|------|------|
 | 1 | Logo/首字母 | `workspace` | 工具工作台 | 所有已审批用户 |
-| ☰ | 三条横线 | `label-toggle` | 展开/收起标签浮层 | 所有已审批用户 |
-| 2 | 放大镜 | `search` | 全局搜索 (command palette) | 所有已审批用户 |
-| 3 | 铃铛 | `notifications` | 通知中心 | 所有已审批用户 |
-| 4 | 盾牌 | `admin` | 管理控制台（显示待审批用户数角标） | 仅 admin |
-| B | 用户头像 | `user` | 账户菜单（退出/改密） | 所有已审批用户 |
-| B | 齿轮 | `prefs` | 偏好（主题/语言） | 所有已审批用户 |
+| # | 图标 | key | 行为 | 可见性 |
+|---|---|---|---|---|
+| 1 | home | `workspace` | 切换工作台上下文 | 所有已审批用户 |
+| 2 | bell | `notifications` | 通知中心（未读数角标） | 所有已审批用户 |
+| 3 | grid-dots | `admin` | 管理台（待审批数角标） | 仅 admin |
+| B | user-plus | — | **静态视觉**，无行为 | 所有已审批用户 |
 
 “B” 表示底部固定区，空余空间用 `flex:1` 弹性推底。
+
+已作废的 L1 入口：☰ 标签浮层开关（L1 文字改为恒显，不再有展开态）、放大镜（搜索上移到
+全宽顶栏胶囊）、底部用户头像与齿轮（迁到 GlobalTopbar 右侧）。
+
+> 参考稿 L1 底部是 Invite。本系统没有邀请通道（PRD §2.2 排除邮箱/邀请），
+> 真实动作是「用户管理」页内的「新建用户」弹窗，因此该槽位保留剪影但不做成按钮。
 
 ## 5. L2 (ContextSidebar) 渲染规则
 
@@ -73,10 +93,29 @@ App.vue
 | `workspace` | 概览(/) + 最近使用 + 收藏 + 工具四分组(速查参考/数据应用/图形工具/文本工具) |
 | `search` | L2 保持当前上下文内容不变，搜索 overlay 独立渲染（不改变 L1 激活状态）；搜索结果按角色过滤：管理操作入口仅 admin 用户可见 |
 | `notifications` | 通知列表导航项 → `/notifications` |
-| `admin` | 管理面板(数据管理/用户管理/通知管理/角色权限/审计日志) |
+| `admin` | 管理台：数据管理（父行，下挂 省市行政区 / 商场管理 / 停车场管理 三条子行）、用户管理、通知管理、角色权限、审计日志 |
 
 - 工具分组按 `tools.category` + `sort_order` 排序。
 - 无权限的工具整分组隐藏。
+
+补充（导航改造定稿）：
+
+- L2 行命中区 251px、高 29、pitch 32、radius 6；文字左界 x113；子项引导线在父图标中心 x92。
+- 弱化副标题 ` - X` 只出现在跨分类的「最近使用」「收藏」里，取 `tool.category`；
+  工具分组行不加副标题（整组同分类，重复无意义且会让一列发虚）。
+- 私有锁图标映射 `data_scope === 'private'`，紧贴名字之后，不是右对齐。
+- L2 不加权限徽标：view-only 工具正常进入页面，页面内编辑控件由该页 `canEdit` 隐藏。
+- `DataManagementView` 的页内 tab 保留（属内容区），与 L2 子行由同一 `route.path` 驱动高亮。
+- 分组折叠状态持久化到 `preferences`（key `v2.collapsed-groups`，空数组 = 全部展开）。
+
+### 4.4 静态视觉元素例外（覆盖 §4.3「空按钮比没有更糟」）
+
+参考稿里若干元素在本系统没有对应数据或动作。经用户明确决定，本轮**保留其视觉剪影**以维持
+1:1 观感，但一律不做成交互元素：`<span>` + `aria-hidden="true"` + `tabindex="-1"`
++ `pointer-events: none`，因此不可点、不可聚焦、不进 tab 顺序。
+
+清单：workspace 胶囊下箭头、顶栏日历图标、L2 头部 `+ Create` 黑胶囊、`••• More` 行、
+分组标题右侧 `+`、L1 底部 Invite 槽。参考稿的 `#` 频道前缀没有宿主行，**不渲染**。
 ## 5.1 权限模型（来自 PRD §5.4/5.5，auth-permission-design.md §4/5/7）
 
 本系统采用 RBAC 多角色并集模型，以下四条为核心安全规则，不可降级：
@@ -96,7 +135,7 @@ App.vue
 |-------|------|------|
 | `toolsStore` | 不变 | 现有 |
 | `authStore` | 不变 | 现有 |
-| `preferencesStore` (新) | 管理 `sidebar-collapsed`、`l1ActiveContext`、`theme`、`locale` 偏好 | 收编 `useTheme` + localStorage 项 |
+| `preferencesStore` (新) | 管理 `sidebar-collapsed`、`l1ActiveContext`、`theme`、`locale`、`collapsed-groups` 偏好 | 收编 `useTheme` + localStorage 项 |
 
 `useRecent`、`useNotifications`、`useFavorites` 保持 composable，不进入 Pinia。
 
@@ -114,7 +153,7 @@ interface PreferencesState {
 
 - **初始化时序**：`theme` 保留现有 `useTheme` 的延迟初始化语义。`preferencesStore.init()` 由 `main.ts` 显式调用，不在 Pinia `state()` 工厂里直接读 `localStorage`，避免暗色偏好被 `watchEffect` 提前触发而 clobber。
 - **双壳互斥**：`VITE_NAV_V2=1` 时 `preferencesStore` 全权管理 `theme`/`locale`，`main.ts` 跳过 `useTheme.init()` 调用；`VITE_NAV_V2=0`（旧壳）走原有 `useTheme` 路径。两条 init 路径互斥，不同时写 `theme` key，避免竞态覆盖。
-- **持久化**：`sidebarCollapsed`、`l1ActiveContext`、`theme`、`locale` 全部存 `localStorage`。**首次读取一次性迁移**：`preferencesStore.init()` 时若旧 key 存在且新 key 不存在，将旧值复制到新 key 后删除旧 key；后续只读写新 key `v2.*`。
+- **持久化**：`sidebarCollapsed`、`l1ActiveContext`、`theme`、`locale`、`collapsedGroups` 全部存 `localStorage`。**首次读取一次性迁移**：`preferencesStore.init()` 时若旧 key 存在且新 key 不存在，将旧值复制到新 key 后删除旧 key；后续只读写新 key `v2.*`。`collapsedGroups` 存 JSON 字符串数组，读取时做 `Array.isArray` + 分组名白名单校验，异常回退 `[]`（= 全部展开）。
 - **locale**：Phase 1 建 vue-i18n + zh/en 壳层字典。工具页内容翻译不在范围。
 
 ## 7. 路由
@@ -131,16 +170,16 @@ interface PreferencesState {
 | 用户行为 | L1 context | L2 内容 | RouterView |
 |---|---|---|---|
 | 点击 workspace 图标 | `workspace` | 概览/最近/收藏/工具分组 | 当前路由不变（若有）；若非 workspace 路由则 `router.push(`/`)` |
-| 点击 admin 图标 | `admin` | 管理面板 | 若当前不在 `/admin/*`，navigate 到 `/admin/data/regions`（避免二次 redirect） |
+| 点击 admin 图标 | `admin` | 管理台 | 若当前不在 `/admin/*`，navigate 到 `/admin/data/regions`（避免二次 redirect） |
 | 点击 notifications 图标 | `notifications` | 通知列表 | navigate 到 `/notifications` |
-| URL 直接进入 `/admin/users` | 自动设为 `admin` | 管理面板 | 正常渲染 |
+| URL 直接进入 `/admin/users` | 自动设为 `admin` | 管理台 | 正常渲染 |
 | URL 直接进入 `/parking` | 自动设为 `workspace` | 工具分组 | 正常渲染 |
 | 点击 search 图标 | **保持当前上下文（不改变 L1 激活状态）** | L2 保持当前上下文内容不变 | RouterView 不变，搜索 overlay 独立渲染 |
 
 - **检测方式**：`router.afterEach` 内 `watch(route.path)` 同步 `l1ActiveContext`，不阻塞导航。
 - **workspace 切换**：若用户当前在非 workspace 路由（如 `/notifications`），点击 workspace 图标 → `router.push(`/`)` 回到 Dashboard。
 - **search 切换**：L1 搜索图标触发 command palette overlay，不影响路由。
-- **`/admin/data` 子路由**（regions/malls/parking-locations）：L2 管理面板展开"数据管理"子项，当前 active 子项高亮。
+- **`/admin/data` 子路由**（regions/malls/parking-locations）：L2 管理台展开"数据管理"子项，当前 active 子项高亮。
 
 ### 7.2 路由配置变更
 
@@ -223,7 +262,7 @@ interface PreferencesState {
 - 工具页内容中英文翻译（壳层文案翻译在 scope 内）
 - 数据库 schema 变更（停车 V2 数据表 `regions`/`malls`/`parking_locations`/`user_parking_favorites` 已在 Phase DB 前完成迁移，不在 v2 scope；本轮随 v2 仅补 Phase DB 所列 migration：通知 RLS + 审计索引/cron，属例外）
 - 管理页面的细粒度 RBAC（v2 管理子页面统一由 admin 角色控制，不按子页面拆分 view/edit 权限；审计员/半管理员为已知限制，后续版本扩展）
-- 管理控制台总览仪表盘（uiux §22.0 标注为已知限制，后续版本扩展）
+- 管理台总览仪表盘（uiux §22.0 标注为已知限制，后续版本扩展）
 
 ## 13. 实施需补齐的前置决策
 
@@ -232,19 +271,19 @@ interface PreferencesState {
 | 1 | 旧 AppShell 是否冻结 | 是。`VITE_NAV_V2=0` 路径下旧壳保持只读，新功能不 backport |
 | 2 | ContextSidebar 收藏区数据源 | 直接复用 `useFavorites(userId)`，不重写 |
 | 3 | 通知角标语义 | 角标 = 未读通知数。进入通知中心后当前视口内可见项标记已读，其余滚动/hover 逐条标记已读（不全局 markAllRead，避免一次性清零用户未逐条查看的通知）。Dashboard banner 关闭 = 同时 dismiss+已读该条；若此前未读，未读角标同步减一（详见 uiux §9 通知交互） |
-| 4 | L1 标签浮层触发 | hover 触发（默认），300ms 延迟；首次登录桌面端默认展开一次并显示 onboarding tooltip |
+| 4 | L1 标签浮层触发 | **作废**。L1 改为图标+下方文字恒显（55px 黑面板），无展开态；`labelPanelOpen` 状态、`openLabelPanel`/`closeLabelPanel` 悬空监听与 `--v2-z-label-panel` token 已全部删除 |
 | 5 | 通知管理页命名 | 全系统统一使用"通知管理"。页面 title、L2 分组项、user-manual 表格名、uiux 章节标题一致 |
-| 6 | L1 顶部 Logo | 沿用紫色方块 "C" logo，不换 |
+| 6 | L1 顶部 Logo | 沿用紫色方块图形（`public/brand-mark.svg`），不换图形。**名称**：全宽顶栏 workspace 胶囊显示 `Taulko`；`<title>` / favicon / meta / v1 旧壳其它叫法本轮不动，仓内并存多套名称为已知状态 |
 | 7 | 最后 active admin 保护 | 在 admin-delete-user（逻辑删除）、admin-restore-user、admin-assign-user-role、admin-delete-role、admin-update-role（若编辑 admin 角色掏空其权限）中增加计数器检查，拒绝使 active admin 数归零的操作。active admin 定义：status='approved' 且绑定 admin 角色的用户。DB 层 `count_active_admins()` 为辅助函数（service_role 调用），无 DELETE 触发器——last-admin 保护在 Edge Function 层强制执行；admin-update-role 掏空权限场景由 Edge Function 在写入前校验 |
 | 8 | 停车场管理新建入口 | 数据管理 → 停车场管理新增"新建停车场"按钮 + `insert` 路径 |
 | 9 | 通知管理完整功能 | 编辑表单暴露 `expires_at` 日期选择器，默认 30 天后，支持"永不过期"。通知管理支持：列表页筛选（草稿/已发布/已撤销/已过期/已归档），其中"已过期"对应即时查询 `status='published' AND expires_at < NOW()`（已归档由 pg_cron 写入 `status='archived'`，两者互斥：archived 的通知不再出现在"已过期"筛选中）、编辑通知内容/过期时间、撤销通知（状态 published→unpublished，已读用户记录保留，未读用户不再看到）、删除通知（软删除，将 status 置为 `archived` + 级联 dismiss 所有 `user_notification_reads`）、发布通知（draft→published）。通知类型枚举：maintenance / new_tool / announcement / alert（`system` 语义由 `announcement` 承载，审批通过等系统事件用 `announcement` 类型）。**定向投递**：`system_notifications` 新增可空 `target_user_id UUID REFERENCES auth.users(id)` 列，支持"仅对单个用户可见"的通知（如审批结果）；广播通知 `target_user_id IS NULL`。RLS 见决策 26 |
-| 10 | 修改密码入口 | L1 用户头像 popover 增加"修改密码"按钮 → `/change-password` |
-| 11 | 移动端触摸目标 | 移动端所有可点击项最小 44×44px；桌面 L1 图标可点击区域 40×40px（图标自然宽度），桌面不做 44px 硬性要求 |
+| 10 | 修改密码入口 | 头像 popover 内「修改密码」→ `/change-password`。popover 已从 L1 底部迁到全宽顶栏右侧；该页在壳外，故 `AuthShell` 新增 `showBack` 出口（回到概览 + 退出登录），仅这一页开启 |
+| 11 | 移动端触摸目标 | 移动端所有可点击项最小 44×44px；桌面 L1 单项为 55×66 的「图标+下方文字」整块可点区，桌面不做 44px 硬性要求 |
 | 12 | 侧栏滚动行为 | active 工具 `scrollIntoView({ block: 'nearest' })` |
 | 13 | 语言切换 scope | 壳层文案翻译在 v2 scope 内（vue-i18n + zh/en 字典）；工具内容不在范围 |
 | 14 | 移动端工具页最小适配 | 横向滚动 + 筛选折叠在 v2 scope 内；不改功能逻辑和 UI 翻新 |
 | 15 | 注册拒绝反馈 | 被拒绝的注册者登录时提示"你的注册申请未被通过{：管理员填写的拒绝原因}。如有疑问请联系管理员"（有原因时附带原因，无原因时仅显示前半部分） |
-| 16 | 管理员审批主动发现 | L1 盾牌图标显示待审批用户数角标。进入管理控制台后角标清零，离开管理控制台（无论进入 workspace / notifications / search / 工具页）后重新拉取 pending 计数并恢复角标。admin 停留在管理控制台内部时，有新用户注册通过 Supabase Realtime `postgres_changes` on `profiles.status='pending'` 实时更新角标 |
+| 16 | 管理员审批主动发现 | L1 盾牌图标显示待审批用户数角标。进入管理台后角标清零，离开管理台（无论进入 workspace / notifications / search / 工具页）后重新拉取 pending 计数并恢复角标。admin 停留在管理台内部时，有新用户注册通过 Supabase Realtime `postgres_changes` on `profiles.status='pending'` 实时更新角标 |
 | 17 | 审计日志字段 | 每条记录包含 `actor_id`、`action`、`target_type`、`target_id`、`ip`、`metadata`(jsonb，含 before/after)、`created_at`，保留期 ≥90 天。写入：审计日志主写入路径为 Edge Function（service_role，绕过 RLS）；当前 DB 已有 `audit_logs_insert_admin` 策略允许 admin 客户端直插（`with check (public.is_admin() and actor_id = auth.uid())`），本方案保留该策略作为兼容路径，但产品约定优先走 Edge Function 以保证 IP/metadata 完整。SELECT：admin 角色通过 RLS 读取全部行。客户端无 UPDATE/DELETE 策略。IP 获取：Edge Function 从 `req.headers.get('x-forwarded-for')` **第一段**取（最左端为原始客户端 IP），不可用时降级 `req.ip`。清理机制：pg_cron 每日 DELETE `created_at < NOW() - INTERVAL '90 days'`，`created_at` 建索引（需随 v2 新增 migration） |
 | 18 | 逻辑删除登录拦截 | `authStore` 初始化时检查 `profiles.status = 'deleted'`（非 `deleted_at IS NOT NULL`），匹配则显示"账号已注销"并阻止进入工作台。恢复用户时 `admin_restore_user` 将 `deleted_at` 置 NULL、`status` 改为 `prior_status`，避免恢复后仍被拦截 |
 | 19 | 恢复已删除用户 | admin 可将 `deleted` 状态用户恢复为删除前的原始状态（`prior_status`），不可追溯时回退到 `approved`。Edge Function `admin_restore_user` 执行：`status := prior_status`、`deleted_at := NULL`、`prior_status := NULL`，写 audit_log。恢复后用户可直接登录（决策 18 检查 `status='deleted'`，已不再拦截） |

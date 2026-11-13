@@ -60,7 +60,8 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <AuthShell title="修改密码" subtitle="输入当前密码，设置新的登录密码">
+  <!-- 改密页在壳外，必须给出返回/登出出口，否则用户只能靠浏览器后退 -->
+  <AuthShell title="修改密码" subtitle="输入当前密码，设置新的登录密码" show-back>
     <form class="space-y-4" @submit.prevent="handleSubmit">
       <div
         v-if="error"

@@ -1,82 +1,176 @@
 <script setup lang="ts">
-import {
-  Bell,
-  Menu,
-  Search,
-   Wrench,
-   LayoutDashboard,
-} from 'lucide-vue-next'
+import CuIcon from './CuIcon.vue'
+import { i18n } from '../../i18n'
 import type { L1Context } from '../../stores/preferences'
+
+const { t } = i18n.global
 
 defineProps<{
   l1Context: L1Context
-  labelPanelOpen: boolean
   isAdmin: boolean
   pendingUsers: number
   unreadCount: number
 }>()
 
+// 搜索已上移到全宽顶栏的胶囊，L1 不再承担搜索入口，
+// 因此这里的 setL1Context 只接受真实上下文，不再需要 'search' 分支。
 const emit = defineEmits<{
-  setL1Context: [ctx: L1Context | 'search']
-  openSearch: []
-  toggleLabelPanel: []
-  openLabelPanel: []
-  closeLabelPanel: []
+  setL1Context: [ctx: L1Context]
 }>()
 </script>
 
 <template>
-  <!-- L1: PrimaryRail -->
-  <nav class="v2-l1" :class="{ 'v2-l1-expanded': labelPanelOpen }" role="navigation" aria-label="Primary navigation">
-    <div class="v2-l1-header">
-      <span v-if="labelPanelOpen" class="v2-l1-brand-text">Taulko</span>
-      <button class="v2-l1-btn v2-l1-btn-toggle" aria-label="Toggle labels" @click="emit('toggleLabelPanel')">
-        <Menu :size="16" />
+  <nav class="v2-l1" role="navigation" aria-label="Primary navigation">
+    <div class="v2-l1-panel">
+      <button
+        class="v2-l1-item"
+        :class="{ active: l1Context === 'workspace' }"
+        :aria-label="t('nav.workspace')"
+        @click="emit('setL1Context', 'workspace')"
+      >
+        <span class="v2-l1-icon-wrap">
+          <span v-if="l1Context === 'workspace'" class="v2-l1-glow" aria-hidden="true" />
+          <CuIcon name="home" :size="18" class="v2-l1-icon" />
+        </span>
+        <span class="v2-l1-label" :title="t('nav.workspace')">{{ t('nav.workspace') }}</span>
       </button>
+
+      <button
+        class="v2-l1-item"
+        :class="{ active: l1Context === 'notifications' }"
+        :aria-label="t('nav.notifications')"
+        @click="emit('setL1Context', 'notifications')"
+      >
+        <span class="v2-l1-icon-wrap">
+          <span v-if="l1Context === 'notifications'" class="v2-l1-glow" aria-hidden="true" />
+          <CuIcon name="bell" :size="18" class="v2-l1-icon" />
+        </span>
+        <span class="v2-l1-label" :title="t('nav.notifications')">{{ t('nav.notifications') }}</span>
+        <span v-if="unreadCount > 0" class="v2-l1-badge" aria-live="assertive">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+      </button>
+
+      <button
+        v-if="isAdmin"
+        class="v2-l1-item"
+        :class="{ active: l1Context === 'admin' }"
+        :aria-label="t('nav.admin')"
+        @click="emit('setL1Context', 'admin')"
+      >
+        <span class="v2-l1-icon-wrap">
+          <span v-if="l1Context === 'admin'" class="v2-l1-glow" aria-hidden="true" />
+          <CuIcon name="grid-dots" :size="18" class="v2-l1-icon" />
+        </span>
+        <span class="v2-l1-label" :title="t('nav.admin')">{{ t('nav.admin') }}</span>
+        <span v-if="pendingUsers > 0" class="v2-l1-badge" aria-live="assertive">{{ pendingUsers > 99 ? '99+' : pendingUsers }}</span>
+      </button>
+
+      <div class="v2-l1-spacer" />
+
+      <!-- 静态视觉：参考稿底部是 Invite，我们没有邀请通道，保留剪影但不做成按钮 -->
+      <div class="v2-l1-item v2-l1-static" aria-hidden="true" tabindex="-1">
+        <span class="v2-l1-icon-wrap"><CuIcon name="user-plus" :size="18" class="v2-l1-icon" /></span>
+        <span class="v2-l1-label">Invite</span>
+      </div>
     </div>
-    <button class="v2-l1-btn" :class="{ active: l1Context === 'workspace' && !labelPanelOpen }" aria-label="Toolkit" @click="emit('setL1Context', 'workspace')">
-      <LayoutDashboard :size="16" />
-      <span v-if="labelPanelOpen" class="v2-l1-label">工作台</span>
-    </button>
-    <button class="v2-l1-btn" :class="{ active: false }" aria-label="Search" @click="emit('openSearch')">
-      <Search :size="16" />
-      <span v-if="labelPanelOpen" class="v2-l1-label">搜索</span>
-    </button>
-    <button class="v2-l1-btn v2-l1-badge-btn" :class="{ active: l1Context === 'notifications' }" aria-label="Notifications" @click="emit('setL1Context', 'notifications')">
-      <Bell :size="16" />
-      <span v-if="labelPanelOpen" class="v2-l1-label">通知</span>
-      <span v-if="unreadCount > 0" class="v2-l1-badge" aria-live="assertive">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
-    </button>
-    <div class="v2-l1-spacer" />
-    <button v-if="isAdmin" class="v2-l1-btn v2-l1-badge-btn" :class="{ active: l1Context === 'admin' }" aria-label="Admin" @click="emit('setL1Context', 'admin')">
-      <Wrench :size="16" />
-      <span v-if="labelPanelOpen" class="v2-l1-label">管理台</span>
-      <span v-if="pendingUsers > 0" class="v2-l1-badge v2-l1-badge-red">{{ pendingUsers > 99 ? '99+' : pendingUsers }}</span>
-    </button>
   </nav>
 </template>
 
 <style scoped>
-/* L1 PrimaryRail */
-.v2-l1 { width: var(--v2-l1-width); min-width: var(--v2-l1-width); background: var(--v2-l1-bg); display: flex; flex-direction: column; align-items: center; padding: 6px 0; gap: var(--v2-nav-item-gap); z-index: var(--v2-z-sticky); transition: width .18s ease, min-width .18s ease; overflow: hidden; }
-.v2-l1-expanded { width: var(--v2-l1-expanded-width); min-width: var(--v2-l1-expanded-width); align-items: stretch; }
+/* L1 轨道：67 = 5px 左沟槽 + 55px 黑面板 + 6px 右沟槽 + 1px 接缝（border-right 归本元素） */
+.v2-l1 {
+  width: var(--cu-rail-width);
+  min-width: var(--cu-rail-width);
+  box-sizing: border-box;
+  background: var(--cu-nav-rail-bg);
+  border-right: 1px solid var(--cu-seam-1);
+  padding: 0 6px 4px 5px;
+  z-index: var(--v2-z-sticky);
+  display: flex;
+}
 
-.v2-l1-header { display: flex; align-items: center; width: var(--v2-l1-width); justify-content: center; flex-shrink: 0; }
-.v2-l1-expanded .v2-l1-header { width: 100%; justify-content: space-between; padding: 0 8px 0 10px; }
-.v2-l1-brand-text { font-size: var(--v2-l1-label-size); font-weight: 600; color: var(--v2-l1-icon-active); white-space: nowrap; line-height: 1; user-select: none; }
+.v2-l1-panel {
+  width: var(--cu-l1-panel-width);
+  border-radius: var(--cu-l1-panel-radius);
+  background: var(--cu-l1-panel-bg);
+  box-shadow: 0 0 4px rgba(0, 0, 0, .14);
+  /* overflow 是辉光的裁切边界：blur 若配错，光晕会溢出 55px 面板糊到标签 */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+}
 
-.v2-l1-btn { width: var(--v2-nav-item-height); height: var(--v2-nav-item-height); display: flex; align-items: center; justify-content: center; border: none; background: transparent; color: var(--v2-l1-icon); cursor: pointer; border-radius: 6px; position: relative; transition: background .12s ease, color .12s ease; padding: 0; flex-shrink: 0; }
-.v2-l1-expanded .v2-l1-btn { width: 100%; justify-content: flex-start; gap: var(--v2-nav-item-gap); padding: 0 10px; }
-.v2-l1-expanded .v2-l1-btn-toggle { width: var(--v2-nav-item-height); justify-content: center; padding: 0; gap: 0; align-self: center; }
-.v2-l1-btn:hover { background: var(--v2-l1-hover); color: var(--v2-l1-icon-hover); }
-.v2-l1-btn.active { color: var(--v2-l1-icon-active); }
-.v2-l1-btn.active::before { content: ''; position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; background: var(--v2-l1-active-indicator); border-radius: 0 3px 3px 0; }
-.v2-l1-label { font-size: var(--v2-l1-label-size); color: var(--v2-l1-icon); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-l1-item {
+  position: relative;
+  width: 100%;
+  height: 66px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 11px 0;
+  box-sizing: border-box;
+  border: none;
+  background: transparent;
+  color: var(--cu-l1-item);
+  cursor: pointer;
+  font-family: var(--cu-font-nav);
+  transition: color .12s ease;
+}
+.v2-l1-item:hover { color: var(--cu-l1-item-hover); }
+.v2-l1-item.active { color: var(--cu-l1-item-active); }
+
+.v2-l1-icon-wrap { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+.v2-l1-icon { position: relative; z-index: 1; display: block; }
+/* 18px 图标 + 上下各 11px = 40px 光晕，与图标同心 */
+.v2-l1-glow {
+  position: absolute;
+  inset: -11px;
+  border-radius: 50%;
+  background: var(--cu-l1-glow);
+  filter: blur(var(--cu-l1-glow-blur));
+  opacity: .9;
+  z-index: 0;
+}
+
+.v2-l1-label {
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+  max-width: 49px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2-l1-item.active .v2-l1-label { font-weight: 600; }
+
 .v2-l1-spacer { flex: 1; }
 
-.v2-l1-badge-btn { position: relative; }
-.v2-l1-badge { position: absolute; top: 4px; right: 4px; min-width: 16px; height: 16px; border-radius: 8px; background: var(--v2-error); color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 4px; line-height: 1; }
-.v2-l1-badge-red { background: var(--v2-warning); }
+/* 徽标定位基准是面板（按钮已铺满面板宽度），距面板右缘 6px。
+   写成相对图标盒的 right:-6px 会被面板 overflow:hidden 裁掉。 */
+.v2-l1-badge {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--cu-l1-badge);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.v2-l1-static { cursor: default; pointer-events: none; }
+
 @media (max-width: 768px) {
   .v2-l1 { display: none !important; }
 }

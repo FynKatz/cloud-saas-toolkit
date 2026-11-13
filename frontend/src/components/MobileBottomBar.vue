@@ -1,43 +1,49 @@
 <script setup lang="ts">
-import { Bell, LayoutDashboard, Search, ShieldCheck, User } from 'lucide-vue-next'
+import CuIcon from './v2/CuIcon.vue'
+import { i18n } from '../i18n'
 import type { L1Context } from '../stores/preferences'
+
+const { t } = i18n.global
 
 defineProps<{
   l1Context: L1Context
   isAdmin: boolean
   pendingUsers: number
   unreadCount: number
+  avatarOpen: boolean
 }>()
 
 const emit = defineEmits<{
   select: [ctx: L1Context | 'search']
   openSidebar: []
+  openAvatar: []
 }>()
 </script>
 
 <template>
   <nav class="v2-mobile-tabbar" role="navigation" aria-label="Mobile navigation">
-    <button class="v2-mobile-tab" :class="{ active: l1Context === 'workspace' }" aria-label="工作台" @click="() => { emit('select', 'workspace'); emit('openSidebar') }">
-      <LayoutDashboard :size="20" />
-      <span>工作台</span>
+    <button class="v2-mobile-tab" :class="{ active: l1Context === 'workspace' }" :aria-label="t('nav.workspace')" @click="() => { emit('select', 'workspace'); emit('openSidebar') }">
+      <CuIcon name="home" :size="20" />
+      <span>{{ t('nav.workspace') }}</span>
     </button>
-    <button class="v2-mobile-tab" aria-label="搜索" @click="emit('select', 'search')">
-      <Search :size="20" />
-      <span>搜索</span>
+    <button class="v2-mobile-tab" :aria-label="t('nav.search')" @click="emit('select', 'search')">
+      <CuIcon name="search" :size="20" />
+      <span>{{ t('nav.search') }}</span>
     </button>
-    <button class="v2-mobile-tab" :class="{ active: l1Context === 'notifications' }" aria-label="通知" @click="emit('select', 'notifications')">
-      <Bell :size="20" />
+    <button class="v2-mobile-tab" :class="{ active: l1Context === 'notifications' }" :aria-label="t('nav.notifications')" @click="emit('select', 'notifications')">
+      <CuIcon name="bell" :size="20" />
       <span v-if="unreadCount > 0" class="v2-mobile-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
-      <span>通知</span>
+      <span>{{ t('nav.notifications') }}</span>
     </button>
-    <button v-if="isAdmin" class="v2-mobile-tab" :class="{ active: l1Context === 'admin' }" aria-label="管理台" @click="emit('select', 'admin')">
-      <ShieldCheck :size="20" />
+    <button v-if="isAdmin" class="v2-mobile-tab" :class="{ active: l1Context === 'admin' }" :aria-label="t('nav.admin')" @click="emit('select', 'admin')">
+      <CuIcon name="grid-dots" :size="20" />
       <span v-if="pendingUsers > 0" class="v2-mobile-badge v2-mobile-badge-red">{{ pendingUsers > 99 ? '99+' : pendingUsers }}</span>
-      <span>管理台</span>
+      <span>{{ t('nav.admin') }}</span>
     </button>
-    <button class="v2-mobile-tab" aria-label="用户" @click="emit('select', 'workspace')">
-      <User :size="20" />
-      <span>用户</span>
+    <!-- 打开头像下拉。不能再 emit('select','workspace')：那会连带 push('/') 把用户弹回概览 -->
+    <button class="v2-mobile-tab" :class="{ active: avatarOpen }" :aria-label="t('account.changePassword')" @click="emit('openAvatar')">
+      <CuIcon name="user-plus" :size="20" />
+      <span>{{ t('nav.account') }}</span>
     </button>
   </nav>
 </template>
@@ -52,9 +58,9 @@ const emit = defineEmits<{
     bottom: 0;
     left: 0;
     right: 0;
-    height: 48px;
-    background: var(--v2-l2-bg);
-    border-top: 1px solid var(--v2-divider);
+    height: var(--cu-mobile-tabbar-height);
+    background: var(--cu-mobile-tabbar-bg);
+    border-top: 1px solid var(--cu-seam-1);
     z-index: var(--v2-z-sticky);
   }
 
@@ -67,7 +73,7 @@ const emit = defineEmits<{
     gap: 1px;
     border: none;
     background: transparent;
-    color: var(--v2-ink-2);
+    color: var(--cu-nav-muted-icon);
     font-size: 10px;
     cursor: pointer;
     padding: 4px 0;
@@ -76,8 +82,8 @@ const emit = defineEmits<{
     min-height: 44px;
   }
 
-  .v2-mobile-tab.active { color: var(--v2-accent); }
-  .v2-mobile-tab:hover { color: var(--v2-ink); }
+  .v2-mobile-tab.active { color: var(--cu-nav-text-strong); }
+  .v2-mobile-tab:hover { color: var(--cu-nav-text); }
 
   .v2-mobile-badge {
     position: absolute;
@@ -86,7 +92,7 @@ const emit = defineEmits<{
     min-width: 15px;
     height: 15px;
     border-radius: 8px;
-    background: var(--v2-error);
+    background: var(--cu-l1-badge);
     color: #fff;
     font-size: 9px;
     font-weight: 700;
@@ -96,6 +102,6 @@ const emit = defineEmits<{
     padding: 0 3px;
     line-height: 1;
   }
-  .v2-mobile-badge-red { background: var(--v2-warning); }
+  .v2-mobile-badge-red { background: var(--cu-l1-badge); }
 }
 </style>

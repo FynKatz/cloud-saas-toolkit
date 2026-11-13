@@ -20,7 +20,14 @@ export function useParking() {
   const imageUrls = ref<Record<string, string[]>>({})
 
   const canView = computed(() => auth.isAdmin || toolsStore.hasTool('parking'))
-  const canAdmin = computed(() => auth.isAdmin)
+  /**
+   * 写权限必须与 RLS 同源：parking 的 with check 是 has_tool_permission('parking','edit')，
+   * 而该函数 = is_admin() 或 角色显式授予 edit。
+   * 之前只看 auth.isAdmin，导致「家庭成员」「测试员」两个持有 parking/edit 的角色
+   * 在界面上看不到任何写入口（数据库其实允许他们写），属功能不可达。
+   * 与 MovieView / TodoView 统一走 toolsStore.canEdit。
+   */
+  const canAdmin = computed(() => auth.isAdmin || toolsStore.canEdit('parking'))
 
   function priceNumber(value: unknown): number | null {
     if (value === null || value === undefined || value === '') return null

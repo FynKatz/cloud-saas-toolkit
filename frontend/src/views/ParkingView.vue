@@ -716,7 +716,10 @@ onBeforeUnmount(() => {
         <h1>停车收费</h1>
         <p>常用停车场、收藏与地图选点的统一入口，数据按权限共享维护。</p>
       </div>
-      <button class="btn btn-primary" @click="openCreate">
+      <!-- 新建入口必须与行内编辑/删除同一门禁：之前它没有 v-if，
+           view-only 用户能打开表单填完再被 createLocationWithImages 的
+           PERMISSION_DENIED 打回，表现为「看起来能写其实不能」。 -->
+      <button v-if="parking.canAdmin.value" class="btn btn-primary" @click="openCreate">
         <Plus :size="16" />添加停车场
       </button>
     </div>

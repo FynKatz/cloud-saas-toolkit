@@ -3,9 +3,12 @@ import { computed } from 'vue'
 import { X, ArrowUpRight } from 'lucide-vue-next'
 import { useInjectNotifications } from '../composables/useNotifications'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+import { isSafeNavTarget } from '../lib/navTarget'
 
 const notifications = useInjectNotifications()
 const router = useRouter()
+const auth = useAuthStore()
 
 const visible = computed(() => !!notifications.currentBanner.value && !notifications.bannerDismissing.value)
 
@@ -28,7 +31,8 @@ function handleDetail() {
   const banner = notifications.currentBanner.value
   if (!banner) return
   notifications.markRead(banner.id)
-  if (banner.target_route) {
+  // target_route 是后台自由文本，路由表没有 catch-all，填错会落进空白页
+  if (isSafeNavTarget(banner.target_route, auth.isAdmin ?? false)) {
     router.push(banner.target_route)
   } else {
     router.push('/notifications')
@@ -69,7 +73,8 @@ function goCenter() {
 <style scoped>
 .v2-notif-banner {
   position: fixed;
-  top: 8px;
+  /* z-index 90 高于顶栏 15，不让出顶栏高度会整条盖住品牌/搜索/主题/语言/头像 */
+  top: calc(var(--cu-topbar-height) + 8px);
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 32px);

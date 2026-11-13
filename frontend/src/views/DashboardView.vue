@@ -20,6 +20,13 @@ const userId = computed(() => auth.user?.id)
 const favorites = useFavorites(userId)
 const notifications = useInjectNotifications()
 
+/**
+ * v2 壳（AppShellV2）自己渲染 NotificationBannerV2 负责系统通知横幅。
+ * 这里若再渲染页内 v1 横幅，`/` 上就会出现两条指向同一目标的「查看详情」。
+ * v1 壳没有壳级横幅，所以只在非 v2 路径保留页内横幅，旧壳行为不变。
+ */
+const isNavV2 = import.meta.env.VITE_NAV_V2 === '1'
+
 const localSearch = ref('')
 const injectedSearch = inject(DASHBOARD_SEARCH_KEY, ref(''))
 const keyword = computed(() =>
@@ -280,7 +287,7 @@ onMounted(() => {
     </div>
 
     <!-- ② Banner（装饰） -->
-    <NotificationBanner v-if="notifications.currentBanner.value" />
+    <NotificationBanner v-if="!isNavV2 && notifications.currentBanner.value" />
     <div v-else class="banner">
       <div class="banner-badge">C</div>
       <div class="banner-main">
@@ -330,7 +337,7 @@ onMounted(() => {
           class="tool-card"
         >
           <div class="tc-head">
-            <div class="tc-icon"><component :is="getToolIcon(tool.icon)" /></div>
+            <div class="tc-icon"><component :is="getToolIcon(tool.icon, tool.id)" /></div>
             <div class="tc-text">
               <div class="tc-name">{{ tool.name }}</div>
               <div class="tc-cat">{{ tool.category }}</div>
@@ -409,7 +416,7 @@ onMounted(() => {
         </div>
         <div class="fav-grid">
           <RouterLink v-for="tool in favoriteTools" :key="tool.id" :to="toolPath(tool)" class="fav-card">
-            <div class="fav-icon"><component :is="getToolIcon(tool.icon)" /></div>
+            <div class="fav-icon"><component :is="getToolIcon(tool.icon, tool.id)" /></div>
             <div class="fav-text">
               <div class="fav-name">{{ tool.name }}</div>
               <div class="fav-cat">{{ tool.category }}</div>
@@ -426,7 +433,7 @@ onMounted(() => {
         </div>
         <div class="fav-grid">
           <RouterLink v-for="tool in recent" :key="tool.id" :to="toolPath(tool)" class="fav-card">
-            <div class="fav-icon"><component :is="getToolIcon(tool.icon)" /></div>
+            <div class="fav-icon"><component :is="getToolIcon(tool.icon, tool.id)" /></div>
             <div class="fav-text">
               <div class="fav-name">{{ tool.name }}</div>
               <div class="fav-cat">{{ tool.category }}</div>
@@ -472,7 +479,7 @@ onMounted(() => {
         <div class="tool-grid pad">
           <RouterLink v-for="tool in toolsStore.allowedTools" :key="tool.id" :to="toolPath(tool)" class="tool-card">
             <div class="tc-head">
-              <div class="tc-icon"><component :is="getToolIcon(tool.icon)" /></div>
+              <div class="tc-icon"><component :is="getToolIcon(tool.icon, tool.id)" /></div>
               <div class="tc-text">
                 <div class="tc-name">{{ tool.name }}</div>
                 <div class="tc-cat">{{ tool.category }}</div>

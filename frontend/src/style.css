@@ -191,22 +191,33 @@
 }
 
 /* ============================================================
-   v2 双层导航 token —— 全部带 --v2- 前缀，与旧 token 隔离。
-   L1 恒暗常量放在 html {} 规则块，不随 .dark 覆写。
+   ClickUp 导航 token。
+   --cu-l1-panel-* / --cu-l1-item* / --cu-l1-badge / --cu-l1-glow 是恒暗常量，
+   只允许出现在下面这个 html {} 块内；:root 与 html.dark 一律不得重声明
+   （html.dark 特异度更高，一旦重声明恒暗语义就反转）。
+   机检：grep -nE '^\s*--cu-l1-' style.css 只命中 html {} 块。
+   其余 --cu-* 是普通主题 token，随 html.dark 覆写。
    ============================================================ */
 html {
-  --v2-l1-bg: #13151f;
-  --v2-l1-hover: #2a2d3a;
-  --v2-l1-icon: #9a9ead;
-  --v2-l1-icon-hover: #d9dce6;
-  --v2-l1-icon-active: #ffffff;
-  --v2-l1-active-indicator: #3b82f6;
-  --v2-l1-width: 44px;
-  --v2-l1-expanded-width: 124px;
+  --cu-l1-panel-bg: #000000;
+  --cu-l1-panel-width: 55px;
+  --cu-l1-panel-radius: 8px;
+  --cu-l1-item: #cdcdcd;
+  --cu-l1-item-hover: #efefef;
+  --cu-l1-item-active: #ffffff;
+  --cu-l1-badge: #e93c81;
+  --cu-l1-glow: conic-gradient(from 210deg, #3f7fdf, #7c5cff, #e5407e, #b7513a, #3f7fdf);
+  --cu-l1-glow-blur: 4px;
 }
 
 :root {
-  --v2-l2-bg: #ffffff;
+  /* ClickUp 导航层：轨道底同时是 L1 沟槽与 L2 面板的底色 */
+  --cu-nav-rail-bg: #f9f9f9;
+  --cu-seam-1: #e9e9e9;
+  --cu-seam-2: #eaeaea;
+  --cu-topbar-bg: #fdfdfd;
+  --cu-subbar-bg: #fdfdfd;
+  --cu-mobile-tabbar-bg: #ffffff;
   --v2-content-bg: #f4f5f7;
   --v2-card-bg: #ffffff;
   --v2-ink: #17202b;
@@ -214,18 +225,45 @@ html {
   --v2-label-muted: #5a6474;
   --v2-border: #667085;
   --v2-divider: rgba(0,0,0,.06);
-  --v2-topbar-height: 48px;
   --v2-accent: #2563eb;
   --v2-accent-light: #f0f5ff;
   --v2-btn-ghost-hover: #f4f5f7;
   --v2-radius: 10px;
   --v2-radius-sm: 7px;
-  --v2-nav-icon: 16px;
-  --v2-nav-item-height: 36px;
-  --v2-nav-item-gap: 8px;
-  --v2-l1-label-size: 12.5px;
-  --v2-l2-group-header-size: 12.5px;
-  --v2-l2-item-size: 13px;
+
+  /* 尺寸 */
+  --cu-topbar-height: 42px;
+  --cu-subbar-height: 48px;
+  --cu-mobile-subbar-height: 40px;
+  --cu-mobile-tabbar-height: 48px;
+  --cu-rail-width: 67px;
+  --cu-l2-width: 281px;
+  --cu-l2-inner: 268px;
+  --cu-l2-gutter: 12px;
+  --cu-nav-row-height: 32px;
+  --cu-icon-slot: 27px;
+  --cu-z-topbar-popover: 30;
+
+  /* 导航文字与配色 */
+  --cu-font-nav: 'Roboto Variable', 'Roboto', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --cu-nav-text: #5f5f5f;
+  --cu-nav-text-strong: #1b1b1b;
+  --cu-nav-text-faint: #aaaaaa;
+  --cu-nav-muted-icon: #8b8b8b;
+  --cu-nav-hover-bg: #f0f0f0;
+  --cu-nav-active-bg: #eaeaea;
+  --cu-nav-field-bg: #ffffff;
+  --cu-nav-field-border: #ebebeb;
+  --cu-pill-bg: #efefef;
+  --cu-black-pill-bg: #1f1f1f;
+  --cu-black-pill-text: #ffffff;
+  --cu-black-pill-border: transparent;
+  /* 静态弱化只用在真正看起来像主操作的 + Create 胶囊上。
+     暗色不降透明度（只会让它更看不见），改由描边承担区分，见 html.dark。 */
+  --cu-static-opacity: .72;
+  --cu-avatar-bg: #2d2d2f;
+  --cu-presence-dot: #289966;
+  --cu-search-anchor: #5533ff;
 
   --v2-success: #16a34a;
   --v2-warning: #b45309;
@@ -278,7 +316,12 @@ html {
 
   --v2-z-dropdown: 10;
   --v2-z-sticky: 15;
-  --v2-z-label-panel: 25;
+  /* 全宽顶栏必须高于副标题栏/L1/L2（都是 15），否则头像下拉面板会被副标题栏盖住：
+     面板的 z-index 被困在顶栏自己创建的层叠上下文内部出不去，而副标题栏是同级、
+     DOM 更靠后的另一个 15，于是画在面板之上。
+     层级序：15 < 20（顶栏，内部 popover 30）< 54（移动遮罩）< 55（移动抽屉）< 80 Toast < 90 横幅。
+     .v2-row 是 static/auto，不创建层叠上下文，所以遮罩与抽屉仍在根上下文参与比较。 */
+  --cu-z-topbar: 20;
   --v2-z-drawer: 55;
   --v2-z-modal-backdrop: 65;
   --v2-z-modal: 60;
@@ -288,7 +331,30 @@ html {
 }
 
 html.dark {
-  --v2-l2-bg: #1a1d27;
+  /* ClickUp 导航层暗值。注意：--cu-l1-* 恒暗族绝不在此重声明。 */
+  --cu-nav-rail-bg: #1a1d27;
+  --cu-seam-1: rgba(255,255,255,.10);
+  --cu-seam-2: rgba(255,255,255,.10);
+  --cu-topbar-bg: #14161d;
+  --cu-subbar-bg: #14161d;
+  --cu-mobile-tabbar-bg: #1a1d27;
+  --cu-nav-text: #8f94a3;
+  --cu-nav-text-strong: #ffffff;
+  --cu-nav-text-faint: #6b7280;
+  --cu-nav-muted-icon: #9ca3af;
+  --cu-nav-hover-bg: #232633;
+  --cu-nav-active-bg: #2a2d3a;
+  --cu-nav-field-bg: #1e2130;
+  --cu-nav-field-border: #2f3342;
+  --cu-pill-bg: #2a2d3a;
+  --cu-black-pill-bg: #2a2d3a;
+  --cu-black-pill-text: #ffffff;
+  /* #3a3d4a 压 #1a1d27 只有 1.56:1，胶囊底色本身更是 1.23:1，等于看不见。
+     提到 #6a6e80（vs rail 3.33:1）：描边而非实心既是可见轮廓，也是「静态非按钮」的信号。
+     暗色不再叠加透明度弱化。 */
+  --cu-black-pill-border: #6a6e80;
+  --cu-static-opacity: 1;
+  --cu-avatar-bg: #3a3d4a;
   --v2-content-bg: #0f1119;
   --v2-card-bg: #1e2130;
   --v2-ink: #e2e4e9;

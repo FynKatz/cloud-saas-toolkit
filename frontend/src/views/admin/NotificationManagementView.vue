@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { Plus, Pencil, Save, X, Eye, Send, Archive, RotateCcw } from 'lucide-vue-next'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/auth'
+import { isSafeNavTarget } from '../../lib/navTarget'
 
 interface NotifRecord {
   id: string
@@ -30,6 +31,19 @@ const form = reactive({
   type: 'announcement',
   priority: 'info',
   target_route: '',
+})
+
+/**
+ * target_route 落库后由三个消费点做白名单校验，非法值会静默回落到通知中心。
+ * 这里提前给出可见提示，避免管理员填了无效路径却毫不知情。
+ * 撰写者本人是 admin，所以按 admin 放行 /admin/* 。
+ */
+const targetRouteWarn = computed(() => {
+  const v = form.target_route.trim()
+  if (!v) return ''
+  return isSafeNavTarget(v, true)
+    ? ''
+    : '路径无效：只能是站内已有页面（如 /parking、/notifications），管理页需以 /admin 开头'
 })
 const editingId = ref<string | null>(null)
 const previewBanner = ref<NotifRecord | null>(null)
@@ -222,6 +236,7 @@ onMounted(load)
           <option value="important">高优先级</option>
         </select>
         <input v-model="form.target_route" placeholder="关联页面路径（可选，如 /parking）" class="rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)] col-span-2" />
+        <p v-if="targetRouteWarn" class="col-span-2 text-xs text-[var(--v2-warning-text)]">{{ targetRouteWarn }}</p>
       </div>
       <div class="flex justify-end gap-2">
         <button class="rounded-md border border-[var(--surface-border)] bg-[var(--surface)] px-3 py-1.5 text-xs text-[var(--text-secondary)]" @click="cancelEdit">取消</button>

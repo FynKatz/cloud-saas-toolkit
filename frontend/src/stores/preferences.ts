@@ -7,11 +7,26 @@ export type Locale = 'zh' | 'en'
 
 const V2_PREFIX = 'v2.'
 
+/** 分组折叠状态里允许出现的 key。收藏/最近用固定 id，工具分组用分类名。 */
+const GROUP_KEY_RE = /^(__recent__|__favorites__|速查参考|数据应用|图形工具|文本工具)$/
+
 function readLocal(key: string): string | null {
   try {
     return localStorage.getItem(key)
   } catch {
     return null
+  }
+}
+
+function readGroups(key: string): string[] {
+  const raw = readLocal(key)
+  if (!raw) return []
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter((v): v is string => typeof v === 'string' && GROUP_KEY_RE.test(v))
+  } catch {
+    return []
   }
 }
 
@@ -47,6 +62,8 @@ export const usePreferencesStore = defineStore('preferences', () => {
   const l1ActiveContext = ref<L1Context>('workspace')
   const theme = ref<ThemeMode>('light')
   const locale = ref<Locale>('zh')
+  /** 折叠中的分组名。空数组 = 全部展开，与改造前的默认语义一致。 */
+  const collapsedGroups = ref<string[]>([])
   let initialized = false
 
   function init(): void {
@@ -91,6 +108,8 @@ export const usePreferencesStore = defineStore('preferences', () => {
 
     const storedLocale = readLocal(`${V2_PREFIX}locale`)
     locale.value = storedLocale === 'en' ? 'en' : 'zh'
+
+    collapsedGroups.value = readGroups(`${V2_PREFIX}collapsed-groups`)
   }
 
   function applyTheme(): void {
@@ -122,16 +141,26 @@ export const usePreferencesStore = defineStore('preferences', () => {
     writeLocal(`${V2_PREFIX}locale`, value)
   }
 
+  function toggleGroupCollapsed(name: string): void {
+    const next = collapsedGroups.value.includes(name)
+      ? collapsedGroups.value.filter(g => g !== name)
+      : [...collapsedGroups.value, name]
+    collapsedGroups.value = next
+    writeLocal(`${V2_PREFIX}collapsed-groups`, JSON.stringify(next))
+  }
+
   return {
     sidebarCollapsed,
     l1ActiveContext,
     theme,
     locale,
+    collapsedGroups,
     init,
     setSidebarCollapsed,
     setL1Context,
     setTheme,
     toggleTheme,
     setLocale,
+    toggleGroupCollapsed,
   }
 })

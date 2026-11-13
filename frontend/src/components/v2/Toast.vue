@@ -59,7 +59,8 @@ defineExpose({ add, remove })
 </template>
 
 <style scoped>
-.v2-toast-container { position: fixed; top: 16px; right: 16px; z-index: var(--v2-z-toast); display: flex; flex-direction: column; gap: 8px; max-width: 380px; }
+/* 全宽顶栏在 z-index 15，Toast 在 80：top 必须让出顶栏高度，否则正好压在主题/语言/头像上 */
+.v2-toast-container { position: fixed; top: calc(var(--cu-topbar-height) + 12px); right: 16px; z-index: var(--v2-z-toast); display: flex; flex-direction: column; gap: 8px; max-width: 380px; }
 .v2-toast-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: var(--v2-radius-sm); box-shadow: 0 4px 16px rgba(0,0,0,.12); border: 1px solid; }
 .v2-toast-icon { flex-shrink: 0; margin-top: 1px; }
 .v2-toast-body { flex: 1; min-width: 0; }
