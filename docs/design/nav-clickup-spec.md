@@ -8,6 +8,10 @@
 参考原图 `clickup-reference-full.png` 为 1600×1006，含 7px 白边 + 1px `#e2e2e2` 窗口框。
 app 视口实为图像 x=8…1591 / y=9…996（1584×988）。
 
+**锚点表（§1）是规范事实源，图片只是佐证。** 需要复现某个数值时以 §1 为准，
+不要反过来用像素测量去推翻已定稿几何 —— 原图带用户自绘的红色标注框与 Mobbin 演示数据，
+测量极易被污染。导航区的测量请改用 `clickup-nav-only.png`（见 §9）。
+
 **本文所有坐标一律为视口相对**，原点 = app 视口左上角。换算：视口值 = 图像值 − 8 / − 9。
 
 那条窗口框不复刻，不给 app 加 border-top。
@@ -22,7 +26,7 @@ L1 容器 x 0..66   宽 67 = 66 轨 + 1 border-right
 L2 容器 x 67..347 宽 281 = 268 内层 + 1 border-right + 12 滚动条沟槽
   内层   x 67..334
   缝     x 335   1px #eaeaea —— L2 自己的 border-right（与 x=66 是两条不同的缝）
-  沟槽   x 336..347 —— 只能是滚动条轨，不是 padding
+  沟槽   x 336..347 —— 由 padding 提供 + 隐藏滚动条（见 §1.1 第 3 条的实施期修正）
 内容    x 348..
 
 行命中区 x 75..325（左缩进 8 / 右缩进 9），高 29，pitch 32，radius 6
@@ -241,7 +245,16 @@ DOM 类名保持 `.v2-*` 不动，只有 CSS 变量用 `--cu-*` 前缀。
 
 | 文件 | 内容 |
 |---|---|
-| `clickup-reference-full.png` | 原始参考截图（1600×1006，含红色标注框） |
+| `clickup-nav-only.png` | **导航区测量用这张**。由原图裁出（图像 x 8..336 / y 9..997 ⇒ 视口 0..328 × 0..988），已排除右侧红框；仅沟槽最右 7px 被裁掉 |
+| `clickup-reference-full.png` | 原始参考截图（1600×1006）。**含用户自绘红色标注框（实测红像素 x 336..1582）与 Mobbin 演示数据**，只用于 §0 锚点复现，不作对外素材、不用于右侧测量 |
 | `01-topbar.png` | 顶栏整条放大 |
 | `02-l1rail.png` / `l1-items.png` / `l1-bottom.png` | L1 黑轨整体 / 项目 / 底部 |
 | `03-l2-top.png` / `04-l2-bottom.png` | L2 上半 / 下半 |
+
+裁片命令（PIL，`/usr/bin/python3` 已装 11.3.0）：
+
+```python
+from PIL import Image
+im = Image.open('docs/design/clickup-ref/clickup-reference-full.png').convert('RGB')
+im.crop((8, 9, 336, 997)).save('docs/design/clickup-ref/clickup-nav-only.png', optimize=True)
+```

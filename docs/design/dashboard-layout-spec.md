@@ -31,12 +31,18 @@
 
 | Token | 值 | 用途 |
 |---|---|---|
-| `--radius` | `14px` | 卡片、panel、banner、side-card |
-| `--radius-sm` | `10px` | 输入框、小卡、图标底座 |
+| `--radius` | `8px` | 内容区卡片与面板：card、panel、banner、list-item、tool-card、fav-card |
+| `--radius-sm` | `6px` | 可点控件：输入框、按钮、select、图标底座、chip |
+| `--v2-radius` | `10px` | 浮层容器：Modal / Drawer / SearchPalette |
 | 圆角胶囊 | `99px` | chip、分类标签、迷你进度条 |
 | 字体 | `Inter, "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif` | 全局 |
 | 基准字号 | `13.5px` | body |
 | 字距 | 标题 `-.3px` ~ `-.5px`，正文 `0`（禁止负字距用于正文） |
+
+> **2026-11-13 修订**：`--radius` 由基线的 14px 收敛为 8px，并新增 10px 浮层档，
+> 形成「控件 6 / 卡片 8 / 浮层 10」三档语义。这是对已锁定 Cake v3 基线的**有意偏离**，
+> 只动圆角，颜色与排版仍锁定基线。完整判定规则、逐处吸附表与验收方式见
+> [content-radius-spec.md](content-radius-spec.md)。
 
 ---
 

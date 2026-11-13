@@ -403,7 +403,12 @@ user_id UUID REFERENCES auth.users(id) NOT NULL
      | 测试员 | view | edit | view | view | view | view | view |
      | 访客 | view | view | view | view | view | view | view |
 
-     说明：所有只读工具（data_scope=none）只授权 `view`；只有 `writable=true` 的工具（停车、家庭电影、Todo）可以出现 `edit`。具体到实施时可在管理界面调整。
+     说明：所有只读工具（data_scope=none）只授权 `view`；只有 `writable=true` 的工具（停车、家庭电影、Todo）可以出现 `edit`。
+     管理界面可在运行时调整授权，但**本矩阵（落地为 `supabase/migrations/20261020010000_init_schema.sql`
+     末尾的 `role_permissions` 种子段，不是 `supabase/seed/`）是权限的唯一事实源**：
+     界面上的增删必须在同一轮同步回种子，否则视为**待恢复漂移**。
+     已发生的漂移实例：`家庭成员` 曾被界面连续操作后丢掉 5 条授权（含 `parking`/`movie` 的 `edit`），
+     由 `supabase/migrations/20261113000000_restore_family_role_permissions.sql` 按本矩阵恢复至 12 条 / 3 edit。
    - 种子 tools：12 个工具元数据。
    - Edge Functions 部署：函数代码存放于 `supabase/functions/`（每个函数一个子目录），通过 Supabase CLI 部署（`supabase functions deploy`）。本地开发使用 `supabase start`。部署前从 `.env.secrets` 取 `SUPABASE_SERVICE_ROLE_KEY`，通过 `supabase secrets set` 注入到 Edge Function 环境变量，不在前端源码中引用。`SUPABASE_SERVICE_ROLE_KEY` 为 §8.1 C 级机密，`.env.secrets` 已提交 git 留痕。
    - 存量数据迁移：停车收费、家庭电影空库启动，不导入旧 Netlify 站点数据（原数据为前端硬编码或 localStorage，无持久化后端）。各速查工具参考内容硬编码在前端组件。

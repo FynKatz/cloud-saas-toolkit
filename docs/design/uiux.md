@@ -241,6 +241,18 @@
   半数带填充，lucide 是严格 2px 纯描边，两者并排就能看出粗细与填充差异。
 - 图标尺寸：L1 18px、L2 行与顶栏 16px、L2 私有锁 12px、顶栏 chevron 10px、chip 旗帜 14px。
 - 内容区（工具页内部）仍可用 lucide，属红色区域，不在本次范围。
+- **lucide 全局线宽统一 1.5**：`style.css` Layer 3 未分层区一条 `svg.lucide { stroke-width: 1.5 }`。
+  必须无单位（写 `1.5px` 会钉死绝对线宽、不再按 24 viewBox 缩放）、必须限定 `.lucide`
+  （裸 `svg` 会把线宽继承进 donut / area / marker 未自报线宽的 path）、必须放在未分层区
+  （lucide 的 `stroke-width="2"` 是 presentation attribute，普通规则即可压过，不需要 `!important`；
+  但放进 `@layer base` 会被 Tailwind utilities 层压住）。
+- 实测偏离：12 / 13px 图标实际渲染线宽约 0.75~0.81px，低分屏偏细，**已接受**，
+  不做按尺寸的条件回退（CSS 无法按渲染尺寸选元素，且图标尺寸有 prop 与 CSS 两个来源）。
+- 实测结论（勿再重复「修复」）：`Icon.js` 函数体内解构掉 `class` **不会**丢失消费者 class，
+  Vue 从原始 `vnode.props` 提取 fallthrough attrs。`<Star :class="{filled}">` 渲染出
+  `lucide lucide-star-icon filled`、`<ArrowUpRight class="tc-go">` 渲染出 `... tc-go`，
+  `.filled` / `.chev.open` / `.tc-go` 三条规则全部生效。
+- 内容区圆角与线宽的完整规范见 [content-radius-spec.md](content-radius-spec.md)。
 - 工具图标源收敛为一份：`lib/toolIcons.ts` 的 `getToolIcon(icon, id)`，
   `AppShellV2` 原有的本地 `ICON_MAP` 已删除。`pixabay-download` 与 `image-stitch` 的 DB icon
   同为 `Image`，按 tool id 覆盖成 `download`，不动 DB、不加 migration。

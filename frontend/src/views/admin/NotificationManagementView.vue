@@ -282,7 +282,7 @@ onMounted(load)
     <!-- 预览 Modal -->
     <Teleport to="body">
       <div v-if="previewBanner" class="fixed inset-0 z-50 flex items-start justify-center pt-[20vh] bg-black/30" @click.self="closePreview">
-        <div class="w-full max-w-[680px] mx-4 rounded-xl bg-[var(--card)] border border-[var(--surface-border)] p-6 shadow-lg">
+        <div class="w-full max-w-[680px] mx-4 rounded-[10px] bg-[var(--card)] border border-[var(--surface-border)] p-6 shadow-lg">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-sm font-semibold text-[var(--text)]">预览 → Dashboard 横幅</h3>
             <button class="text-[var(--text-secondary)] hover:text-[var(--text)]" @click="closePreview"><X class="h-4 w-4" /></button>

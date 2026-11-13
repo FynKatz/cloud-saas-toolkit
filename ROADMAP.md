@@ -7,10 +7,15 @@
 - 当前仓库为完整工程：Vue 3 + Vite 前端 + Supabase（Auth/RLS/DB）+ Netlify 部署。
 - Git 远端：`origin` (GitHub) / `gitee` (Gitee 镜像)。
 - 分支策略：`feature/2610 → dev → int → stg → prod`。
-- `prod` 分支通过 Netlify 自动部署到 https://cloud-saas-toolkit.netlify.app，线上为 Vue 版本。
+- 线上为 Vue 版本，地址 https://cloud-saas-toolkit.netlify.app 。
+  **部署走 Netlify API 直传（`scripts/netlify-deploy.mjs --publish`），不是 GitHub 自动触发** ——
+  Continuous Deployment 需要付费计划，见 AGENTS §10。
 - 密钥按 A/B/C 三级管理（见 [PRD §8.1](docs/PRD.md)）：`.env.secrets`（git 跟踪）为单一事实源，`frontend/.env`（gitignore）存公开 `VITE_` 变量，C 级机密不进入前端产物。
 - **Phase 1–6 已完成**：数据层 / 认证权限 / 前端重构 / 工具迁移 / 全站 UI/UX 统一 / 数据驱动 Dashboard。
 - **Phase 7 系统通知已完成**（2026-10-23）：黑名单式已读/已关、通知中心、Admin 管理。
+- **Phase 8 导航改版已完成**（2026-11-13，`9fdde6f`）：v2 双层导航 + ClickUp 导航 1:1 复刻。
+- **Phase 9 内容区统一与停车收尾已完成**（2026-11-13，未提交）：圆角三档 + lucide 线宽统一 +
+  两条数据修复 migration + 停车 V2 全量回归。
 - 运维通道：复用 git config 里带域凭据的代理后，shell 可直达 Supabase / Netlify / Gitee，
   migration 用 `sh scripts/supa-sql.sh --file <path>`；浏览器兜底用
   `scripts/supa-ego-cli.sh`（ego-browser，Test Chrome CDP 已废弃）。
@@ -86,6 +91,25 @@ Browser
   批量已读）。
 - 7.3 ✅ Admin 端：通知发布/撤回/归档，`read_count` 由 SECURITY DEFINER 触发器维护。
 - 7.4 ✅ 设计文档：`docs/dsgn-system-notifications.md`。
+
+### Phase 8: 导航改版 ✅ 已完成（2026-11-13）
+
+- 8.1 ✅ v2 双层导航壳（`AppShellV2` + `PrimaryRail` + `ContextSidebar` + `GlobalTopbar`）。
+- 8.2 ✅ ClickUp 导航 1:1 复刻与层叠/门禁修复，几何由 `scripts/nav-ego-check.mjs` 机检。
+- 8.3 ✅ 设计规格：[nav-clickup-spec.md](docs/design/nav-clickup-spec.md)。
+
+### Phase 9: 内容区统一与停车收尾 ✅ 已完成（2026-11-13）
+
+- 9.1 ✅ 圆角吸附三档（控件 6 / 卡片 8 / 浮层 10）+ `svg.lucide` 线宽统一 1.5，
+  颜色与排版仍锁定 Cake v3。规范见
+  [content-radius-spec.md](docs/design/content-radius-spec.md)。
+- 9.2 ✅ 数据修复：恢复 `家庭成员` 漂移掉的 5 条授权（`20261113000000`）；
+  补上此前根本不存在的高德停车图片私有桶与 SELECT 策略（`20261113000100`）。
+  两条均已执行并校验。**本库无 `schema_migrations` 表，文件进仓库 ≠ 生效。**
+- 9.3 ✅ 停车 V2 实施计划 §10.2/10.3 全量回归通过（17 项），并修出
+  「admin 主列表泄漏已停用记录」这一真实缺陷。
+- 9.4 ⏸ 高德 JS Key 域名白名单：账号侧 console 配置，需用户配合。
+- 9.5 ⏸ 提交 / 双推 / Netlify 直传：等用户明确下令（AGENTS §3）。
 
 ## Repository Rules
 

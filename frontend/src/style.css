@@ -27,8 +27,14 @@
   --card: #ffffff;
   --hover: #f2f2f7;
   --chip-neutral: #f5f5f8;
-  --radius: 14px;
-  --radius-sm: 10px;
+  /* 圆角三档，与 ClickUp 导航层同一尺度（详见 docs/design/content-radius-spec.md）。
+     --radius   = 8px  内容区的卡片与面板
+     --radius-sm= 6px  可点控件与行内元素
+     --v2-radius= 10px 浮层容器（Modal / Drawer / SearchPalette）
+     这是对 PROCESS_LOG 里「视觉基线锁定 Cake v3 radius 14px」的有意偏离：
+     颜色与排版仍锁定 Cake v3，只有圆角收敛。 */
+  --radius: 8px;
+  --radius-sm: 6px;
 
   /* ============================================================
      Layer 2 — 既有语义名，映射到 Layer 1。
@@ -135,6 +141,29 @@
 /* ============================================================
    Layer 3 — 全局组件样式（AppShell / DashboardView / NotificationBanner / admin 预览共享）
    ============================================================ */
+/*
+ * 图标线宽全站统一 1.5，与导航层 CuIcon 一致。
+ *
+ * 三条硬约束（均为实测结论，改动前请先复核）：
+ *  1. 值必须**无单位**。写 1.5px 会变成绝对值、不再随 24 的 viewBox 缩放，
+ *     等于把所有尺寸的图标线宽钉死。
+ *  2. 必须限定 `svg.lucide`，**不能写裸 `svg`**。stroke-width 是可继承属性，
+ *     裸 svg 会把线宽灌进 donut / area / marker 里没有自报 stroke-width 的 path。
+ *     lucide-vue-next 给每个 svg 硬写 class="lucide lucide-<name>-icon"，
+ *     所以这一条能覆盖全站 200+ 处图标，含 5 个壳级组件，无需逐文件改。
+ *  3. 必须写在**未分层**的 Layer 3 区，不要放进 `@layer base`。
+ *     lucide 的 stroke-width="2" 是 presentation attribute，级联上排在所有 CSS
+ *     声明之前，普通规则即可压过，不需要 !important；但 Tailwind 的
+ *     preflight/utilities 都在 @layer 内，放进 @layer base 反而会被 utilities 压住。
+ *
+ * 已知偏离：12/13px 图标实际渲染线宽约 0.75~0.81px，低分屏偏细。
+ * 不做「按尺寸回退 2」的条件规则 —— CSS 无法按渲染尺寸选择元素，且图标尺寸有
+ * `:size` prop 与 CSS（h-4 w-4 / :deep(svg){width:17px}）两个来源，属性枚举只能覆盖一半。
+ */
+svg.lucide {
+  stroke-width: 1.5;
+}
+
 .banner {
   display: flex;
   align-items: center;
@@ -229,7 +258,9 @@ html {
   --v2-accent-light: #f0f5ff;
   --v2-btn-ghost-hover: #f4f5f7;
   --v2-radius: 10px;
-  --v2-radius-sm: 7px;
+  /* 7px 不在 6/8/10 任一档上；它的 11 个消费者（Toast / Drawer / Modal 关闭钮 /
+     Skeleton / 离线条 / skip-link / 两条 banner）全是可点控件或小徽标，归 6px。 */
+  --v2-radius-sm: 6px;
 
   /* 尺寸 */
   --cu-topbar-height: 42px;

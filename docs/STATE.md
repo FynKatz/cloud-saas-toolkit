@@ -1,7 +1,7 @@
 # STATE.md — 项目当前状态
 
 > 自动由 agent 维护，记录当前阶段、分支、未提交改动和待办清单。
-> 更新时间：2026-11-05
+> 更新时间：2026-11-13
 
 ## 当前分支
 
@@ -20,73 +20,64 @@ feature/2610（HEAD）
 | 5 | 设计系统 + 全站 UI/UX 统一 | ✅ 已完成 |
 | 6 | 数据驱动 Dashboard + 脚手架清扫 | ✅ 已完成 |
 | 7 | 系统通知 | ✅ 已完成 |
+| 8 | v2 双层导航 + ClickUp 导航 1:1 复刻 | ✅ 已完成（`9fdde6f` 已提交） |
+| 9 | 内容区圆角/线宽统一 + 数据修复 + 停车 V2 回归 | ✅ 已完成（未提交） |
 
 ## 正在进行
 
 | 工作项 | 状态 | 详情 |
 |---|---|---|
-| 停车收费 V2 | 代码完成，回归中 | [parking-implementation-plan.md](docs/design/parking/parking-implementation-plan.md) |
-| 数据管理三页（省市/商场/停车场） | 代码完成 | admin 面板新增菜单 |
+| 停车收费 V2 | ✅ 回归全通过 | [parking-implementation-plan.md](docs/design/parking/parking-implementation-plan.md) §10.2/10.3 |
+| 数据管理三页（省市/商场/停车场） | ✅ 完成 | admin 面板；停用记录的恢复入口在此 |
+| 内容区圆角/线宽统一 | ✅ 完成 | [content-radius-spec.md](docs/design/content-radius-spec.md) |
+| 高德 JS Key 域名白名单 | ⏸ 需用户配合 | 账号侧 console 配置，agent 无法闭环 |
+| 本批次提交 / 推送 / 部署 | ⏸ 等用户明确下令 | AGENTS §3：不得自行 commit |
 
-## 未提交改动（feature/2610）
+## 本批次未提交改动（feature/2610）
 
 ```text
-修改（13 文件）：
-  .env.secrets, PROCESS_LOG.md, ROADMAP.md, docs/ISSUES-20261022.md,
-  docs/design/dashboard-layout-spec.md, docs/runbook-corporate-network.md,
-  frontend/src/components/AppShell.vue, frontend/src/router/index.ts,
-  frontend/src/views/DashboardView.vue, frontend/src/views/ParkingView.vue,
-  scripts/net-doctor.sh, scripts/supa-sql.sh
-
-新增（16 文件/目录）：
-  docs/design/parking/（设计原型+实施计划）
-  frontend/src/composables/useMalls.ts, useParking.ts, useRegions.ts
-  frontend/src/lib/amap.ts
-  frontend/src/types/parking.ts
-  frontend/src/views/admin/DataManagementView.vue, MallManagementView.vue,
-    ParkingLocationAdminView.vue, RegionManagementView.vue
-  frontend/src/vite-env.d.ts
-  scripts/build-regions-seed.mjs, supa-ego-cli.sh, supa-ego.mjs
-  supabase/functions/amap_geocode/
-  supabase/migrations/20261104010000_parking_v2_schema.sql,
-    20261104020000_seed_regions.sql, 20261104030000_parking_storage.sql
-  supabase/seed/
-
-删除：
-  scripts/supabase-cdp.mjs（Test Chrome CDP 废弃）
+修改：PROCESS_LOG.md, AGENTS.md, ROADMAP.md, docs/STATE.md,
+  docs/design/{content-radius-spec(新增),nav-clickup-spec,dashboard-layout-spec,uiux}.md,
+  docs/design/parking/parking-implementation-plan.md,
+  frontend/src/style.css,
+  frontend/src/views/{ParkingView,DashboardView,NotificationCenterView}.vue,
+  frontend/src/views/admin/NotificationManagementView.vue,
+  frontend/src/components/auth/AuthShell.vue,
+  scripts/nav-ego-check.mjs
+新增：supabase/migrations/20261113000000_restore_family_role_permissions.sql,
+      supabase/migrations/20261113000100_parking_images_bucket_and_select.sql
 ```
 
-## 停车 V2 待办（来自实施计划 §10.2/10.3）
+## 本轮修出的两个真实缺陷
 
-### 功能回归（未勾 = 待验证）
-- [ ] admin：搜索/筛选/只看收藏全链路
-- [ ] admin：地图 marker 双向联动
-- [ ] admin：地图搜索/定位/缩放
-- [ ] admin：编辑/停用/删除停车场
-- [ ] admin：数据管理三页全功能
-- [ ] 普通用户：权限边界（不能直接 INSERT/UPDATE/DELETE）
-- [ ] 普通用户：收藏切换与持久化
-- [ ] 移动端响应式
+1. **已停用停车场仍出现在 admin 主列表与地图**。`ParkingView` 过去只靠 RLS 过滤 `status`，
+   而 admin 的 SELECT 策略可见全部行，与实施计划「停用后主列表消失」矛盾。
+   已在 `filtered` 内加 `status !== 'active'` 短路，恢复入口保留在 admin 数据管理页。
+2. **`parking-images` 桶此前根本不存在**。`20261020030000_storage.sql` 写了 SELECT 策略但
+   当时只执行了一半，`storage.buckets` 为空 —— 「图片上传 + 私有桶签名 URL 可读」在此之前
+   必然失败。已补 `20261113000100_parking_images_bucket_and_select.sql` 并执行。
 
-### 安全回归
-- [x] 普通用户经 RPC 新增成功
-- [x] 直接 INSERT 被 RLS 拒绝
-- [ ] 旧百度 Key 不再出现在新代码中
-- [ ] amap_geocode Edge Function 部署并可用
+另记一条**非缺陷**：`家庭成员`(0002) 的 5 条授权是 2026-11-04 被人从 RBAC 界面连续点掉造成的
+漂移（`audit_logs` 有 13 次 `admin_set_role_permission`），Edge Function 逻辑本身正确。
+已按种子恢复为 12 条 / 3 edit，并把「种子是唯一事实源」写进 AGENTS §7。
 
-### 收尾（Phase F）
-- [ ] npm run build 通过
-- [ ] git commit + push（feature/2610 → GitHub + Gitee）
-- [ ] 更新实施计划勾选状态
+## v1 冻结分支的被动变化
 
-## 阻塞项
+`--radius` / `--radius-sm` 重值会连带改掉 v1 `AppShell.vue` 的 `.side-card`、收缩态图标格、
+`.user-pop` 圆角。生产配置 `VITE_NAV_V2=1` 下 v1 不可达，`scripts/` 无 radius/stroke 断言，
+故**接受该被动变化，不手工对齐**。
 
-- `AMap.Geocoder` 回调在前端不触发（已走通服务端高德 Web API 直连替代方案）。
-- 建议方案：部署 `supabase/functions/amap_geocode` Edge Function，前端用 `supabase.functions.invoke` 调用。
+## 数据基线（回归收尾已核对）
+
+`parking_locations` 1（北京SKP停车场，active，`images: []`）/ `parking_malls` 0 /
+`user_parking_favorites` 1（admin→SKP）/ `regions` 2850 / `user_recent_tools` 0 /
+`storage.objects` 0 / `家庭成员` 授权 12 条（3 edit）。
+QA 数据统一 `QA_` 前缀，验证后已按 `AGENTS §7` 全删；
+`localStorage` 的 `cloud-saas-toolkit:recent-tools` 已清回 `[]`。
 
 ## 下一步
 
-1. ~~创建 AGENTS.md（repo agent 入口）~~ ✅ 已完成
-2. 停车 V2 回归跑完（ego-browser 自动化）
-3. 部署 amap_geocode Edge Function
-4. npm run build → 提交 → 推送
+1. 高德 JS Key 域名白名单需用户在 console 配置后才能真正闭环。
+2. `ParkingView` 表单里「解析地址到地图」只回填坐标，不会自动选中省/市/区下拉
+   （保存仍要求手选区划）。属可选优化，未在本批次范围。
+3. 提交 / 双推 / Netlify 直传：等用户明确下令。

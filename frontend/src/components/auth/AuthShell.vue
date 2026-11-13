@@ -53,7 +53,7 @@ async function logout() {
     </button>
 
     <div
-      class="relative z-10 w-full max-w-sm rounded-2xl border px-8 py-10 transition-shadow"
+      class="relative z-10 w-full max-w-sm rounded-lg border px-8 py-10 transition-shadow"
       :style="{
         background: 'var(--surface)',
         borderColor: 'var(--surface-border)',
@@ -63,7 +63,7 @@ async function logout() {
       <!-- 品牌标记 -->
       <div class="mb-5 flex justify-center">
         <div
-          class="grid h-12 w-12 place-items-center rounded-2xl"
+          class="grid h-12 w-12 place-items-center rounded-lg"
           style="background: var(--violet-solid)"
         >
           <LogIn class="h-6 w-6 text-white" />

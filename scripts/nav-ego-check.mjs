@@ -108,13 +108,21 @@ const m = await page.evaluate(() => {
     rowText: r(firstItem?.querySelector('.v2-l2-item-text')),
     // 行间距只能在同一分组内量：跨分组的相邻两行中间还夹着组头和分隔线，
     // 拿全局第 1、2 个行算 pitch 会得到 80 左右的假失败。
+    //
+    // 必须遍历所有分组、取第一个「行数 >= 2」的来量。
+    // 早期版本直接取第一个 .v2-l2-subitems，而分组内容随收藏/最近使用状态变化
+    // （实测出现过 [1,4,3,2,3]：第一组是只有 1 行的「最近使用」），
+    // 于是 rowPitch 变 null，脚本以「元素不存在」假失败。
     rowPitch: (() => {
-      const group = document.querySelector('.v2-l2-subitems')
-      if (!group) return null
-      const items = group.querySelectorAll('.v2-l2-item')
-      if (items.length < 2) return null
-      return +(items[1].getBoundingClientRect().top - items[0].getBoundingClientRect().top).toFixed(2)
+      for (const g of document.querySelectorAll('.v2-l2-subitems')) {
+        const items = g.querySelectorAll('.v2-l2-item')
+        if (items.length < 2) continue
+        return +(items[1].getBoundingClientRect().top - items[0].getBoundingClientRect().top).toFixed(2)
+      }
+      return null
     })(),
+    // 供诊断用：各分组行数，出问题时能一眼看出是不是 DOM 态没就绪
+    groupRowCounts: [...document.querySelectorAll('.v2-l2-subitems')].map(g => g.querySelectorAll('.v2-l2-item').length),
     groupHeadHeight: (() => {
       const h = document.querySelector('.v2-l2-group-head')
       return h ? +h.getBoundingClientRect().height.toFixed(2) : null

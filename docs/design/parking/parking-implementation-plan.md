@@ -452,33 +452,67 @@ frontend/src/
 
 ### 10.2 功能清单
 
-- [ ] 搜索框按商场/地址/备注命中
-- [ ] 省市县级联 + 重置
+- [x] 搜索框按商场/地址/备注命中
+- [x] 省市县级联 + 重置
 - [x] 商场下拉 + “+ 新增”后回填
-- [ ] 只看收藏过滤正确
+- [x] 只看收藏过滤正确
 - [x] 表格行选中与详情抽屉联动
-- [ ] 地图 marker 与列表/表格双向高亮
-- [ ] 地图搜索/缩放/定位/选点
+- [x] 地图 marker 与列表/表格双向高亮
+- [x] 地图搜索/缩放/定位/选点
 - [x] 新增保存后列表和地图即时出现
-- [ ] 编辑更新后行/卡片/marker 同步
-- [ ] 停用后主列表消失、可在地图总览外恢复
-- [ ] admin 管理页能看到已停用记录并恢复
-- [ ] 删除（admin，二次确认）后收藏级联清理
-- [ ] 图片上传成功、私有 bucket 图片按 RLS/签名 URL 可读、无公开 URL 泄漏
-- [ ] 普通用户只能经 RPC 新增，直接 INSERT parking_locations / parking_malls 被 RLS 拒绝
+- [x] 编辑更新后行/卡片/marker 同步
+- [x] 停用后主列表消失、可在地图总览外恢复
+- [x] admin 管理页能看到已停用记录并恢复
+- [x] 删除（admin，二次确认）后收藏级联清理
+- [x] 图片上传成功、私有 bucket 图片按 RLS/签名 URL 可读、无公开 URL 泄漏
+- [x] 普通用户只能经 RPC 新增，直接 INSERT parking_locations / parking_malls 被 RLS 拒绝
 - [x] 无数据/无结果/无坐标空状态
-- [ ] 移动端（<900px）布局不重叠、地图可用
+- [x] 移动端（<900px）布局不重叠、地图可用
+
+回归证据（2026-11-13，以构建产物 `serve-dist` + ego 实测，QA 数据统一 `QA_` 前缀、验后已全删）：
+
+- 搜索/筛选/收藏/重置：`QA_` 五条样本命中备注（含新能源车位）、地址（申长路）、商场（望京SOHO）。
+- 编辑同步：详情抽屉 → 编辑 → 日间价 10→18，卡片即时显示 18。
+- 停用：主列表消失且 marker 由 5 减为 4；恢复入口在「管理台 / 停车场管理」的启用按钮。
+- marker 双向：点行 → 列表与卡片同步高亮且地图视野位移；点 marker → 打开对应详情抽屉并回亮该行。
+- 删除级联：`user_parking_favorites.parking_location_id` 为 `ON DELETE CASCADE`，删记录后收藏行归零。
+- 图片：表单 `选择图片` → 本地预览 → 保存 → `images` 存对象路径（非签名 URL）；
+  私有桶 public 端点返回 400；详情页 `<img>` 走签名 URL 且 `naturalWidth>0`。
+- 移动端 390px：五个区块无重叠、无横向溢出、地图 356×520 且 4 个 marker 正常渲染。
+
+> **本轮修出的真实缺陷**：`ParkingView` 的主列表此前只靠 RLS 过滤 `status`，
+> 而 admin 的 SELECT 策略可见全部行，导致已停用记录仍然出现在 admin 的主列表与地图上，
+> 与本节「停用后主列表消失」及 §5「select 默认只返回 active」矛盾。
+> 已在 `filtered` 计算属性内加 `if (loc.status !== 'active') return false` 对齐口径，
+> 恢复入口保持在 admin 数据管理页（那里可按状态筛选）。
 
 ### 10.3 安全清单
 
 - [x] 普通用户经 `create_parking_location` RPC 新增成功；直接 INSERT 被 RLS 拒绝
-- [ ] 待审批用户读不到数据
-- [ ] 收藏不泄漏不可见停车场
-- [ ] `AMAP_WEB_KEY` 不在前端 bundle 中（`rg` 构建产物为空）
-- [ ] 旧百度 Key（`parking.html`、`js/parking-mgt.js` 硬编码）不再出现在新代码提交中
+- [x] 待审批用户读不到数据
+- [x] 收藏不泄漏不可见停车场
+- [x] `AMAP_WEB_KEY` 不在前端 bundle 中（`rg` 构建产物为空）
+- [x] 旧百度 Key（`parking.html`、`js/parking-mgt.js` 硬编码）不再出现在新代码提交中
 - [x] `frontend/.env` 不提交 Git；`.env.secrets` 留痕
 - [ ] 高德 JS Key 域名白名单生效
 
+> 去重说明：10.2 的「普通用户只能经 RPC 新增，直接 INSERT 被 RLS 拒绝」与本节第一条同义，
+> 实测证据统一记在这里，10.2 只保留功能视角。
+
+安全实测证据（2026-11-13，真实 Supabase 会话，非 DEV 离线种子）：
+
+- 访客直连 INSERT `parking_locations` / `parking_malls` → 403 `42501`（RLS 拒绝）。
+- 家庭成员（已恢复 parking/edit 授权）直连 UPDATE / DELETE → 生效 **0 行**，数据未被改动；
+  同账号经 RPC 新增成功 —— 印证「普通用户新增走 RPC、编辑/删除/停用仍是 admin 专属」的既定口径。
+- 待审批用户（把 tester 临时置 `pending` 实测，测后已还原 `approved`）：
+  `parking_locations` 读为空、收藏读为空、写收藏 403、`tools` 读为空 —— 四项同时失效，
+  与 `has_tool_permission` 要求 `status='approved'` 且 `must_change_password=false` 一致。
+- 访客收藏表读为 `[]`，且按不可见记录 id 直查 `parking_locations` 亦为 `[]`，收藏不构成旁路。
+- `rg 'AMAP_WEB_KEY' frontend/dist` 零命中；`rg 'jsapi.baidu|api.map.baidu|BMap' frontend/` 零命中。
+
+> **待用户配合项**：「高德 JS Key 域名白名单生效」属账号侧 console 配置，代码里查不到，
+> agent 无法闭环。目前 `net::ERR_CONNECTION_REFUSED` 之类的加载失败会被
+> `.map-fallback` 兜住，地图不可用时其余列表功能不受影响。
 ---
 
 ## 11. 待确认/假设

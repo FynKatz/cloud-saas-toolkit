@@ -64,6 +64,16 @@ feature/2610 → dev → int → stg → prod
 
 - 自动化测试会污染真实数据，每次回归收尾清点并回滚自己写入的行（收藏/最近/停车/电影/任务）。
 - DEV 模式的离线 seed 必须与 `public.tools` 表一致（`SELECT id,name,category,icon,data_scope,writable,sort_order ORDER BY sort_order`）。
+- **权限种子是 RBAC 的唯一事实源。** `supabase/seed/` 里的 `role_permissions` 定义必须与线上表一致：
+  通过 Admin「角色管理」界面增删授权时，同一轮要把改动同步回种子，否则视为**待恢复漂移**，
+  后续任何按种子的核对都会得出错误结论。漂移实例与恢复记录见
+  `supabase/migrations/20261113000000_restore_family_role_permissions.sql`。
+- **权限种子是 RBAC 的唯一事实源。** 它不在 `supabase/seed/`（那里只有 `regions`），
+  而在 `supabase/migrations/20261020010000_init_schema.sql` 末尾的两段 upsert：
+  9 个只读工具 × 3 个非 admin 种子角色，外加各角色的 `parking`/`movie`/`todo` 授权。
+  通过 Admin「角色管理」界面增删授权时，同一轮要把改动同步回该种子段，否则视为**待恢复漂移**，
+  后续任何按种子的核对都会得出错误结论。漂移实例与恢复记录见
+  `supabase/migrations/20261113000000_restore_family_role_permissions.sql`。
 
 ## 8. 项目公约
 

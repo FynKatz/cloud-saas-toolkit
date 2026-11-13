@@ -140,14 +140,14 @@ onMounted(() => {
 .filter-row { display: flex; gap: 4px; background: var(--chip-neutral); border-radius: 99px; padding: 3px; }
 .filter-btn { padding: 5px 14px; border-radius: 99px; font-size: 12.5px; font-weight: 500; border: none; background: none; cursor: pointer; color: var(--ink-2); transition: all .12s; }
 .filter-btn.active { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
-.action-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 9px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 13px; cursor: pointer; font-family: inherit; transition: all .12s; }
+.action-btn { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 6px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 13px; cursor: pointer; font-family: inherit; transition: all .12s; }
 .action-btn:hover { background: var(--hover); }
 
 .empty { text-align: center; padding: 60px 0; color: var(--ink-3); }
 .empty p { font-size: 14px; }
 
 .list { display: flex; flex-direction: column; gap: 6px; }
-.list-item { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--card); overflow: hidden; transition: border-color .12s; }
+.list-item { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); overflow: hidden; transition: border-color .12s; }
 .list-item:hover { border-color: var(--violet-line); }
 .item-main { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; }
 .read-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); flex-shrink: 0; }
@@ -168,7 +168,7 @@ onMounted(() => {
 .chev.open { transform: rotate(90deg); }
 .item-detail { border-top: 1px solid var(--line); padding: 14px 18px 18px; }
 .detail-content { font-size: 13px; color: var(--ink-2); line-height: 1.6; white-space: pre-wrap; margin-bottom: 12px; }
-.detail-go { background: var(--violet-soft); color: var(--violet); border: 1px solid var(--violet-line); border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .12s; }
+.detail-go { background: var(--violet-soft); color: var(--violet); border: 1px solid var(--violet-line); border-radius: 6px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .12s; }
 .detail-go:hover { background: var(--violet); color: #fff; }
 
 .slide-enter-active, .slide-leave-active { transition: all .18s ease; overflow: hidden; }
