@@ -106,3 +106,9 @@ SUPA_PROXY=http://127.0.0.1:18899 node scripts/netlify-deploy.mjs --publish
 - 脚本位置：`scripts/netlify-deploy.mjs`。
 - 线上主域：`https://cloud-saas-toolkit.netlify.app`。
 - 查询部署记录：`GET /api/v1/sites/{site_id}/deploys`（同一个 token）。
+
+**上线判据（不要凭脚本退出码下结论）**：直传 deploy 会落到 site 的 `prod` 分支，
+上传完成后自动 `state=ready` 并成为 `published_deploy`。确认上线要看
+`GET /sites/{site_id}` 的 `published_deploy.id` 是否等于本次 deploy id，
+再抽查产物内容（例如 `assets/index-*.css` 里的 `--radius` 值、懒加载 chunk 的关键字）。
+`node ... | tail` 会把退出码替换成 `tail` 的 0，与 `push-retry.sh` 同理，别用它判断成败。

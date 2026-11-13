@@ -145,8 +145,10 @@
  * 图标线宽全站统一 1.5，与导航层 CuIcon 一致。
  *
  * 三条硬约束（均为实测结论，改动前请先复核）：
- *  1. 值必须**无单位**。写 1.5px 会变成绝对值、不再随 24 的 viewBox 缩放，
- *     等于把所有尺寸的图标线宽钉死。
+ *  1. 写 `1.5` 还是 `1.5px` **等价**，不必强求无单位。SVG 里 CSS 的 px 就是用户单位，
+ *     实测线宽仍随 viewBox 缩放：16px 图标→1.0 设备像素、15px→0.938、14px→0.875
+ *     （= 1.5 × 渲染尺寸 / 24）。且 minifier 会把无单位的 1.5 输出成 `1.5px`，
+ *     构建产物里看到 px 后缀是正常的，不是退化。
  *  2. 必须限定 `svg.lucide`，**不能写裸 `svg`**。stroke-width 是可继承属性，
  *     裸 svg 会把线宽灌进 donut / area / marker 里没有自报 stroke-width 的 path。
  *     lucide-vue-next 给每个 svg 硬写 class="lucide lucide-<name>-icon"，

@@ -48,7 +48,7 @@ feature/2610（HEAD）
       supabase/migrations/20261113000100_parking_images_bucket_and_select.sql
 ```
 
-## 本轮修出的两个真实缺陷
+## 本轮修出的三个真实缺陷
 
 1. **已停用停车场仍出现在 admin 主列表与地图**。`ParkingView` 过去只靠 RLS 过滤 `status`，
    而 admin 的 SELECT 策略可见全部行，与实施计划「停用后主列表消失」矛盾。
@@ -60,6 +60,22 @@ feature/2610（HEAD）
 另记一条**非缺陷**：`家庭成员`(0002) 的 5 条授权是 2026-11-04 被人从 RBAC 界面连续点掉造成的
 漂移（`audit_logs` 有 13 次 `admin_set_role_permission`），Edge Function 逻辑本身正确。
 已按种子恢复为 12 条 / 3 edit，并把「种子是唯一事实源」写进 AGENTS §7。
+
+3. **`netlify-deploy.mjs --publish` 的发布步骤恒失败**。它调 `POST /sites/{id}/main`，
+   而该端点不存在（实测 404）。但直传 deploy 会落在 site 的 `prod` 分支上、上传完自动
+   `state=ready` 并成为 `published_deploy`，**线上其实已经更新成功** —— 异常只是把成功
+   掩盖成失败。已改为轮询 deploy 状态 + 以 `published_deploy.id === 本次 deploy.id`
+   为唯一成功判据，仅在真的是 lock/draft 时才 unlock/restore。
+   另注：`node scripts/netlify-deploy.mjs ... | tail` 会把退出码换成 tail 的 0，
+   判断成败必须看脚本自身输出，不能信管道退出码（AGENTS §6 对 push 有同样警告）。
+
+### 一处文档结论被实测否证（已纠正）
+
+上一轮写的「`stroke-width` 必须无单位，写 `1.5px` 会钉死绝对线宽」**是错的**：
+SVG 内 CSS 的 px 就是用户单位，线宽仍按 viewBox 缩放 —— 实测 16px 图标 1.0 设备像素、
+15px→0.938、14px→0.875（= 1.5 × 尺寸 / 24）。且 minifier 本就把源码的 `1.5` 输出成
+`1.5px`，构建产物带 px 属正常。`style.css` 注释、`content-radius-spec.md` §3、`uiux.md`
+三处已同步纠正，避免下一个人拿这条假约束去「修」它。
 
 ## v1 冻结分支的被动变化
 

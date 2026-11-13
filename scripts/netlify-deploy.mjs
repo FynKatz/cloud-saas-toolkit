@@ -142,10 +142,38 @@ if (todo.length) console.log(' done');
 
 // 5. publish
 if (PUBLISH) {
-  // draft deploys must also be unlocked+published via /main
-  try { api('POST', `/deploys/${deploy.id}/unlock`, {}); } catch { /* not locked */ }
-  const main = api('POST', `/sites/${siteId}/main`, { deploy_id: deploy.id });
-  console.log(`PUBLISHED -> ${main.ssl_url || main.url}`);
+  // 实测（2026-11-13）：直传产生的 deploy 落在 site 的 prod 分支上，上传完即自动转
+  // state=ready 并成为 published_deploy，**不需要**额外调用发布接口。
+  // 旧代码这里调 POST /sites/{id}/main —— 该端点不存在，恒返回 404，
+  // 于是「线上其实已经更新成功」也会被抛出的异常掩盖成部署失败。
+  // 因此改成：轮询真实状态 -> 仅在确实是 lock/draft 时才 unlock+restore -> 以
+  // published_deploy.id 是否等于本次 deploy 作为唯一成功判据。
+  let cur = deploy;
+  for (let i = 0; i < 60; i++) {
+    cur = api('GET', `/deploys/${deploy.id}`);
+    if (cur.state === 'ready' || cur.state === 'error') break;
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  if (cur.state === 'error') {
+    throw new Error(`deploy ${deploy.id} state=error: ${(cur.error_message || 'unknown').slice(0, 200)}`);
+  }
+  // 只有真的被锁成 draft 时才需要 unlock / restore；正常情况下这两个都不会触发。
+  if (cur.draft || cur.state === 'uploaded') {
+    try { api('POST', `/deploys/${deploy.id}/unlock`, {}); } catch { /* not locked */ }
+    try { api('POST', `/deploys/${deploy.id}/restore`, {}); } catch { /* already live */ }
+    for (let i = 0; i < 30; i++) {
+      cur = api('GET', `/deploys/${deploy.id}`);
+      if (cur.state === 'ready') break;
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+  const site = api('GET', `/sites/${siteId}`);
+  const publishedId = (site.published_deploy || {}).id;
+  if (publishedId !== deploy.id) {
+    throw new Error(`未上线：published_deploy=${publishedId} 而非本次 ${deploy.id}（state=${cur.state}）`);
+  }
+  const live = site.published_deploy.ssl_url || site.published_deploy.url || site.ssl_url || site.url;
+  console.log(`PUBLISHED -> ${live} (state=${cur.state}, deploy=${deploy.id})`);
 } else {
   console.log('draft deploy — 未影响线上主版本。加 --publish 才上线。');
 }
