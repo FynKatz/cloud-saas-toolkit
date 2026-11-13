@@ -189,3 +189,164 @@
   background: var(--violet);
   color: #fff;
 }
+
+/* ============================================================
+   v2 双层导航 token —— 全部带 --v2- 前缀，与旧 token 隔离。
+   L1 恒暗常量放在 html {} 规则块，不随 .dark 覆写。
+   ============================================================ */
+html {
+  --v2-l1-bg: #13151f;
+  --v2-l1-hover: #2a2d3a;
+  --v2-l1-icon: #9a9ead;
+  --v2-l1-icon-hover: #d9dce6;
+  --v2-l1-icon-active: #ffffff;
+  --v2-l1-active-indicator: #3b82f6;
+  --v2-l1-width: 44px;
+  --v2-l1-expanded-width: 124px;
+}
+
+:root {
+  --v2-l2-bg: #ffffff;
+  --v2-content-bg: #f4f5f7;
+  --v2-card-bg: #ffffff;
+  --v2-ink: #17202b;
+  --v2-ink-2: #505b6b;
+  --v2-label-muted: #5a6474;
+  --v2-border: #667085;
+  --v2-divider: rgba(0,0,0,.06);
+  --v2-topbar-height: 48px;
+  --v2-accent: #2563eb;
+  --v2-accent-light: #f0f5ff;
+  --v2-btn-ghost-hover: #f4f5f7;
+  --v2-radius: 10px;
+  --v2-radius-sm: 7px;
+  --v2-nav-icon: 16px;
+  --v2-nav-item-height: 36px;
+  --v2-nav-item-gap: 8px;
+  --v2-l1-label-size: 12.5px;
+  --v2-l2-group-header-size: 12.5px;
+  --v2-l2-item-size: 13px;
+
+  --v2-success: #16a34a;
+  --v2-warning: #b45309;
+  --v2-error: #dc2626;
+  --v2-info: #2563eb;
+  --v2-success-text: #16a34a;
+  --v2-success-bg: #f0fdf4;
+  --v2-success-border: #86efac;
+  --v2-success-surface: #dcfce7;
+  --v2-warning-text: #b45309;
+  --v2-warning-bg: #fffbeb;
+  --v2-warning-border: #fcd34d;
+  --v2-warning-surface: #fef3c7;
+  --v2-error-text: #dc2626;
+  --v2-error-bg: #fef2f2;
+  --v2-error-border: #fca5a5;
+  --v2-error-surface: #fee2e2;
+  --v2-info-text: #2563eb;
+  --v2-info-bg: #eff6ff;
+  --v2-info-border: #93c5fd;
+  --v2-info-surface: #dbeafe;
+
+  --v2-skeleton-base: #e5e7eb;
+  --v2-skeleton-highlight: #f3f4f6;
+
+  --v2-btn-primary-bg: #2563eb;
+  --v2-btn-primary-hover: #1d4ed8;
+  --v2-btn-primary-active: #1e40af;
+  --v2-btn-primary-text: #ffffff;
+  --v2-btn-secondary-bg: transparent;
+  --v2-btn-secondary-border: #667085;
+  --v2-btn-secondary-hover: #f4f5f7;
+  --v2-btn-secondary-active: #e5e7eb;
+  --v2-btn-secondary-text: #17202b;
+  --v2-btn-danger-bg: #dc2626;
+  --v2-btn-danger-hover: #b91c1c;
+  --v2-btn-danger-active: #991b1b;
+  --v2-btn-danger-text: #ffffff;
+  --v2-btn-danger-border: #dc2626;
+  --v2-btn-ghost-bg: transparent;
+  --v2-btn-ghost-active: #e5e7eb;
+  --v2-btn-ghost-text: #17202b;
+  --v2-btn-ghost-border: transparent;
+  --v2-btn-disabled-bg: #e5e7eb;
+  --v2-btn-disabled-text: #9ca3af;
+  --v2-focus-ring-color: #2563eb;
+  --v2-focus-ring-width: 2px;
+  --v2-focus-ring-offset: 2px;
+  --v2-focus-ring: 0 0 0 2px #2563eb;
+
+  --v2-z-dropdown: 10;
+  --v2-z-sticky: 15;
+  --v2-z-label-panel: 25;
+  --v2-z-drawer: 55;
+  --v2-z-modal-backdrop: 65;
+  --v2-z-modal: 60;
+  --v2-z-command-palette: 70;
+  --v2-z-toast: 80;
+  --v2-z-notification-banner: 90;
+}
+
+html.dark {
+  --v2-l2-bg: #1a1d27;
+  --v2-content-bg: #0f1119;
+  --v2-card-bg: #1e2130;
+  --v2-ink: #e2e4e9;
+  --v2-ink-2: #8b8f9a;
+  --v2-label-muted: #888d99;
+  --v2-divider: rgba(255,255,255,.06);
+  --v2-accent: #4b82ff;
+  --v2-accent-light: #1e2a45;
+  --v2-btn-ghost-hover: #252836;
+
+  --v2-success: #4ade80;
+  --v2-warning: #fbbf24;
+  --v2-error: #f87171;
+  --v2-info: #60a5fa;
+  --v2-success-text: #4ade80;
+  --v2-success-bg: #052e16;
+  --v2-success-border: #166534;
+  --v2-success-surface: #052e16;
+  --v2-warning-text: #fbbf24;
+  --v2-warning-bg: #451a03;
+  --v2-warning-border: #854d0e;
+  --v2-warning-surface: #451a03;
+  --v2-error-text: #f87171;
+  --v2-error-bg: #450a0a;
+  --v2-error-border: #7f1d1d;
+  --v2-error-surface: #450a0a;
+  --v2-info-text: #60a5fa;
+  --v2-info-bg: #172554;
+  --v2-info-border: #1e3a5f;
+  --v2-info-surface: #172554;
+
+  --v2-skeleton-base: #252836;
+  --v2-skeleton-highlight: #2f3342;
+
+  --v2-btn-primary-bg: #4b82ff;
+  --v2-btn-primary-hover: #3b82f6;
+  --v2-btn-primary-active: #2563eb;
+  --v2-btn-secondary-hover: #252836;
+  --v2-btn-secondary-active: #1e2130;
+  --v2-btn-danger-bg: #f87171;
+  --v2-btn-danger-hover: #ef4444;
+  --v2-btn-danger-active: #dc2626;
+  --v2-btn-danger-border: #f87171;
+  --v2-btn-ghost-hover: #252836;
+  --v2-btn-ghost-active: #1e2130;
+  --v2-btn-disabled-bg: #2a2d3a;
+  --v2-btn-disabled-text: #6b7280;
+  --v2-focus-ring-color: #4b82ff;
+  --v2-focus-ring: 0 0 0 2px #4b82ff;
+}
+
+/* ============================================================
+   V2 全局 focus-visible（覆盖 shell 内 & teleport 组件）
+   ============================================================ */
+.v2-shell :focus-visible,
+.v2-search-palette :focus-visible,
+.v2-modal-card :focus-visible,
+.v2-drawer-panel :focus-visible {
+  outline: var(--v2-focus-ring);
+  outline-offset: var(--v2-focus-ring-offset);
+}

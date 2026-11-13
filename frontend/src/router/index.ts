@@ -1,5 +1,6 @@
 import type { RouteRecordRaw, Router } from 'vue-router'
 import AppShell from '../components/AppShell.vue'
+import AppShellV2 from '../components/AppShellV2.vue'
 import DashboardView from '../views/DashboardView.vue'
 import { useAuthStore } from '../stores/auth'
 import { useToolsStore } from '../stores/tools'
@@ -43,7 +44,7 @@ export const routes: RouteRecordRaw[] = [
   },
   {
     path: '/',
-    component: AppShell,
+    component: import.meta.env.VITE_NAV_V2 === '1' ? AppShellV2 : AppShell,
     meta: { requiresAuth: true },
     children: [
       {
