@@ -75,15 +75,21 @@ const categories = computed(() => {
 const counts = ref<Record<string, number>>({ tools: 0, parking: 0, movies: 0, tasks: 0 })
 const countsLoading = ref(true)
 
-async function head(table: string): Promise<number> {
-  const { count } = await supabase.from(table).select('id', { count: 'exact', head: true })
+async function head(table: string, eq?: [string, string]): Promise<number> {
+  let q = supabase.from(table).select('id', { count: 'exact', head: true })
+  if (eq) q = q.eq(eq[0], eq[1])
+  const { count } = await q
   return count ?? 0
 }
 
 async function loadCounts() {
   countsLoading.value = true
   const [parking, movies, tasks] = await Promise.all([
-    head('parking_locations'), head('movies_library'), head('tasks'),
+    // 只数 active：与停车页主列表口径一致（已停用记录不进列表，也不该进 KPI）。
+    // 注意这里数的是 parking_locations 条目，本工程没有「停车记录」表。
+    head('parking_locations', ['status', 'active']),
+    head('movies_library'),
+    head('tasks'),
   ])
   counts.value = {
     tools: toolsStore.allowedTools.length,
@@ -94,7 +100,7 @@ async function loadCounts() {
 
 const kpis = computed(() => [
   { label: '工具总数', value: toolsStore.allowedTools.length, foot: '可用', chip: 'up' },
-  { label: '停车记录', value: counts.value.parking, foot: counts.value.parking ? '条' : '暂无记录', chip: 'up' },
+  { label: '停车场条目', value: counts.value.parking, foot: counts.value.parking ? '在用' : '暂无记录', chip: 'up' },
   { label: '电影条目', value: counts.value.movies, foot: counts.value.movies ? '条' : '暂无记录', chip: 'up' },
   { label: '待办任务', value: counts.value.tasks, foot: counts.value.tasks ? '项' : '暂无任务', chip: 'up' },
 ])
@@ -105,7 +111,7 @@ const donutSegments = computed(() => {
   const t = dataTotal.value
   if (!t) return []
   return [
-    { name: '停车记录', value: counts.value.parking, color: 'var(--violet)' },
+    { name: '停车场', value: counts.value.parking, color: 'var(--violet)' },
     { name: '电影条目', value: counts.value.movies, color: '#8b78ff' },
     { name: '待办任务', value: counts.value.tasks, color: '#d0ccff' },
   ]
@@ -402,7 +408,7 @@ onMounted(() => {
                 <div v-for="s in donutSegments" :key="s.name" class="legend-row">
                   <span class="swatch" :style="{ background: s.color }" />{{ s.name }}<b>{{ s.value }}</b>
                 </div>
-                <div v-if="!donutSegments.length" class="legend-row">录入停车、电影或待办后自动统计<b>—</b></div>
+                <div v-if="!donutSegments.length" class="legend-row">录入停车场、电影或待办后自动统计<b>—</b></div>
               </div>
             </div>
           </div>

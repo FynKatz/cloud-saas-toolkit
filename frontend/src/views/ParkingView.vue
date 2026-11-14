@@ -672,7 +672,9 @@ async function geocodeFormAddress() {
   const result = await geocodeAddress(addr)
   if (result) {
     setFormSelection(result.lng, result.lat)
+    const filled = applyGeocodeRegion(result)
     mapStatus.value = '地址解析成功，坐标已回填'
+    if (filled.length) mapStatus.value = `地址解析成功，坐标已回填，并自动选中${filled.join('/')}`
     if (map) {
       map.setCenter([result.lng, result.lat])
       map.setZoom(15)
@@ -680,6 +682,49 @@ async function geocodeFormAddress() {
   } else {
     mapStatus.value = '地址解析失败，请手动在地图上选点'
   }
+}
+
+/**
+ * 用解析结果反查区划字典，补全表单里还空着的省/市/区。
+ * 只填空白项，绝不覆盖管理员已经手选的值。
+ *
+ * 为什么不直接拿 city 名字对上：直辖市在高德返回「上海市」，而字典里上海唯一的市级行
+ * 叫「上海城区」（重庆还分「重庆城区 / 重庆郊县」），按 city_name 匹配会落空。
+ * 所以优先用 (province_name, district_name) 定位整行 —— 区名能唯一确定它属于哪个市；
+ * 退而求其次才按 city_name，最后才是「该省只有一个市」的兜底。
+ */
+function applyGeocodeRegion(result: { province?: string; city?: string; district?: string }): string[] {
+  const filled: string[] = []
+  if (!result.province) return filled
+  const inProv = regions.regions.value.filter((r) => r.province_name === result.province)
+  if (!inProv.length) return filled
+
+  if (!form.province_code) {
+    form.province_code = inProv[0].province_code
+    filled.push('省')
+  }
+  const code = inProv[0].province_code
+  const scoped = inProv.filter((r) => r.province_code === code)
+
+  if (!form.city_code || !form.district_code) {
+    const byDistrict = result.district
+      ? scoped.find((r) => r.district_name === result.district)
+      : undefined
+    if (byDistrict) {
+      if (!form.city_code) { form.city_code = byDistrict.city_code; filled.push('市') }
+      if (!form.district_code) { form.district_code = byDistrict.district_code; filled.push('区') }
+      return filled
+    }
+    const byCity = result.city ? scoped.find((r) => r.city_name === result.city) : undefined
+    if (byCity && !form.city_code) {
+      form.city_code = byCity.city_code
+      filled.push('市')
+    } else if (!form.city_code) {
+      const cities = [...new Set(scoped.map((r) => r.city_code))]
+      if (cities.length === 1) { form.city_code = cities[0]; filled.push('市') }
+    }
+  }
+  return filled
 }
 
 function resetFilters() {
