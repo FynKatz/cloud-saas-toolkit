@@ -10,38 +10,7 @@ type AMapLike = {
   Pixel: new (x: number, y: number) => unknown
   Marker: new (opts: Record<string, unknown>) => unknown
   InfoWindow: new (opts: Record<string, unknown>) => unknown
-  Geocoder: new (opts: Record<string, unknown>) => GeocoderInstance
-  PlaceSearch: new (opts: Record<string, unknown>) => PlaceSearchInstance
   Geolocation: new (opts: Record<string, unknown>) => GeolocationInstance
-}
-
-interface GeocoderInstance {
-  getLocation(
-    query: string,
-    cb: (
-      status: string,
-      result: { geocodes?: Array<{ location: { lng: number; lat: number } }> },
-    ) => void,
-  ): void
-}
-
-interface PlaceSearchInstance {
-  search(
-    keyword: string,
-    cb: (
-      status: string,
-      result: { poiList?: { pois?: Array<{ name: string; address?: string; location: { lng: number; lat: number } }> } },
-    ) => void,
-  ): void
-  searchNearBy(
-    keyword: string,
-    center: { lng: number; lat: number },
-    radius: number,
-    cb: (
-      status: string,
-      result: { poiList?: { pois?: Array<{ name: string; address?: string; location: { lng: number; lat: number } }> } },
-    ) => void,
-  ): void
 }
 
 interface GeolocationInstance {
@@ -57,15 +26,6 @@ interface GeocodeResult {
   address?: string
 }
 
-/** 插件通过 script.onload 后可能仍异步就绪，轮询等待，避免 AMap.Geocoder 未定义。 */
-async function waitForPlugin(ready: () => boolean, timeoutMs = 8000): Promise<void> {
-  const end = Date.now() + timeoutMs
-  while (!ready()) {
-    if (Date.now() > end) throw new Error('AMAP_PLUGIN_READY_TIMEOUT')
-    await new Promise((resolve) => setTimeout(resolve, 200))
-  }
-}
-
 export function loadAMap(): Promise<AMapLike> {
   if (window.AMap) return Promise.resolve(window.AMap as AMapLike)
   if (loadPromise) return loadPromise
@@ -75,9 +35,18 @@ export function loadAMap(): Promise<AMapLike> {
     return Promise.reject(new Error('AMAP_JS_KEY_MISSING'))
   }
 
+  // 注意：这把 JS Key 在控制台启用了「安全密钥」，但这里**故意不配 jscode / serviceHost**。
+  // 实测底图、marker、缩放、覆盖物、地图选点都不校验 jscode；只有 PlaceSearch / Geocoder
+  // 这类检索服务需要它，而这两种能力本工程的正确做法是走服务端 Web服务 Key：
+  //   地址解析 → Edge Function `amap_geocode`
+  //   POI 搜索 → Edge Function `amap-place`
+  // 于是密钥完全不进前端。serviceHost 代理这条路已实测否决：高德对 platform=JS 的
+  // restapi 请求从 Supabase 出口 IP 一律回 SERVICE_NOT_AVAILABLE(10002)。
   loadPromise = new Promise((resolve, reject) => {
     const script = document.createElement('script')
-    script.src = `https://webapi.amap.com/maps?v=2.0&key=${encodeURIComponent(key)}&plugin=AMap.Geolocation,AMap.PlaceSearch,AMap.Geocoder`
+    // 只加载 Geolocation：PlaceSearch / Geocoder 已改走服务端 Edge Function，
+    // 前端不再需要它们，也就不需要 JS Key 的安全密钥。
+    script.src = `https://webapi.amap.com/maps?v=2.0&key=${encodeURIComponent(key)}&plugin=AMap.Geolocation`
     script.async = true
     script.onload = () => {
       if (window.AMap) resolve(window.AMap as AMapLike)
@@ -146,30 +115,21 @@ export async function geocodeAddress(address: string): Promise<GeocodeResult | n
   }
 }
 
-/** 周边 POI 搜索：供地图搜索框使用。 */
+/**
+ * POI 搜索：供地图搜索框使用。
+ * 走 Edge Function `amap-place`（服务端 Web服务 Key），不再用前端 AMap.PlaceSearch ——
+ * 后者要求 JS Key 的安全密钥，会把密钥暴露到构建产物。签名与返回结构保持原样，
+ * 调用方无需改动。
+ */
 export async function searchPlaces(
   keyword: string,
   center?: { lng: number; lat: number },
 ): Promise<Array<{ name: string; address?: string; location: { lng: number; lat: number } }>> {
-  const AMap = await loadAMap()
-  await waitForPlugin(() => typeof AMap.PlaceSearch === 'function')
-  return new Promise((resolve) => {
-    const place = new AMap.PlaceSearch({
-      pageSize: 10,
-      pageIndex: 1,
-      citylimit: false,
-    })
-    const done = (status: string, result: { poiList?: { pois?: Array<{ name: string; address?: string; location: { lng: number; lat: number } }> } }) => {
-      if (status === 'complete' && result.poiList?.pois?.length) {
-        resolve(result.poiList.pois)
-      } else {
-        resolve([])
-      }
-    }
-    if (center) {
-      place.searchNearBy(keyword, center, 5000, done)
-    } else {
-      place.search(keyword, done)
-    }
-  })
+  const query = keyword.trim()
+  if (!query) return []
+  const { data, error } = await supabase.functions.invoke<{
+    results?: Array<{ name: string; address?: string; location: { lng: number; lat: number } }>
+  }>('amap-place', { body: { keywords: query, center, radius: 5000, limit: 10 } })
+  if (error || !data?.results) return []
+  return data.results
 }

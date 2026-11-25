@@ -494,12 +494,53 @@ frontend/src/
 - [x] `AMAP_WEB_KEY` 不在前端 bundle 中（`rg` 构建产物为空）
 - [x] 旧百度 Key（`parking.html`、`js/parking-mgt.js` 硬编码）不再出现在新代码提交中
 - [x] `frontend/.env` 不提交 Git；`.env.secrets` 留痕
-- [ ] 高德 JS Key 域名白名单生效
+- [x] 高德 JS Key 域名白名单生效
+
+> 白名单生效的判据是**反向**的：只有未授权域名才报错，授权域名干净。
+> 实测（2026-11-25，ego 真实浏览器）：
+> `cloud-saas-toolkit.netlify.app` 无任何鉴权错误；`example.com` 与 `127.0.0.1:4173`
+> 均报 `FlyDataAuthTask error: INVALID_USER_DOMAIN`。
+> 注意第一次采样曾误判为「没生效」—— 该错误是异步后到的，等待窗口必须 ≥10s。
 
 > 去重说明：10.2 的「普通用户只能经 RPC 新增，直接 INSERT 被 RLS 拒绝」与本节第一条同义，
 > 实测证据统一记在这里，10.2 只保留功能视角。
 
 安全实测证据（2026-11-13，真实 Supabase 会话，非 DEV 离线种子）：
+
+**2026-11-25 补：检索能力全部迁到服务端，前端不再持有任何高德机密。**
+
+排查域名白名单时顺带发现一个长期缺陷：`PlaceSearch` / `Geocoder` 在**任意域名**下都返回
+`INVALID_USER_SCODE` —— 这把 JS Key 在控制台已启用安全密钥，而 `lib/amap.ts` 只传了 `key`。
+后果是底图、marker、缩放、选点全部正常（这部分不校验 scode），但「地图搜索」和前端地理编码
+**从来没通过**。当初「`AMap.Geocoder` 回调不触发」被记成阻塞项并改用 Edge Function
+（Web 服务 Key）绕开，根因其实是这个鉴权缺失，不是回调时序。
+
+处置过程中先试了两种「密钥不进前端」的做法，只有第二种成立：
+
+1. `serviceHost` 代理（Edge Function 追加 jscode 后转发）—— **实测否决**。
+   高德发的不是 XHR 而是 **JSONP**（`callback=jsonp_...`），且带
+   `platform=JS&s=rsv3&sdkversion&appname&csid&antiCrab` 整套参数；这些参数从代理透传后，
+   从 Supabase 出口 IP 仍一律 `SERVICE_NOT_AVAILABLE(10002)`，带合法 jscode 也一样。
+   同一出口用 Web服务 Key 的普通参数搜 POI 却是 `info:OK`（探针实测 68 条）——
+   说明高德对 JS 平台的 restapi 请求做了来源校验，这条路走不通。
+   失败的 `amap-service` 与临时探针 `amap-probe` 均已删除，不留公开中转面。
+2. **检索能力改用 Web服务 Key 直接做服务端接口** —— 采用。
+   `地址解析 → amap_geocode`（已有）、`POI 搜索 → amap-place`（本轮新增）。
+   `lib/amap.ts` 的 `searchPlaces()` 签名与返回结构不变，调用方零改动；
+   传 `center` 时函数内部自动改走高德 `place/around` 周边搜索，保留原
+   `searchNearBy(keyword, center, 5000)` 语义。
+   同时把 `maps.js` 的插件列表收敛为仅 `AMap.Geolocation`，并删掉
+   `_AMapSecurityConfig` / `VITE_AMAP_SECURITY_CODE` / `VITE_AMAP_SERVICE_HOST`。
+
+验证（生产站点，真实登录态）：底图与 marker 正常且 `typeof _AMapSecurityConfig === 'undefined'`；
+「地图搜索」输入 `虹桥天地` 回车 → `找到 2 个地点` 且视野移动；
+`grep -rl <密钥> frontend/dist/` 0 命中。
+
+顺带修掉一处状态竞态：`runAddressSearch` 在写结果数之前没等 `watch(filtered)` 那轮 flush，
+提示会被 `renderMarkers` 的「暂无坐标，点击添加或使用地图搜索」覆盖，已补 `await nextTick()`。
+
+> 说明：不限城市的全国关键字搜索可能命中跨省同名地点（实测 `虹桥天地` 返回湘西同名 POI），
+> 属高德关键字搜索的既有行为；需要更准可给 `amap-place` 传 `city`，本轮未启用。
 
 - 访客直连 INSERT `parking_locations` / `parking_malls` → 403 `42501`（RLS 拒绝）。
 - 家庭成员（已恢复 parking/edit 授权）直连 UPDATE / DELETE → 生效 **0 行**，数据未被改动；

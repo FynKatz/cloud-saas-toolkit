@@ -46,8 +46,33 @@ const { readFile } = await import('node:fs/promises')
 const cred = pickAdmin(await readFile(ACCOUNTS_CSV, 'utf8'))
 
 const task = await taskSpace(TASK_SPACE)
-const page = task.page(PAGE_LABEL)
-console.log({ spaceId: task.spaceId, page: PAGE_LABEL })
+// PAGE_LABEL 只是「上一次 session 留下的标签」，不保证存在（换 session、
+// 或别的 session 关页都会让它消失）。按 ego-workbench 的生命周期契约：
+// 自己建的页必须在同一次 eval 内用 try/finally 关掉。
+let page = null
+let createdHere = false
+try {
+  const known = (await task.pages()).find((x) => x.label === PAGE_LABEL)
+  if (known) page = task.page(PAGE_LABEL)
+} catch { /* 标签失效，下面新建 */ }
+if (!page) {
+  page = await task.newPage()
+  createdHere = true
+}
+const releasePage = async () => {
+  if (!createdHere) return
+  try { await page.close() } catch { /* 已关闭 */ }
+}
+// 顶层 await 抛错在 ESM 里走 unhandledRejection，同步异常走 uncaughtException，
+// 两个都要挂，否则中途失败就会把自建页面留成孤儿 renderer。
+for (const ev of ['uncaughtException', 'unhandledRejection']) {
+  process.on(ev, async (e) => {
+    console.error(e instanceof Error ? e.message : String(e))
+    await releasePage()
+    process.exit(1)
+  })
+}
+console.log({ spaceId: task.spaceId, page: createdHere ? '<newPage 用完即关>' : PAGE_LABEL })
 
 await page.goto(`${BASE}/`, { timeout: 30000 })
 await page.waitForTimeout(1200)
@@ -189,6 +214,8 @@ near(m.l2Scroll?.clientW, 268, 'L2 滚动视口宽')
 // 不得多出第二条页面级滚动条（.v2-row 缺 min-height:0 的典型症状）
 if (m.docScrollH > m.vh + 1) fails.push(`文档出现第二条滚动条: scrollHeight ${m.docScrollH} > viewport ${m.vh}`)
 // L2 沟槽必须是滚动条轨，不是 padding
+// 注：沟槽实际由 padding 提供 + 隐藏滚动条（见 nav-clickup-spec §1.1 的实施期修正），
+// 这里只断言 overflow-y 仍为 scroll —— 它是那个 padding 方案成立的前提。
 if (m.l2Scroll && m.l2Scroll.overflowY !== 'scroll') fails.push(`L2 overflow-y 应为 scroll，实为 ${m.l2Scroll.overflowY}`)
 if (m.l1PanelBg !== 'rgb(0, 0, 0)') fails.push(`L1 黑面板应恒暗纯黑，实为 ${m.l1PanelBg}`)
 
@@ -200,3 +227,4 @@ if (fails.length) { console.log('FAIL\n' + fails.join('\n')) } else { console.lo
 const shot = '/tmp/nav-check-desktop.png'
 await page.screenshot({ path: shot })
 console.log('screenshot:', shot)
+await releasePage()

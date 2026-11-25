@@ -614,12 +614,15 @@ async function runAddressSearch() {
   if (!keyword || !map) return
   mapStatus.value = '正在搜索...'
   const results = await searchPlaces(keyword)
-  mapStatus.value = results.length ? `找到 ${results.length} 个地点` : '未找到匹配地点'
   if (results[0]) {
     searchQuery.value = keyword
     map.setCenter([results[0].location.lng, results[0].location.lat])
     map.setZoom(14)
   }
+  // 与 applyMapSearch 过滤分支同一个坑：searchQuery 变更会触发 watch → renderMarkers
+  // → fitMarkers 覆写 mapStatus，必须等这一轮 flush 完再写，否则用户看不到搜索结果数。
+  await nextTick()
+  mapStatus.value = results.length ? `找到 ${results.length} 个地点` : '未找到匹配地点'
 }
 
 async function applyMapSearch() {

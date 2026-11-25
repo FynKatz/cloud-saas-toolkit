@@ -110,5 +110,37 @@ QA 数据统一 `QA_` 前缀，验证后已按 `AGENTS §7` 全删；
 
 ## 下一步
 
-1. 高德 JS Key 域名白名单需用户在 console 配置后才能真正闭环（无开放 API，不能脚本化）。
-2. 真正的「停车记录」功能（新表 + 页面）仍是空白，按工单另起。
+1. 真正的「停车记录」功能（新表 + 页面）仍是空白，按工单另起。
+
+## 高德 Key 鉴权闭环（2026-11-25，最终形态）
+
+两把 Key 分工先记清楚，避免下次改错：
+
+| 环境变量 | 前缀 | 类型 | 鉴权方式 | 现状 |
+|---|---|---|---|---|
+| `VITE_AMAP_JS_KEY` | `645b` | Web端(JS API) | 域名白名单 | 只负责**地图显示**，前端公开可见，可接受 |
+| `AMAP_WEB_KEY` | `34e4` | Web服务 | 不设 IP 白名单 | 负责**所有检索能力**，只存在于服务端 |
+
+**结论：前端不含任何高德机密。** `securityJsCode` / `serviceHost` / `VITE_AMAP_SECURITY_CODE`
+全部已从代码与环境变量中移除，`grep -rl <密钥> frontend/dist/` 为 0 命中。
+
+分工与实测依据：
+
+- **地图显示不需要安全密钥。** 底图、marker、缩放、覆盖物、地图选点、定位都不校验 jscode，
+  所以 JS Key 保持「只有域名白名单」这一种最简单的用法。
+- **检索能力全部走服务端 Web服务 Key**，与 JS Key 的安全密钥彻底解绑：
+  `地址解析 → Edge Function amap_geocode`（已有）、
+  `POI 搜索 → Edge Function amap-place`（本轮新增，签名与原前端 `searchPlaces()` 一致，
+  调用方零改动；传 `center` 时自动改走高德 `place/around` 周边搜索）。
+- **`serviceHost` 代理这条路实测否决**，别再尝试：高德对 `platform=JS` 的 restapi 请求
+  校验来源，从 Supabase 出口 IP 一律 `SERVICE_NOT_AVAILABLE(10002)`，带合法 jscode 也一样；
+  而同一出口用 Web服务 Key 的普通参数搜 POI 是 `info:OK`（探针实测 68 条）。
+  探针函数 `amap-probe` 与失败的 `amap-service` 均已删除，不留公开中转面。
+- 高德 JS Key 的**域名白名单已生效**（判据是反向的：`example.com` 与 `127.0.0.1:4173`
+  报 `INVALID_USER_DOMAIN`，生产域名干净）。本地按决定不加入白名单，
+  因此本地只剩「地图显示可用、检索由服务端兜」，行为与生产一致。
+- 顺带修掉一个从未被定位的长期缺陷：`PlaceSearch` / `Geocoder` 此前一律
+  `INVALID_USER_SCODE`，即「地图搜索」从来没工作过。生产实测现在返回
+  `找到 2 个地点` 并移动视野。
+- 另修一处状态竞态：`runAddressSearch` 写结果数之前没有等 `watch(filtered)` 那轮 flush，
+  提示会被 `renderMarkers` 的「暂无坐标…」盖掉，已补 `await nextTick()`。
