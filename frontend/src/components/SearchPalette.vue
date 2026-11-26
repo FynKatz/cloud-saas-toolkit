@@ -121,7 +121,7 @@ function handleInputKeydown(e: KeyboardEvent) {
 
 <style scoped>
 .v2-search-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: var(--v2-z-command-palette); display: flex; justify-content: center; padding-top: 15vh; }
-.v2-search-palette { width: 480px; max-height: 60vh; background: var(--v2-card-bg); border-radius: var(--v2-radius); box-shadow: 0 16px 60px rgba(0,0,0,.2); overflow: hidden; display: flex; flex-direction: column; }
+.v2-search-palette { width: 480px; max-width: calc(100vw - 32px); max-height: 60vh; background: var(--v2-card-bg); border-radius: var(--v2-radius); box-shadow: 0 16px 60px rgba(0,0,0,.2); overflow: hidden; display: flex; flex-direction: column; }
 .v2-search-input-wrap { display: flex; align-items: center; padding: 12px 14px; gap: 10px; border-bottom: 1px solid var(--v2-border); }
 .v2-search-input-icon { color: var(--v2-ink-2); flex-shrink: 0; }
 .v2-search-input-main { flex: 1; border: none; background: transparent; font-size: 15px; color: var(--v2-ink); outline: none; }

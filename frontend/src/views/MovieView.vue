@@ -236,25 +236,25 @@ onMounted(loadMovies)
             {{ editingId ? '编辑电影' : '添加电影' }}
           </h3>
           <div class="space-y-3">
-            <input v-model="form.title" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="标题 *" />
-            <input v-model="form.original_title" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="原名" />
-            <input v-model="form.poster_path" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="海报 URL" />
-            <textarea v-model="form.overview" rows="2" class="w-full resize-none rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="简介" />
+            <input v-model="form.title" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="标题 *" />
+            <input v-model="form.original_title" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="原名" />
+            <input v-model="form.poster_path" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="海报 URL" />
+            <textarea v-model="form.overview" rows="2" class="w-full resize-none rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-base text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="简介" />
             <div class="grid grid-cols-2 gap-3">
-              <input v-model="form.release_date" type="date" class="h-9 rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" />
-              <input v-model.number="form.rating" type="number" min="0" max="10" step="0.1" class="h-9 rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="评分" />
+              <input v-model="form.release_date" type="date" class="h-9 rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base text-[var(--text)] outline-none focus:border-[var(--accent)]" />
+              <input v-model.number="form.rating" type="number" min="0" max="10" step="0.1" class="h-9 rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="评分" />
             </div>
-            <input v-model="form.genres" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="类型（逗号分隔）" />
-            <select v-model="form.watch_status" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]">
+            <input v-model="form.genres" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="类型（逗号分隔）" />
+            <select v-model="form.watch_status" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base text-[var(--text)] outline-none focus:border-[var(--accent)]">
               <option value="未看">未看</option>
               <option value="已看">已看</option>
               <option value="想看">想看</option>
             </select>
-            <textarea v-model="form.notes" rows="2" class="w-full resize-none rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="备注" />
+            <textarea v-model="form.notes" rows="2" class="w-full resize-none rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-base text-[var(--text)] outline-none focus:border-[var(--accent)]" placeholder="备注" />
           </div>
           <div class="mt-4 flex justify-end gap-2">
-            <button class="rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-4 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text)]" @click="showForm = false">取消</button>
-            <button class="rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-85" @click="saveMovie">保存</button>
+            <button class="rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-4 py-2 text-base text-[var(--text-secondary)] hover:text-[var(--text)]" @click="showForm = false">取消</button>
+            <button class="rounded-md bg-[var(--accent)] px-4 py-2 text-base font-medium text-white hover:opacity-85" @click="saveMovie">保存</button>
           </div>
         </div>
       </div>

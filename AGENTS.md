@@ -100,7 +100,7 @@ SUPA_PROXY=http://127.0.0.1:18899 node scripts/netlify-deploy.mjs --publish
 - 凭据来源：`.env.secrets` 中的 `NETLIFY_AUTH_TOKEN`。
 - 传输层：curl 走 ego relay（`127.0.0.1:18899`），`SUPA_PROXY` 注入代理地址。
 - 脚本位置：`scripts/netlify-deploy.mjs`。
-- 线上主域：`https://cloud-saas-toolkit.netlify.app`。
+- 线上主域：`https://taulko-hub.netlify.app`。
 - 查询部署记录：`GET /api/v1/sites/{site_id}/deploys`（同一个 token）。
 
 **上线判据（不要凭脚本退出码下结论）**：直传 deploy 会落到 site 的 `prod` 分支，

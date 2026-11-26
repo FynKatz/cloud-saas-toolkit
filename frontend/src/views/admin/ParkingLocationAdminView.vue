@@ -452,11 +452,11 @@ onMounted(load)
           <div class="grid gap-3 sm:grid-cols-2">
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">停车场名称 *</span>
-              <input v-model="form.name" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" />
+              <input v-model="form.name" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" />
             </label>
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">商场</span>
-              <select v-model="form.mall_id" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-sm outline-none focus:border-[var(--accent)]">
+              <select v-model="form.mall_id" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-base outline-none focus:border-[var(--accent)]">
                 <option value="">无</option>
                 <option v-for="m in mallOptions" :key="m.id" :value="m.id">{{ m.name }}</option>
               </select>
@@ -465,21 +465,21 @@ onMounted(load)
           <div class="grid gap-3 sm:grid-cols-3">
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">省</span>
-              <select v-model="form.province_code" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-sm outline-none focus:border-[var(--accent)]">
+              <select v-model="form.province_code" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-base outline-none focus:border-[var(--accent)]">
                 <option value="">请选择</option>
                 <option v-for="p in provinceOptions" :key="p.province_code" :value="p.province_code">{{ p.province_name }}</option>
               </select>
             </label>
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">市</span>
-              <select v-model="form.city_code" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-sm outline-none focus:border-[var(--accent)]" :disabled="!form.province_code">
+              <select v-model="form.city_code" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-base outline-none focus:border-[var(--accent)]" :disabled="!form.province_code">
                 <option value="">请选择</option>
                 <option v-for="c in cityOptions" :key="c.city_code" :value="c.city_code">{{ c.city_name }}</option>
               </select>
             </label>
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">区县</span>
-              <select v-model="form.district_code" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-sm outline-none focus:border-[var(--accent)]" :disabled="!form.city_code">
+              <select v-model="form.district_code" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-base outline-none focus:border-[var(--accent)]" :disabled="!form.city_code">
                 <option value="">请选择</option>
                 <option v-for="d in districtOptions" :key="d.district_code" :value="d.district_code">{{ d.district_name }}</option>
               </select>
@@ -487,30 +487,30 @@ onMounted(load)
           </div>
           <label class="block">
             <span class="mb-1 block text-xs text-[var(--text-secondary)]">地址</span>
-            <input v-model="form.address" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" />
+            <input v-model="form.address" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" />
           </label>
           <div class="grid gap-3 sm:grid-cols-4">
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">免费时长</span>
-              <input v-model="form.free_duration" type="number" min="0" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" placeholder="分钟" />
+              <input v-model="form.free_duration" type="number" min="0" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" placeholder="分钟" />
             </label>
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">计费周期</span>
-              <input v-model="form.charge_interval" type="number" min="0" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" placeholder="分钟" />
+              <input v-model="form.charge_interval" type="number" min="0" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" placeholder="分钟" />
             </label>
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">日间价格</span>
-              <input v-model="form.day_price" type="number" min="0" step="0.01" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" placeholder="0.00" />
+              <input v-model="form.day_price" type="number" min="0" step="0.01" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" placeholder="0.00" />
             </label>
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">夜间价格</span>
-              <input v-model="form.night_price" type="number" min="0" step="0.01" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" placeholder="0.00" />
+              <input v-model="form.night_price" type="number" min="0" step="0.01" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" placeholder="0.00" />
             </label>
           </div>
           <div class="grid gap-3 sm:grid-cols-3">
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">日间单位</span>
-              <select v-model="form.day_unit" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-sm outline-none focus:border-[var(--accent)]">
+              <select v-model="form.day_unit" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-base outline-none focus:border-[var(--accent)]">
                 <option value="">无</option>
                 <option value="元/小时">元/小时</option>
                 <option value="元/分钟">元/分钟</option>
@@ -520,7 +520,7 @@ onMounted(load)
             </label>
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">夜间单位</span>
-              <select v-model="form.night_unit" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-sm outline-none focus:border-[var(--accent)]">
+              <select v-model="form.night_unit" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-base outline-none focus:border-[var(--accent)]">
                 <option value="">无</option>
                 <option value="元/小时">元/小时</option>
                 <option value="元/分钟">元/分钟</option>
@@ -530,7 +530,7 @@ onMounted(load)
             </label>
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">状态</span>
-              <select v-model="form.status" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-sm outline-none focus:border-[var(--accent)]">
+              <select v-model="form.status" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-base outline-none focus:border-[var(--accent)]">
                 <option value="active">启用</option>
                 <option value="inactive">停用</option>
               </select>
@@ -538,13 +538,13 @@ onMounted(load)
           </div>
           <label class="block">
             <span class="mb-1 block text-xs text-[var(--text-secondary)]">备注</span>
-            <textarea v-model="form.notes" rows="2" class="w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]" />
+            <textarea v-model="form.notes" rows="2" class="w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]" />
           </label>
         </div>
 
         <div class="mt-5 flex justify-end gap-2">
-          <button class="h-9 rounded-md border border-[var(--surface-border)] px-4 text-sm text-[var(--text-secondary)] hover:bg-[var(--nav-hover)]" @click="closeModal">取消</button>
-          <button :disabled="!!saving" class="h-9 rounded-md bg-[var(--accent)] px-4 text-sm font-medium text-white disabled:opacity-60" @click="save">
+          <button class="h-9 rounded-md border border-[var(--surface-border)] px-4 text-base text-[var(--text-secondary)] hover:bg-[var(--nav-hover)]" @click="closeModal">取消</button>
+          <button :disabled="!!saving" class="h-9 rounded-md bg-[var(--accent)] px-4 text-base font-medium text-white disabled:opacity-60" @click="save">
             {{ saving === '__form' ? '保存中…' : '保存' }}
           </button>
         </div>

@@ -15,7 +15,6 @@ import {
   Heart,
   Image,
   LayoutList,
-  LocateFixed,
   MapPin,
   Minus,
   Navigation,
@@ -32,7 +31,7 @@ import {
 import { useParking } from '../composables/useParking'
 import { useRegions } from '../composables/useRegions'
 import { useMalls } from '../composables/useMalls'
-import { loadAMap, amapStatus, geocodeAddress, searchPlaces } from '../lib/amap'
+import { loadAMap, amapStatus, searchPlaces } from '../lib/amap'
 import type { ParkingLocation } from '../types/parking'
 
 type DrawerKind = 'detail' | 'form'
@@ -62,6 +61,9 @@ const locating = ref(false)
 const mapLoading = ref(false)
 const showCreateMall = ref(false)
 const newMallName = ref('')
+const formPlaceQuery = ref('')
+const formPlaceResults = ref<Array<{ name: string; address?: string; location: { lng: number; lat: number } }>>([])
+const formPlaceSearching = ref(false)
 
 let map: any = null
 let formMap: any = null
@@ -447,6 +449,8 @@ function resetForm() {
   newMallName.value = ''
   saveError.value = ''
   clearFormSelection()
+  formPlaceQuery.value = ''
+  formPlaceResults.value = []
   formMapReady.value = false
   if (formMap) {
     try {
@@ -665,69 +669,36 @@ async function locateMe() {
   }
 }
 
-async function geocodeFormAddress() {
-  const addr = form.address.trim()
-  if (!addr) {
-    saveError.value = '请先填写地址'
+let formPlaceTimer: ReturnType<typeof setTimeout> | null = null
+function searchFormPlaces() {
+  const q = formPlaceQuery.value.trim()
+  if (!q) {
+    formPlaceResults.value = []
+    if (formPlaceTimer) { clearTimeout(formPlaceTimer); formPlaceTimer = null }
     return
   }
-  mapStatus.value = '正在解析地址...'
-  const result = await geocodeAddress(addr)
-  if (result) {
-    setFormSelection(result.lng, result.lat)
-    const filled = applyGeocodeRegion(result)
-    mapStatus.value = '地址解析成功，坐标已回填'
-    if (filled.length) mapStatus.value = `地址解析成功，坐标已回填，并自动选中${filled.join('/')}`
-    if (map) {
-      map.setCenter([result.lng, result.lat])
-      map.setZoom(15)
+  if (formPlaceTimer) clearTimeout(formPlaceTimer)
+  formPlaceTimer = setTimeout(async () => {
+    formPlaceTimer = null
+    formPlaceSearching.value = true
+    try {
+      const results = await searchPlaces(q)
+      formPlaceResults.value = results.slice(0, 6)
+    } finally {
+      formPlaceSearching.value = false
     }
-  } else {
-    mapStatus.value = '地址解析失败，请手动在地图上选点'
-  }
+  }, 300)
 }
 
-/**
- * 用解析结果反查区划字典，补全表单里还空着的省/市/区。
- * 只填空白项，绝不覆盖管理员已经手选的值。
- *
- * 为什么不直接拿 city 名字对上：直辖市在高德返回「上海市」，而字典里上海唯一的市级行
- * 叫「上海城区」（重庆还分「重庆城区 / 重庆郊县」），按 city_name 匹配会落空。
- * 所以优先用 (province_name, district_name) 定位整行 —— 区名能唯一确定它属于哪个市；
- * 退而求其次才按 city_name，最后才是「该省只有一个市」的兜底。
- */
-function applyGeocodeRegion(result: { province?: string; city?: string; district?: string }): string[] {
-  const filled: string[] = []
-  if (!result.province) return filled
-  const inProv = regions.regions.value.filter((r) => r.province_name === result.province)
-  if (!inProv.length) return filled
-
-  if (!form.province_code) {
-    form.province_code = inProv[0].province_code
-    filled.push('省')
+function selectFormPlace(place: { name: string; address?: string; location: { lng: number; lat: number } }) {
+  setFormSelection(place.location.lng, place.location.lat, place.address || place.name)
+  form.address = place.address || place.name
+  formPlaceQuery.value = place.name
+  formPlaceResults.value = []
+  if (map) {
+    map.setCenter([place.location.lng, place.location.lat])
+    map.setZoom(15)
   }
-  const code = inProv[0].province_code
-  const scoped = inProv.filter((r) => r.province_code === code)
-
-  if (!form.city_code || !form.district_code) {
-    const byDistrict = result.district
-      ? scoped.find((r) => r.district_name === result.district)
-      : undefined
-    if (byDistrict) {
-      if (!form.city_code) { form.city_code = byDistrict.city_code; filled.push('市') }
-      if (!form.district_code) { form.district_code = byDistrict.district_code; filled.push('区') }
-      return filled
-    }
-    const byCity = result.city ? scoped.find((r) => r.city_name === result.city) : undefined
-    if (byCity && !form.city_code) {
-      form.city_code = byCity.city_code
-      filled.push('市')
-    } else if (!form.city_code) {
-      const cities = [...new Set(scoped.map((r) => r.city_code))]
-      if (cities.length === 1) { form.city_code = cities[0]; filled.push('市') }
-    }
-  }
-  return filled
 }
 
 function resetFilters() {
@@ -1146,10 +1117,33 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <textarea v-model="form.address" class="textarea" rows="2" placeholder="详细地址（可地址解析）"></textarea>
-              <button class="btn address-parse" :disabled="!form.address.trim()" @click="geocodeFormAddress">
-                <LocateFixed :size="14" />解析地址到地图
-              </button>
+              <div class="place-search-wrap">
+                <div class="place-search-input">
+                  <Search :size="14" class="place-search-icon" />
+                  <input
+                    v-model="formPlaceQuery"
+                    class="input"
+                    placeholder="搜索地点（输入名称，如「望京SOHO」）"
+                    @input="searchFormPlaces"
+                    @focus="formPlaceQuery && formPlaceResults.length === 0 && searchFormPlaces()"
+                  />
+                  <span v-if="formPlaceSearching" class="place-spinner" />
+                </div>
+                <div v-if="formPlaceResults.length" class="place-results">
+                  <button
+                    v-for="(place, i) in formPlaceResults"
+                    :key="i"
+                    class="place-result"
+                    @click="selectFormPlace(place)"
+                  >
+                    <MapPin :size="13" />
+                    <span class="place-name">{{ place.name }}</span>
+                    <span v-if="place.address" class="place-addr">{{ place.address }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <textarea v-model="form.address" class="textarea" rows="2" placeholder="详细地址（自动回填或手动修改）"></textarea>
               <div class="map-pick">
                 <div ref="formMapEl" class="form-map" />
                 <div class="map-pick-tip">
@@ -1379,7 +1373,17 @@ onBeforeUnmount(() => {
 .new-mall-row { display: flex; gap: 8px; align-items: center; }
 .new-mall-row .input { margin: 0; flex: 1; }
 .confirm-mall { margin-top: 8px; background: var(--violet-soft, var(--accent-soft)); border-color: var(--violet-line); color: var(--violet, var(--accent)); }
-.address-parse { margin-bottom: 10px; background: var(--violet-soft, var(--accent-soft)); border-color: var(--violet-line, var(--accent-soft)); color: var(--violet, var(--accent)); }
+.place-search-wrap { position: relative; margin-bottom: 10px; }
+.place-search-input { position: relative; display: flex; align-items: center; }
+.place-search-icon { position: absolute; left: 10px; color: var(--ink-3, var(--text-secondary)); pointer-events: none; z-index: 1; }
+.place-search-input .input { padding-left: 32px; width: 100%; }
+.place-spinner { position: absolute; right: 10px; width: 14px; height: 14px; border: 2px solid var(--line, var(--surface-border)); border-top-color: var(--accent, #2563eb); border-radius: 50%; animation: place-spin 0.6s linear infinite; }
+@keyframes place-spin { to { transform: rotate(360deg); } }
+.place-results { position: absolute; top: 100%; left: 0; right: 0; background: var(--card, var(--surface)); border: 1px solid var(--line, var(--surface-border)); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.12); z-index: 20; max-height: 220px; overflow-y: auto; margin-top: 4px; }
+.place-result { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; border: none; background: none; color: var(--ink, var(--text)); font-size: 13px; cursor: pointer; text-align: left; transition: background .1s; }
+.place-result:hover { background: var(--hover, var(--nav-hover)); }
+.place-result .place-name { font-weight: 500; white-space: nowrap; color: var(--ink, var(--text)); }
+.place-result .place-addr { color: var(--ink-3, var(--text-secondary)); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .map-pick { position: relative; }
 .map-pick-tip { display: flex; align-items: center; gap: 7px; margin-top: 8px; font-size: 12px; color: var(--ink-2, var(--text-secondary)); flex-wrap: wrap; }
 .region-tag { margin-left: auto; padding: 3px 8px; border-radius: 99px; background: var(--chip-neutral, var(--nav-hover)); color: var(--ink-2, var(--text-secondary)); }
@@ -1400,6 +1404,9 @@ onBeforeUnmount(() => {
   .map-layout { grid-template-columns: 1fr; }
   .map-wrap, .map-canvas { min-height: 520px; }
   .list-panel { height: 520px; }
+}
+@media (max-width: 480px) {
+  .metrics { grid-template-columns: 1fr; }
 }
 @media (max-width: 720px) {
   .metrics { grid-template-columns: repeat(2, 1fr); gap: 9px; }

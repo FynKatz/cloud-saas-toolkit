@@ -57,6 +57,16 @@ export function loadAMap(): Promise<AMapLike> {
       reject(new Error('AMAP_LOAD_FAILED'))
     }
     document.head.appendChild(script)
+    // 15s 超时：网络挂起时 script.onload/onerror 均不触发，保证调用方不永久卡死。
+    // 超时后置空 loadPromise 允许重试（用户手动刷新地图或切换页面后再进入）。
+    const timeout = setTimeout(() => {
+      loadPromise = null
+      reject(new Error('AMAP_LOAD_TIMEOUT'))
+    }, 15_000)
+    const origResolve = resolve
+    const origReject = reject
+    resolve = ((v: AMapLike) => { clearTimeout(timeout); origResolve(v) }) as typeof resolve
+    reject = ((err: unknown) => { clearTimeout(timeout); origReject(err) }) as typeof reject
   })
   return loadPromise
 }

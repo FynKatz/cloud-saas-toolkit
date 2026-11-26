@@ -87,5 +87,5 @@ npm run dev             # 默认 http://localhost:5173
 
 | 分支 | 环境 | URL |
 |------|------|-----|
-| `prod` | 生产 | https://cloud-saas-toolkit.netlify.app |
+| `prod` | 生产 | https://taulko-hub.netlify.app |
 | 其他 | Netlify 分支部署按需 |

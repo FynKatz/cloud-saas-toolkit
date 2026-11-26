@@ -362,26 +362,26 @@ onMounted(load)
         <div class="space-y-3">
           <label class="block">
             <span class="mb-1 block text-xs text-[var(--text-secondary)]">商场名称 *</span>
-            <input v-model="form.name" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" placeholder="例如：陆家嘴中心 L+Mall" />
+            <input v-model="form.name" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" placeholder="例如：陆家嘴中心 L+Mall" />
           </label>
           <div class="grid gap-3 sm:grid-cols-3">
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">省</span>
-              <select v-model="form.province_code" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-sm outline-none focus:border-[var(--accent)]">
+              <select v-model="form.province_code" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-base outline-none focus:border-[var(--accent)]">
                 <option value="">请选择</option>
                 <option v-for="p in provinceOptions" :key="p.province_code" :value="p.province_code">{{ p.province_name }}</option>
               </select>
             </label>
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">市</span>
-              <select v-model="form.city_code" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-sm outline-none focus:border-[var(--accent)]" :disabled="!form.province_code">
+              <select v-model="form.city_code" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-base outline-none focus:border-[var(--accent)]" :disabled="!form.province_code">
                 <option value="">请选择</option>
                 <option v-for="c in cityOptions" :key="c.city_code" :value="c.city_code">{{ c.city_name }}</option>
               </select>
             </label>
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">区县</span>
-              <select v-model="form.district_code" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-sm outline-none focus:border-[var(--accent)]" :disabled="!form.city_code">
+              <select v-model="form.district_code" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-base outline-none focus:border-[var(--accent)]" :disabled="!form.city_code">
                 <option value="">请选择</option>
                 <option v-for="d in districtOptions" :key="d.district_code" :value="d.district_code">{{ d.district_name }}</option>
               </select>
@@ -389,13 +389,13 @@ onMounted(load)
           </div>
           <label class="block">
             <span class="mb-1 block text-xs text-[var(--text-secondary)]">地址</span>
-            <input v-model="form.address" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" placeholder="详细地址（可选）" />
+            <input v-model="form.address" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" placeholder="详细地址（可选）" />
           </label>
         </div>
 
         <div class="mt-5 flex justify-end gap-2">
-          <button class="h-9 rounded-md border border-[var(--surface-border)] px-4 text-sm text-[var(--text-secondary)] hover:bg-[var(--nav-hover)]" @click="closeModal">取消</button>
-          <button :disabled="!!saving" class="h-9 rounded-md bg-[var(--accent)] px-4 text-sm font-medium text-white disabled:opacity-60" @click="save">
+          <button class="h-9 rounded-md border border-[var(--surface-border)] px-4 text-base text-[var(--text-secondary)] hover:bg-[var(--nav-hover)]" @click="closeModal">取消</button>
+          <button :disabled="!!saving" class="h-9 rounded-md bg-[var(--accent)] px-4 text-base font-medium text-white disabled:opacity-60" @click="save">
             {{ saving === '__form' ? '保存中…' : '保存' }}
           </button>
         </div>

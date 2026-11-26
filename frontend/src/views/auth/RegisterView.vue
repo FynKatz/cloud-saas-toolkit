@@ -75,7 +75,7 @@ async function handleRegister() {
           v-model="form.username"
           type="text"
           autocomplete="username"
-          class="h-10 w-full rounded-md border px-3 text-sm outline-none transition"
+          class="h-10 w-full rounded-md border px-3 text-base outline-none transition"
           :style="{
             background: 'var(--bg)',
             borderColor: 'var(--surface-border)',
@@ -96,7 +96,7 @@ async function handleRegister() {
           v-model="form.password"
           type="password"
           autocomplete="new-password"
-          class="h-10 w-full rounded-md border px-3 text-sm outline-none transition"
+          class="h-10 w-full rounded-md border px-3 text-base outline-none transition"
           :style="{
             background: 'var(--bg)',
             borderColor: 'var(--surface-border)',
@@ -117,7 +117,7 @@ async function handleRegister() {
           v-model="form.confirm"
           type="password"
           autocomplete="new-password"
-          class="h-10 w-full rounded-md border px-3 text-sm outline-none transition"
+          class="h-10 w-full rounded-md border px-3 text-base outline-none transition"
           :style="{
             background: 'var(--bg)',
             borderColor: 'var(--surface-border)',
@@ -130,7 +130,7 @@ async function handleRegister() {
       <button
         type="submit"
         :disabled="submitting"
-        class="h-10 w-full rounded-md text-sm font-medium text-white transition disabled:opacity-60"
+        class="h-10 w-full rounded-md text-base font-medium text-white transition disabled:opacity-60"
         style="background: var(--accent)"
       >
         {{ submitting ? '注册中…' : '注册' }}

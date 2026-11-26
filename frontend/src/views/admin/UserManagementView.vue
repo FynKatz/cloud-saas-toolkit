@@ -215,7 +215,7 @@ onMounted(async () => {
       {{ error }}
     </div>
 
-    <div class="rounded-lg border border-[var(--surface-border)] bg-[var(--surface)]">
+    <div class="overflow-x-auto rounded-lg border border-[var(--surface-border)] bg-[var(--surface)]">
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b border-[var(--surface-border)] text-left text-[11px] uppercase text-[var(--text-secondary)]">
@@ -329,22 +329,22 @@ onMounted(async () => {
           <template v-if="activeModal === 'create'">
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">用户名</span>
-              <input v-model="form.username" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" placeholder="小写字母、数字、_ 或 -" />
+              <input v-model="form.username" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" placeholder="小写字母、数字、_ 或 -" />
             </label>
             <label class="block">
               <span class="mb-1 block text-xs text-[var(--text-secondary)]">密码</span>
-              <input v-model="form.password" type="text" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" placeholder="至少 8 位，含字母和数字" />
+              <input v-model="form.password" type="text" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" placeholder="至少 8 位，含字母和数字" />
             </label>
           </template>
 
           <label v-if="activeModal === 'reset'" class="block">
             <span class="mb-1 block text-xs text-[var(--text-secondary)]">新密码</span>
-            <input v-model="form.password" type="text" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" placeholder="至少 8 位，含字母和数字" />
+            <input v-model="form.password" type="text" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" placeholder="至少 8 位，含字母和数字" />
           </label>
 
           <label v-if="activeModal === 'reject'" class="block">
             <span class="mb-1 block text-xs text-[var(--text-secondary)]">拒绝原因</span>
-            <textarea v-model="form.reason" rows="3" class="w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]" placeholder="将展示给申请人" />
+            <textarea v-model="form.reason" rows="3" class="w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]" placeholder="将展示给申请人" />
           </label>
 
           <div v-if="activeModal === 'create' || activeModal === 'approve' || activeModal === 'roles'">

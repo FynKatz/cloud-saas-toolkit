@@ -514,6 +514,7 @@ onMounted(() => {
 .hero p { color: var(--ink-2); font-size: 13px; margin-top: 4px; }
 .spacer { flex: 1; }
 .range { border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; font-size: 13px; font-family: inherit; color: var(--ink); background: var(--card); cursor: pointer; }
+@media (max-width: 768px) { .range { font-size: 16px; } }
 
 .banner { display: flex; align-items: center; gap: 14px; margin-top: 18px; padding: 15px 20px; border-radius: var(--radius); background: var(--violet-soft); border: 1px solid var(--violet-line); }
 .banner-badge { width: 36px; height: 36px; border-radius: 8px; background: var(--violet-solid); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; font-size: 15px; }
@@ -525,6 +526,7 @@ onMounted(() => {
 .search-row { margin-top: 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .search-box { flex: 1; max-width: 480px; position: relative; }
 .search-box input { width: 100%; height: 42px; border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 0 44px 0 42px; font-size: 13.5px; font-family: inherit; color: var(--ink); background: var(--card); outline: none; transition: border-color .15s, box-shadow .15s; }
+@media (max-width: 768px) { .search-box input { font-size: 16px; } }
 .search-box input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(85, 51, 255, .08); }
 .s-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--ink-3); pointer-events: none; }
 .s-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--ink-3); padding: 4px; border-radius: 50%; display: flex; }
@@ -628,5 +630,8 @@ onMounted(() => {
 @media (max-width: 1024px) {
   .kpis { grid-template-columns: repeat(2, 1fr); }
   .charts, .bottom-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .kpis { grid-template-columns: 1fr; }
 }
 </style>

@@ -21,7 +21,7 @@ import { join, relative, sep } from 'node:path';
 const args = process.argv.slice(2);
 const opt = (n, d) => { const i = args.indexOf('--' + n); return i >= 0 && args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : d; };
 const DIST = opt('dir', 'frontend/dist');
-const SITE = opt('site', 'cloud-saas-toolkit');
+const SITE = opt('site', 'taulko-hub');
 const PUBLISH = args.includes('--publish');
 
 const readKey = (file, key) => {

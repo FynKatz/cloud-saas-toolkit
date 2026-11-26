@@ -222,20 +222,20 @@ onMounted(load)
     <!-- 编辑/新建表单 -->
     <div v-if="editing" class="rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] p-4 space-y-3">
       <div class="grid grid-cols-2 gap-3">
-        <input v-model="form.title" placeholder="标题" class="rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)] col-span-2" />
-        <textarea v-model="form.content" placeholder="内容" rows="4" class="rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)] col-span-2 resize-y" />
-        <select v-model="form.type" class="rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]">
+        <input v-model="form.title" placeholder="标题" class="rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-base outline-none focus:border-[var(--accent)] col-span-2" />
+        <textarea v-model="form.content" placeholder="内容" rows="4" class="rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-base outline-none focus:border-[var(--accent)] col-span-2 resize-y" />
+        <select v-model="form.type" class="rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]">
           <option value="announcement">公告</option>
           <option value="maintenance">维护</option>
           <option value="new_tool">新工具</option>
           <option value="alert">告警</option>
         </select>
-        <select v-model="form.priority" class="rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)]">
+        <select v-model="form.priority" class="rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-base outline-none focus:border-[var(--accent)]">
           <option value="info">低优先级</option>
           <option value="warning">中优先级</option>
           <option value="important">高优先级</option>
         </select>
-        <input v-model="form.target_route" placeholder="关联页面路径（可选，如 /parking）" class="rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-sm outline-none focus:border-[var(--accent)] col-span-2" />
+        <input v-model="form.target_route" placeholder="关联页面路径（可选，如 /parking）" class="rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 py-2 text-base outline-none focus:border-[var(--accent)] col-span-2" />
         <p v-if="targetRouteWarn" class="col-span-2 text-xs text-[var(--v2-warning-text)]">{{ targetRouteWarn }}</p>
       </div>
       <div class="flex justify-end gap-2">

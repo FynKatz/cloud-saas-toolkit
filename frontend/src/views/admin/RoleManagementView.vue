@@ -195,8 +195,8 @@ onMounted(refresh)
           </template>
           <template v-else>
             <div class="flex min-w-0 flex-1 gap-2">
-              <input v-model="form.name" class="h-8 w-40 rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-sm outline-none focus:border-[var(--accent)]" />
-              <input v-model="form.description" class="h-8 min-w-0 flex-1 rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-sm outline-none focus:border-[var(--accent)]" placeholder="描述" />
+              <input v-model="form.name" class="h-8 w-40 rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-base outline-none focus:border-[var(--accent)]" />
+              <input v-model="form.description" class="h-8 min-w-0 flex-1 rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-2 text-base outline-none focus:border-[var(--accent)]" placeholder="描述" />
             </div>
             <button class="grid h-7 w-7 place-items-center rounded text-emerald-600 hover:bg-emerald-50" title="保存" @click="saveEdit">
               <Save class="h-4 w-4" />
@@ -258,8 +258,8 @@ onMounted(refresh)
       <div class="w-full max-w-sm rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] p-5 shadow-xl">
         <h3 class="mb-4 text-sm font-semibold text-[var(--text)]">新建角色</h3>
         <div class="space-y-3">
-          <input v-model="newRole.name" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" placeholder="角色名" />
-          <input v-model="newRole.description" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-sm outline-none focus:border-[var(--accent)]" placeholder="描述（可选）" />
+          <input v-model="newRole.name" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" placeholder="角色名" />
+          <input v-model="newRole.description" class="h-9 w-full rounded-md border border-[var(--surface-border)] bg-[var(--bg)] px-3 text-base outline-none focus:border-[var(--accent)]" placeholder="描述（可选）" />
         </div>
         <div class="mt-5 flex justify-end gap-2">
           <button class="h-9 rounded-md border border-[var(--surface-border)] px-4 text-sm text-[var(--text-secondary)] hover:bg-[var(--nav-hover)]" @click="creating = false">取消</button>
